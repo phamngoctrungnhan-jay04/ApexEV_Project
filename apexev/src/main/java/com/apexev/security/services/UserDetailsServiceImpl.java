@@ -1,0 +1,39 @@
+package com.apexev.security.services;
+
+import com.apexev.entity.User;
+import com.apexev.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class UserDetailsServiceImpl implements UserDetailsService {
+
+    @Autowired
+    private UserService userService;
+
+
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String usernameOrEmailOrPhone) throws UsernameNotFoundException {
+        User user;
+        if (usernameOrEmailOrPhone.contains("@")) {
+            user = userService.getUserByEmail(usernameOrEmailOrPhone)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        } else {
+            user = userService.getUserByPhone(usernameOrEmailOrPhone)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        }
+        return UserDetailsImpl.build(user);
+    }
+
+    @Transactional
+    public UserDetails loadUserById(Integer userId) {
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+        return UserDetailsImpl.build(user);
+    }
+}
