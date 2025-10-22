@@ -5,27 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a6878cd1-54c8-42c2-8ec9-8656b8a6f16d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/config/JwtAuthenticationFilter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/config/OpenApiConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/config/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/AuthController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/LoginRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RefreshRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/UserUpdateRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/LoginSuccessResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/RegisterResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/UserResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/exception/UserAlreadyExistsException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/UserRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/security/jwt/JwtUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/security/services/UserDetailsImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/security/services/UserDetailsServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/UserService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/UserServiceIpml.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/MailController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/MailRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/MailService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/RegisterResponse.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -117,11 +104,23 @@
       <updated>1760706084213</updated>
       <workItem from="1760706085301" duration="1570000" />
       <workItem from="1760776983368" duration="1293000" />
-      <workItem from="1760944043639" duration="7893000" />
+      <workItem from="1760944043639" duration="8475000" />
+      <workItem from="1761098517641" duration="11897000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
