@@ -43,7 +43,7 @@ public class AuthController {
     private UserDetailsServiceImpl userDetailsServiceImpl;
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')") // Chỉ admin mới được tạo tài khoản mới , bỏ cái này nhé
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         UserRole role = UserRole.valueOf(request.getRole());
         userService.registerUser(

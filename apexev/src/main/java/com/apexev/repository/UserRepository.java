@@ -1,6 +1,7 @@
 package com.apexev.repository;
 
 import com.apexev.entity.User;
+import com.apexev.enums.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByEmail(String email);
 
     boolean existsByPhone(String phone);
+
+    List<User> findByRole(UserRole role);
 
     //tìm người dùng có vai trò là Admin hoac Nurse
     @Query("select u from User u where u.role='ADMIN' or u.role='NURSE'")
