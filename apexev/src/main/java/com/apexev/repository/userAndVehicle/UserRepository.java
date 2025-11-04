@@ -1,4 +1,4 @@
-package com.apexev.repository;
+package com.apexev.repository.userAndVehicle;
 
 import com.apexev.entity.User;
 import com.apexev.enums.UserRole;

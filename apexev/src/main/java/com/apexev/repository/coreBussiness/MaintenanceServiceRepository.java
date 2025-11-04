@@ -1,4 +1,4 @@
-package com.apexev.repository;
+package com.apexev.repository.coreBussiness;
 
 import com.apexev.entity.MaintenanceService;
 import org.springframework.data.jpa.repository.JpaRepository;

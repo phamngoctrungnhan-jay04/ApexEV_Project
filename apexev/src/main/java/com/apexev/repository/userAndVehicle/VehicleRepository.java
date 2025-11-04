@@ -1,4 +1,4 @@
-package com.apexev.repository;
+package com.apexev.repository.userAndVehicle;
 
 import com.apexev.entity.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
