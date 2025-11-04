@@ -1,7 +1,7 @@
-package com.apexev.service;
+package com.apexev.service.service_Interface;
 
-import com.apexev.dto.request.UserUpdateRequest;
-import com.apexev.dto.response.UserResponse;
+import com.apexev.dto.request.userAndVehicleRequest.UserUpdateRequest;
+import com.apexev.dto.response.userAndVehicleResponse.UserResponse;
 import com.apexev.entity.User;
 import com.apexev.enums.UserRole;
 

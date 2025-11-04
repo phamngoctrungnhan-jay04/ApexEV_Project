@@ -11,6 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
-    Optional<Invoice> findByServiceOrderOrderId(Long orderId);
+    Optional<Invoice> findByServiceOrderId(Long orderId);
     List<Invoice> findByStatus(InvoiceStatus status); // VD: Tìm các hóa đơn chưa trả
 }

@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface ServiceChecklistRepository extends JpaRepository<ServiceChecklist, Long> {
-    Optional<ServiceChecklist> findByServiceOrderOrderId(Long orderId);
+    Optional<ServiceChecklist> findByServiceOrderId(Long orderId);
 }

@@ -1,4 +1,4 @@
-package com.apexev.dto.request;
+package com.apexev.dto.request.userAndVehicleRequest;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

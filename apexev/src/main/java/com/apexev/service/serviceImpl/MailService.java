@@ -1,4 +1,4 @@
-package com.apexev.service.serviceIplm;
+package com.apexev.service.serviceImpl;
 
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

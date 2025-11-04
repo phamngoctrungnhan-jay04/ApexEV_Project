@@ -1,5 +1,6 @@
 package com.apexev.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,5 +62,9 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+    @Bean
+    public ModelMapper modelMapper() { // để spring boot biết khi gọi modelMapper ở service dưới dạng yêu cầu private final -> nếu ko có -> lỗi ko dùng được mapper
+        return new ModelMapper();
     }
 }

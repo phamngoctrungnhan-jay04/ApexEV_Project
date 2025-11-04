@@ -1,4 +1,6 @@
 package com.apexev.config;
+import com.apexev.entity.User;
+import com.apexev.repository.userAndVehicle.UserRepository;
 
 import com.apexev.security.jwt.JwtUtils;
 import com.apexev.security.services.UserDetailsServiceImpl;
@@ -28,10 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        // Danh sách các đường dẫn muốn bộ lọc này BỎ QUA
         String[] permitAllPaths = {
                 "/api/auth/**",
                 "/api/admin/vaccination-campaigns",
@@ -39,12 +42,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 "/v3/api-docs/**", // Swagger JSON
                 "/error"
         };
-
         AntPathMatcher pathMatcher = new AntPathMatcher();
         String path = request.getRequestURI();
-
-        // Nếu request path khớp với bất kỳ đường dẫn nào trong danh sách
-        // -> trả về true (nghĩa là "không filter")
         return Arrays.stream(permitAllPaths)
                 .anyMatch(p -> pathMatcher.match(p, path));
     }
@@ -69,11 +68,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            // Dòng này chỉ để lấy 'authorities' (quyền)
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
             if (jwtUtils.validateJwtToken(token)) {
+                // Tải đối tượng User (Entity) thật từ database
+                User userEntity = userRepository.findByPhone(username)
+                        .orElseThrow(() -> new RuntimeException("User not found in JWT filter"));
+
+                // Tạo một token xác thực mới
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
+                                userEntity, // Đặt User làm Principal
+                                null,
+                                userDetails.getAuthorities());
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 logger.debug("User authenticated successfully with roles: {}", userDetails.getAuthorities());
             } else {
