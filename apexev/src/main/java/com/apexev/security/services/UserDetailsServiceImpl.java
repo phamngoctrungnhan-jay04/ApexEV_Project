@@ -1,7 +1,7 @@
 package com.apexev.security.services;
 
 import com.apexev.entity.User;
-import com.apexev.service.UserService;
+import com.apexev.service.service_Interface.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
