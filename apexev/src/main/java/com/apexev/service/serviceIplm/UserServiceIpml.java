@@ -5,7 +5,7 @@ import com.apexev.dto.response.UserResponse;
 import com.apexev.entity.User;
 import com.apexev.enums.UserRole;
 import com.apexev.exception.UserAlreadyExistsException;
-import com.apexev.repository.UserRepository;
+import com.apexev.repository.userAndVehicle.UserRepository;
 import com.apexev.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
