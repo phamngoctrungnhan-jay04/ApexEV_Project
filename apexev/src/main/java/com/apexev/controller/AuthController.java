@@ -3,6 +3,7 @@ package com.apexev.controller;
 import com.apexev.dto.request.LoginRequest;
 import com.apexev.dto.request.RefreshRequest;
 import com.apexev.dto.request.RegisterRequest;
+import com.apexev.dto.request.RegisterStaffRequest;
 import com.apexev.dto.response.LoginSuccessResponse;
 import com.apexev.enums.UserRole;
 import com.apexev.security.jwt.JwtUtils;
@@ -42,10 +43,22 @@ public class AuthController {
     @Autowired
     private UserDetailsServiceImpl userDetailsServiceImpl;
 
-    @PostMapping("/register")
-    //@PreAuthorize("hasRole('ADMIN')") // Chỉ admin mới được tạo tài khoản mới , bỏ cái này nhé
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
+    @PostMapping("/register-staff")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> registerStaff(@RequestBody @Valid RegisterStaffRequest request) {
         UserRole role = UserRole.valueOf(request.getRole());
+        userService.registerUser(
+                request.getFullName(),
+                request.getEmail(),
+                request.getPhone(),
+                request.getPassword(),
+                role
+        );
+        return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
+    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
+        UserRole role = UserRole.valueOf("CUSTOMER");
         userService.registerUser(
                 request.getFullName(),
                 request.getEmail(),

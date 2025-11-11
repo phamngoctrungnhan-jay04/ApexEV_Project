@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RegisterRequest {
+public class RegisterStaffRequest {
 
     @NotBlank(message = "Họ tên không được để trống")
     @Size(max = 100, message = "Họ tên tối đa 100 ký tự")
@@ -29,4 +29,6 @@ public class RegisterRequest {
     @Size(min = 6, max = 128, message = "Mật khẩu phải từ 6 đến 128 ký tự")
     private String password;
 
+    @NotBlank
+    private String role;
 }

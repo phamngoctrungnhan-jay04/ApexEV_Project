@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    List<Review> findByServiceOrderOrderId(Long orderId);
-    List<Review> findByServiceOrderTechnicianUserId(Long technicianId); // Xem review của 1 KTV
+    List<Review> findByServiceOrderId(Long orderId);
+//    List<Review> findByServiceOrderTechnicianUserId(Long technicianId); // Xem review của 1 KTV
 }
