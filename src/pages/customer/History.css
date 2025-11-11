@@ -1,0 +1,231 @@
+/* History Page Styles */
+.history-page {
+  padding: 1.5rem 0;
+}
+
+.page-header h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+}
+
+.page-header p {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* Stats Cards */
+.stat-card {
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.stat-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon {
+  font-size: 2rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Orders Card */
+.orders-card {
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Orders Table */
+.orders-table {
+  margin-bottom: 0;
+}
+
+.orders-table thead {
+  background: #f9fafb;
+}
+
+.orders-table thead th {
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 1rem 0.75rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.orders-table tbody td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.orders-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.orders-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Order Detail Modal */
+.order-detail h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.order-detail p {
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .history-page {
+    padding: 1rem 0;
+  }
+
+  .page-header h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .history-page {
+    padding: 0.75rem 0;
+  }
+
+  .page-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .stat-card {
+    margin-bottom: 1rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+
+  .stat-icon {
+    font-size: 1.5rem;
+  }
+
+  /* Stack filters vertically on mobile */
+  .filters-section .row > div {
+    margin-bottom: 0.75rem;
+  }
+
+  .table-responsive {
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+  }
+
+  .orders-table {
+    font-size: 0.85rem;
+    min-width: 600px;
+  }
+
+  .orders-table thead th,
+  .orders-table tbody td {
+    padding: 0.75rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Buttons in table */
+  .orders-table .btn-sm {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* Pagination */
+  .pagination {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .page-link {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .history-page {
+    padding: 0.5rem 0;
+  }
+
+  .page-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .page-header p {
+    font-size: 0.875rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .stat-info {
+    gap: 0.75rem;
+  }
+
+  /* Make table cards scrollable */
+  .orders-table {
+    font-size: 0.8rem;
+  }
+
+  /* Modal adjustments */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .order-detail p {
+    font-size: 0.875rem;
+  }
+
+  /* Pagination on small screens */
+  .pagination .page-item:not(.active):not(:first-child):not(:last-child) {
+    display: none;
+  }
+
+  .pagination .page-link {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}

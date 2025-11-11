@@ -1,0 +1,135 @@
+// Mock Customers Data
+export const customers = [
+  {
+    id: 1,
+    fullName: 'Nguyễn Văn An',
+    email: 'nguyenvanan@example.com',
+    phone: '0912345678',
+    avatar: 'https://ui-avatars.com/api/?name=Nguyen+Van+An&background=3B82F6&color=fff',
+    address: '123 Đường Nguyễn Huệ, Quận 1, TP.HCM',
+    dateJoined: '2024-01-15',
+    totalSpent: 15750000,
+    totalMaintenance: 12,
+    status: 'active',
+    loyaltyPoints: 1575
+  },
+  {
+    id: 2,
+    fullName: 'Trần Thị Bình',
+    email: 'tranthibinh@example.com',
+    phone: '0923456789',
+    avatar: 'https://ui-avatars.com/api/?name=Tran+Thi+Binh&background=10B981&color=fff',
+    address: '456 Đường Lê Lợi, Quận 3, TP.HCM',
+    dateJoined: '2024-02-20',
+    totalSpent: 8500000,
+    totalMaintenance: 6,
+    status: 'active',
+    loyaltyPoints: 850
+  },
+  {
+    id: 3,
+    fullName: 'Lê Minh Châu',
+    email: 'leminhchau@example.com',
+    phone: '0934567890',
+    avatar: 'https://ui-avatars.com/api/?name=Le+Minh+Chau&background=F59E0B&color=fff',
+    address: '789 Đường Trần Hưng Đạo, Quận 5, TP.HCM',
+    dateJoined: '2023-11-10',
+    totalSpent: 22300000,
+    totalMaintenance: 18,
+    status: 'active',
+    loyaltyPoints: 2230
+  },
+  {
+    id: 4,
+    fullName: 'Phạm Hoàng Dũng',
+    email: 'phamhoangdung@example.com',
+    phone: '0945678901',
+    avatar: 'https://ui-avatars.com/api/?name=Pham+Hoang+Dung&background=8B5CF6&color=fff',
+    address: '321 Đường Võ Văn Tần, Quận 3, TP.HCM',
+    dateJoined: '2024-03-05',
+    totalSpent: 6200000,
+    totalMaintenance: 4,
+    status: 'active',
+    loyaltyPoints: 620
+  },
+  {
+    id: 5,
+    fullName: 'Hoàng Thị Như',
+    email: 'hoangthinhunhu@example.com',
+    phone: '0956789012',
+    avatar: 'https://ui-avatars.com/api/?name=Hoang+Thi+Nhu&background=EC4899&color=fff',
+    address: '654 Đường Điện Biên Phủ, Bình Thạnh, TP.HCM',
+    dateJoined: '2023-09-25',
+    totalSpent: 18900000,
+    totalMaintenance: 15,
+    status: 'active',
+    loyaltyPoints: 1890
+  },
+  {
+    id: 6,
+    fullName: 'Đặng Quốc Khánh',
+    email: 'dangquockhanh@example.com',
+    phone: '0967890123',
+    avatar: 'https://ui-avatars.com/api/?name=Dang+Quoc+Khanh&background=06B6D4&color=fff',
+    address: '987 Đường Cách Mạng Tháng 8, Quận 10, TP.HCM',
+    dateJoined: '2024-04-12',
+    totalSpent: 4500000,
+    totalMaintenance: 3,
+    status: 'active',
+    loyaltyPoints: 450
+  },
+  {
+    id: 7,
+    fullName: 'Vũ Thị Mai',
+    email: 'vuthimai@example.com',
+    phone: '0978901234',
+    avatar: 'https://ui-avatars.com/api/?name=Vu+Thi+Mai&background=EF4444&color=fff',
+    address: '159 Đường Pasteur, Quận 1, TP.HCM',
+    dateJoined: '2023-12-08',
+    totalSpent: 13400000,
+    totalMaintenance: 10,
+    status: 'active',
+    loyaltyPoints: 1340
+  },
+  {
+    id: 8,
+    fullName: 'Bùi Văn Long',
+    email: 'buivanlong@example.com',
+    phone: '0989012345',
+    avatar: 'https://ui-avatars.com/api/?name=Bui+Van+Long&background=14B8A6&color=fff',
+    address: '753 Đường Lý Thường Kiệt, Quận 11, TP.HCM',
+    dateJoined: '2024-01-30',
+    totalSpent: 9800000,
+    totalMaintenance: 7,
+    status: 'active',
+    loyaltyPoints: 980
+  },
+  {
+    id: 9,
+    fullName: 'Phan Thị Hoa',
+    email: 'phanthihoa@example.com',
+    phone: '0990123456',
+    avatar: 'https://ui-avatars.com/api/?name=Phan+Thi+Hoa&background=F97316&color=fff',
+    address: '852 Đường Nguyễn Thị Minh Khai, Quận 3, TP.HCM',
+    dateJoined: '2023-10-18',
+    totalSpent: 16700000,
+    totalMaintenance: 13,
+    status: 'active',
+    loyaltyPoints: 1670
+  },
+  {
+    id: 10,
+    fullName: 'Trịnh Minh Tâm',
+    email: 'trinhminhtam@example.com',
+    phone: '0901234567',
+    avatar: 'https://ui-avatars.com/api/?name=Trinh+Minh+Tam&background=6366F1&color=fff',
+    address: '246 Đường Hai Bà Trưng, Quận 1, TP.HCM',
+    dateJoined: '2024-02-14',
+    totalSpent: 7300000,
+    totalMaintenance: 5,
+    status: 'active',
+    loyaltyPoints: 730
+  }
+];
+
+export default customers;

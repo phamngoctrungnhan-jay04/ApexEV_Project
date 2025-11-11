@@ -1,0 +1,172 @@
+// Mock Technicians Data
+export const technicians = [
+  {
+    id: 1,
+    fullName: 'Nguyễn Văn Hùng',
+    email: 'hungnv@apexev.com',
+    phone: '0901111111',
+    avatar: 'https://ui-avatars.com/api/?name=Nguyen+Van+Hung&background=3B82F6&color=fff',
+    role: 'senior-technician',
+    specialization: ['battery', 'electrical', 'diagnostics'],
+    yearsOfExperience: 8,
+    certifications: ['EV Specialist Level 3', 'High Voltage Safety', 'VinFast Certified'],
+    rating: 4.9,
+    totalReviews: 156,
+    completedJobs: 892,
+    status: 'available',
+    workingHours: '08:00 - 17:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  },
+  {
+    id: 2,
+    fullName: 'Trần Minh Tuấn',
+    email: 'tuantm@apexev.com',
+    phone: '0902222222',
+    avatar: 'https://ui-avatars.com/api/?name=Tran+Minh+Tuan&background=10B981&color=fff',
+    role: 'senior-technician',
+    specialization: ['motor', 'powertrain', 'software'],
+    yearsOfExperience: 7,
+    certifications: ['EV Specialist Level 3', 'Tesla Certified', 'Software Update Pro'],
+    rating: 4.8,
+    totalReviews: 143,
+    completedJobs: 784,
+    status: 'busy',
+    currentJob: 25,
+    workingHours: '08:00 - 17:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  },
+  {
+    id: 3,
+    fullName: 'Lê Thị Hương',
+    email: 'huonglt@apexev.com',
+    phone: '0903333333',
+    avatar: 'https://ui-avatars.com/api/?name=Le+Thi+Huong&background=F59E0B&color=fff',
+    role: 'technician',
+    specialization: ['brake', 'suspension', 'tire'],
+    yearsOfExperience: 5,
+    certifications: ['EV Specialist Level 2', 'Brake Systems Expert'],
+    rating: 4.7,
+    totalReviews: 98,
+    completedJobs: 542,
+    status: 'available',
+    workingHours: '08:00 - 17:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  },
+  {
+    id: 4,
+    fullName: 'Phạm Đức Anh',
+    email: 'anhpd@apexev.com',
+    phone: '0904444444',
+    avatar: 'https://ui-avatars.com/api/?name=Pham+Duc+Anh&background=8B5CF6&color=fff',
+    role: 'technician',
+    specialization: ['hvac', 'interior', 'general-maintenance'],
+    yearsOfExperience: 4,
+    certifications: ['EV Specialist Level 2', 'HVAC Systems'],
+    rating: 4.6,
+    totalReviews: 87,
+    completedJobs: 468,
+    status: 'busy',
+    currentJob: 28,
+    workingHours: '09:00 - 18:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  },
+  {
+    id: 5,
+    fullName: 'Võ Quang Long',
+    email: 'longvq@apexev.com',
+    phone: '0905555555',
+    avatar: 'https://ui-avatars.com/api/?name=Vo+Quang+Long&background=EC4899&color=fff',
+    role: 'junior-technician',
+    specialization: ['tire', 'cleaning', 'basic-maintenance'],
+    yearsOfExperience: 2,
+    certifications: ['EV Specialist Level 1'],
+    rating: 4.5,
+    totalReviews: 52,
+    completedJobs: 243,
+    status: 'available',
+    workingHours: '08:00 - 17:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  },
+  {
+    id: 6,
+    fullName: 'Đỗ Thị Mai',
+    email: 'maitd@apexev.com',
+    phone: '0906666666',
+    avatar: 'https://ui-avatars.com/api/?name=Do+Thi+Mai&background=06B6D4&color=fff',
+    role: 'junior-technician',
+    specialization: ['inspection', 'cleaning', 'basic-maintenance'],
+    yearsOfExperience: 1,
+    certifications: ['EV Specialist Level 1'],
+    rating: 4.4,
+    totalReviews: 34,
+    completedJobs: 156,
+    status: 'available',
+    workingHours: '09:00 - 18:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  },
+  {
+    id: 7,
+    fullName: 'Hoàng Minh Khoa',
+    email: 'khoahm@apexev.com',
+    phone: '0907777777',
+    avatar: 'https://ui-avatars.com/api/?name=Hoang+Minh+Khoa&background=EF4444&color=fff',
+    role: 'service-advisor',
+    specialization: ['customer-service', 'consultation'],
+    yearsOfExperience: 6,
+    certifications: ['Customer Service Excellence', 'EV Knowledge Certified'],
+    rating: 4.9,
+    totalReviews: 212,
+    completedJobs: 1243, // consultations
+    status: 'available',
+    workingHours: '08:00 - 18:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  },
+  {
+    id: 8,
+    fullName: 'Bùi Thị Lan',
+    email: 'lanbt@apexev.com',
+    phone: '0908888888',
+    avatar: 'https://ui-avatars.com/api/?name=Bui+Thi+Lan&background=14B8A6&color=fff',
+    role: 'service-advisor',
+    specialization: ['customer-service', 'consultation'],
+    yearsOfExperience: 4,
+    certifications: ['Customer Service Excellence', 'EV Knowledge Certified'],
+    rating: 4.8,
+    totalReviews: 178,
+    completedJobs: 967,
+    status: 'busy',
+    currentJob: 32,
+    workingHours: '08:00 - 18:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  }
+];
+
+// Technician roles
+export const technicianRoles = [
+  { id: 'senior-technician', name: 'Kỹ thuật viên cao cấp', nameEn: 'Senior Technician' },
+  { id: 'technician', name: 'Kỹ thuật viên', nameEn: 'Technician' },
+  { id: 'junior-technician', name: 'Kỹ thuật viên mới', nameEn: 'Junior Technician' },
+  { id: 'service-advisor', name: 'Tư vấn dịch vụ', nameEn: 'Service Advisor' }
+];
+
+// Technician specializations
+export const specializations = [
+  { id: 'battery', name: 'Hệ thống pin', nameEn: 'Battery Systems' },
+  { id: 'electrical', name: 'Điện & Điện tử', nameEn: 'Electrical & Electronics' },
+  { id: 'diagnostics', name: 'Chẩn đoán', nameEn: 'Diagnostics' },
+  { id: 'motor', name: 'Động cơ điện', nameEn: 'Electric Motor' },
+  { id: 'powertrain', name: 'Hệ thống truyền động', nameEn: 'Powertrain' },
+  { id: 'software', name: 'Phần mềm', nameEn: 'Software' },
+  { id: 'brake', name: 'Hệ thống phanh', nameEn: 'Brake Systems' },
+  { id: 'suspension', name: 'Hệ thống treo', nameEn: 'Suspension' },
+  { id: 'tire', name: 'Lốp xe', nameEn: 'Tires' },
+  { id: 'hvac', name: 'Điều hòa', nameEn: 'HVAC' },
+  { id: 'interior', name: 'Nội thất', nameEn: 'Interior' },
+  { id: 'general-maintenance', name: 'Bảo dưỡng tổng quát', nameEn: 'General Maintenance' },
+  { id: 'cleaning', name: 'Vệ sinh', nameEn: 'Cleaning' },
+  { id: 'inspection', name: 'Kiểm tra', nameEn: 'Inspection' },
+  { id: 'customer-service', name: 'Chăm sóc khách hàng', nameEn: 'Customer Service' },
+  { id: 'consultation', name: 'Tư vấn', nameEn: 'Consultation' }
+];
+
+export default technicians;

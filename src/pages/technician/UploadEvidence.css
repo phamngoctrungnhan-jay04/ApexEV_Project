@@ -1,0 +1,635 @@
+/* ========================
+   UPLOAD EVIDENCE PAGE
+   ======================== */
+
+.upload-evidence-page {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* ========================
+   PAGE HEADER
+   ======================== */
+
+.upload-evidence-page .page-header {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.upload-evidence-page .page-header h2 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.upload-evidence-page .page-header p {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+}
+
+.upload-evidence-page .header-stats {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.upload-evidence-page .stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ========================
+   UPLOAD CARD
+   ======================== */
+
+.upload-evidence-page .upload-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: 100%;
+}
+
+.upload-evidence-page .upload-card .card-body {
+  padding: 24px;
+}
+
+.upload-evidence-page .upload-card h5 {
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ========================
+   DROP ZONE
+   ======================== */
+
+.upload-evidence-page .drop-zone {
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.upload-evidence-page .drop-zone:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.upload-evidence-page .drop-zone.active {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  transform: scale(1.02);
+}
+
+.upload-evidence-page .upload-icon {
+  font-size: 48px;
+  color: #3b82f6;
+  margin-bottom: 16px;
+}
+
+.upload-evidence-page .drop-zone p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.upload-evidence-page .drop-zone strong {
+  color: #1a1a1a;
+}
+
+/* ========================
+   FILE INFO ALERT
+   ======================== */
+
+.upload-evidence-page .file-info {
+  border-radius: 8px;
+  margin-bottom: 0;
+}
+
+.upload-evidence-page .file-info small {
+  line-height: 1.6;
+}
+
+/* ========================
+   FILES CARD
+   ======================== */
+
+.upload-evidence-page .files-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.upload-evidence-page .files-card .card-body {
+  padding: 24px;
+}
+
+.upload-evidence-page .files-card h5 {
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* ========================
+   EMPTY STATE
+   ======================== */
+
+.upload-evidence-page .empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+}
+
+.upload-evidence-page .empty-state svg {
+  opacity: 0.3;
+}
+
+.upload-evidence-page .empty-state p {
+  margin: 0;
+}
+
+/* ========================
+   FILE GRID
+   ======================== */
+
+.upload-evidence-page .file-grid {
+  margin: 0 -8px;
+}
+
+.upload-evidence-page .file-grid > div {
+  padding: 0 8px;
+}
+
+/* ========================
+   FILE PREVIEW CARD
+   ======================== */
+
+.upload-evidence-page .file-preview-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.upload-evidence-page .file-preview-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  border-color: #3b82f6;
+}
+
+/* ========================
+   FILE PREVIEW
+   ======================== */
+
+.upload-evidence-page .file-preview {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background: #f3f4f6;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.upload-evidence-page .file-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.upload-evidence-page .file-preview:hover img {
+  transform: scale(1.1);
+}
+
+.upload-evidence-page .video-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.upload-evidence-page .video-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-evidence-page .video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: background 0.3s ease;
+}
+
+.upload-evidence-page .file-preview:hover .video-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ========================
+   STATUS BADGE
+   ======================== */
+
+.upload-evidence-page .status-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  animation: fadeIn 0.3s ease;
+}
+
+.upload-evidence-page .status-badge.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.upload-evidence-page .status-badge.warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* ========================
+   UPLOAD PROGRESS
+   ======================== */
+
+.upload-evidence-page .upload-progress {
+  height: 4px;
+  border-radius: 0;
+  margin: 0;
+  background: #e5e7eb;
+}
+
+.upload-evidence-page .upload-progress .progress-bar {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+  transition: width 0.3s ease;
+}
+
+/* ========================
+   FILE INFO
+   ======================== */
+
+.upload-evidence-page .file-preview-card .card-body {
+  padding: 12px;
+}
+
+.upload-evidence-page .file-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.upload-evidence-page .file-type-icon {
+  flex-shrink: 0;
+}
+
+.upload-evidence-page .file-type-icon.image {
+  color: #3b82f6;
+}
+
+.upload-evidence-page .file-type-icon.video {
+  color: #8b5cf6;
+}
+
+/* ========================
+   FILE ACTIONS
+   ======================== */
+
+.upload-evidence-page .file-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.upload-evidence-page .file-actions .btn {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.upload-evidence-page .file-actions .btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ========================
+   GALLERY MODAL
+   ======================== */
+
+.upload-evidence-page .gallery-modal .modal-content {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.upload-evidence-page .gallery-modal .modal-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 20px 24px;
+  border: none;
+}
+
+.upload-evidence-page .gallery-modal .modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.upload-evidence-page .gallery-modal .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+.upload-evidence-page .gallery-modal .btn-close:hover {
+  opacity: 1;
+}
+
+.upload-evidence-page .gallery-modal .modal-body {
+  padding: 0;
+  background: #1a1a1a;
+}
+
+.upload-evidence-page .gallery-preview {
+  width: 100%;
+  max-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.upload-evidence-page .gallery-preview img {
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+}
+
+.upload-evidence-page .gallery-preview video {
+  width: 100%;
+  max-height: 60vh;
+  background: #000;
+}
+
+.upload-evidence-page .gallery-info {
+  background: white;
+  padding: 24px;
+}
+
+.upload-evidence-page .gallery-info p {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.upload-evidence-page .gallery-info strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.upload-evidence-page .gallery-modal .modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ========================
+   DELETE CONFIRM MODAL
+   ======================== */
+
+.upload-evidence-page .delete-confirm-modal .modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.upload-evidence-page .delete-confirm-modal .modal-header {
+  padding: 20px 24px;
+}
+
+.upload-evidence-page .delete-confirm-modal .modal-title {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.upload-evidence-page .delete-confirm-modal .modal-body {
+  padding: 24px;
+}
+
+.upload-evidence-page .delete-confirm-modal .modal-footer {
+  padding: 16px 24px;
+}
+
+/* ========================
+   ANIMATIONS
+   ======================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================
+   RESPONSIVE DESIGN
+   ======================== */
+
+/* Tablet */
+@media (max-width: 991px) {
+  .upload-evidence-page {
+    padding: 16px;
+  }
+
+  .upload-evidence-page .page-header {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .upload-evidence-page .page-header h2 {
+    font-size: 22px;
+  }
+
+  .upload-evidence-page .header-stats {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .upload-evidence-page .file-preview {
+    height: 160px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .upload-evidence-page {
+    padding: 12px;
+  }
+
+  .upload-evidence-page .page-header {
+    padding: 16px;
+  }
+
+  .upload-evidence-page .page-header h2 {
+    font-size: 20px;
+  }
+
+  .upload-evidence-page .upload-card .card-body,
+  .upload-evidence-page .files-card .card-body {
+    padding: 16px;
+  }
+
+  .upload-evidence-page .drop-zone {
+    padding: 32px 16px;
+  }
+
+  .upload-evidence-page .upload-icon {
+    font-size: 40px;
+  }
+
+  .upload-evidence-page .file-grid > div {
+    padding: 0 6px;
+    margin-bottom: 12px !important;
+  }
+
+  .upload-evidence-page .file-preview {
+    height: 140px;
+  }
+
+  .upload-evidence-page .stat-badge {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .upload-evidence-page .gallery-preview {
+    max-height: 50vh;
+  }
+
+  .upload-evidence-page .gallery-preview img,
+  .upload-evidence-page .gallery-preview video {
+    max-height: 50vh;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 575px) {
+  .upload-evidence-page .header-stats {
+    flex-wrap: wrap;
+  }
+
+  .upload-evidence-page .stat-badge {
+    flex: 1 1 auto;
+    min-width: 140px;
+  }
+
+  .upload-evidence-page .drop-zone {
+    padding: 24px 12px;
+  }
+
+  .upload-evidence-page .empty-state {
+    padding: 48px 16px;
+  }
+
+  .upload-evidence-page .file-grid {
+    margin: 0 -4px;
+  }
+
+  .upload-evidence-page .file-grid > div {
+    padding: 0 4px;
+  }
+
+  .upload-evidence-page .file-preview {
+    height: 120px;
+  }
+
+  .upload-evidence-page .file-actions .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .upload-evidence-page .gallery-info {
+    padding: 16px;
+  }
+
+  .upload-evidence-page .gallery-info .row {
+    gap: 8px;
+  }
+
+  .upload-evidence-page .gallery-info .col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .upload-evidence-page .page-header,
+  .upload-evidence-page .upload-card,
+  .upload-evidence-page .file-actions,
+  .upload-evidence-page .modal,
+  .upload-evidence-page .btn {
+    display: none !important;
+  }
+
+  .upload-evidence-page .files-card {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+
+  .upload-evidence-page .file-preview-card {
+    page-break-inside: avoid;
+  }
+}
