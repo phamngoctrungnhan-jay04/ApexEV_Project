@@ -13,7 +13,7 @@ import org.hibernate.annotations.Nationalized;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ServiceChecklistResult {
+public class ServiceChecklistResult { // chứa thông tin chi tiết của cuốn sách -> khi ktv ktra xong và điền thông tin vào form và bấm nộp -> sẽ lưu vào bảng này
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "result_id")

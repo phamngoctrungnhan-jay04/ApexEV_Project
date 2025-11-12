@@ -1,5 +1,6 @@
 package com.apexev.service.serviceImpl;
 
+import com.apexev.dto.request.userAndVehicleRequest.UpdateProfileRequest;
 import com.apexev.dto.request.userAndVehicleRequest.UserUpdateRequest;
 import com.apexev.dto.response.userAndVehicleResponse.UserResponse;
 import com.apexev.entity.User;
@@ -7,6 +8,8 @@ import com.apexev.enums.UserRole;
 import com.apexev.exception.UserAlreadyExistsException;
 import com.apexev.repository.userAndVehicle.UserRepository;
 import com.apexev.service.service_Interface.UserService;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,14 +20,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.modelmapper.ModelMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceIpml implements UserService {
 
+    private final ModelMapper modelMapper;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -175,5 +180,36 @@ public class UserServiceIpml implements UserService {
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    public UserResponse getMyProfile(User loggedInUser) {
+        return modelMapper.map(loggedInUser, UserResponse.class);
+    }
+
+    @Override
+    public UserResponse updateMyProfile(User loggedInUser, UpdateProfileRequest request) {
+        // 1. Kiểm tra nghiệp vụ: Email mới có bị trùng với ai khác không?
+        Optional<User> userByEmail = userRepository.findByEmail(request.getEmail());
+        if (userByEmail.isPresent() && !userByEmail.get().getUserId().equals(loggedInUser.getUserId())) {
+            throw new IllegalArgumentException("Email này đã được sử dụng bởi tài khoản khác.");
+        }
+
+        // 2. Kiểm tra nghiệp vụ: SĐT mới có bị trùng với ai khác không?
+        Optional<User> userByPhone = userRepository.findByPhone(request.getPhone());
+        if (userByPhone.isPresent() && !userByPhone.get().getUserId().equals(loggedInUser.getUserId())) {
+            throw new IllegalArgumentException("Số điện thoại này đã được sử dụng bởi tài khoản khác.");
+        }
+
+        // 3. Cập nhật thông tin cho đối tượng User (Entity)
+        loggedInUser.setFullName(request.getFullName());
+        loggedInUser.setEmail(request.getEmail());
+        loggedInUser.setPhone(request.getPhone());
+
+        // 4. Lưu lại (Hibernate/JPA đủ thông minh để biết đây là UPDATE, không phải CREATE)
+        User updatedUser = userRepository.save(loggedInUser);
+
+        // 5. Map và trả về
+        return modelMapper.map(updatedUser, UserResponse.class);
     }
 }

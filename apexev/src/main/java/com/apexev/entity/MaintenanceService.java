@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @NoArgsConstructor
-public class MaintenanceService {
+public class MaintenanceService { // bảng công thợ cụ thể cho từng dịch vụ -> đi kèm khi báo giá
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "service_id")

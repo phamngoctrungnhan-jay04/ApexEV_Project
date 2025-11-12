@@ -12,6 +12,7 @@ import com.apexev.repository.coreBussiness.AppointmentRepository;
 import com.apexev.repository.userAndVehicle.UserRepository;
 import com.apexev.repository.userAndVehicle.VehicleRepository;
 import com.apexev.service.service_Interface.AppointmentService;
+import com.apexev.service.service_Interface.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,6 +28,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository; // gắn cố vấn dịch vụ
+    private final NotificationService notificationService; // Thêm NotificationService
     //setup tự động chuyển Entity -> DTO
     private final ModelMapper modelMapper;
 
@@ -56,6 +58,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         newAppointment.setStatus(AppointmentStatus.PENDING);
         // 7. lưu và trả về
         Appointment savedAppointment = appointmentRepository.save(newAppointment);
+        
+        // 8. Gửi notification cho customer
+        String message = String.format("Lịch hẹn của bạn đã được tạo thành công vào lúc %s. Vui lòng chờ cố vấn xác nhận.",
+                savedAppointment.getAppointmentTime().toString());
+        notificationService.sendNotification(customer, message, null);
+        
         return modelMapper.map(savedAppointment, AppointmentResponse.class);
         // giải thích
         /*
@@ -123,6 +131,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setServiceAdvisor(loggedInUser);
         // 5. lưu và trả về
         Appointment savedAppointment = appointmentRepository.save(appointment);
+        
+        // 6. Gửi notification cho customer
+        String message = String.format("Lịch hẹn của bạn vào lúc %s đã được xác nhận bởi cố vấn %s.",
+                savedAppointment.getAppointmentTime().toString(),
+                loggedInUser.getFullName());
+        notificationService.sendNotification(appointment.getCustomer(), message, null);
+        
         return modelMapper.map(savedAppointment, AppointmentResponse.class);
     }
 
