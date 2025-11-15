@@ -254,35 +254,47 @@
   border: 2px solid rgba(255, 255, 255, 0.08);
 }
 
-.brand-logo-large {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 32px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 30px;
+/* Simple Brand Logo - APEX EV */
+.brand-logo-simple {
   display: flex;
   align-items: center;
+  gap: 12px;
+  margin: 0 auto 48px;
   justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.brand-logo-simple:hover {
+  transform: scale(1.05);
+}
+
+.logo-apex {
   font-size: 56px;
-  color: white;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  animation: pulse 3s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
-  50% { transform: scale(1.05); box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4); }
-}
-
-.brand-title {
-  font-size: 48px;
   font-weight: 800;
   color: white;
-  margin-bottom: 16px;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  letter-spacing: -1px;
+  letter-spacing: 2px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.logo-ev {
+  background: linear-gradient(135deg, #005CF0, #1E7FFF);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-size: 32px;
+  font-weight: 700;
+  box-shadow: 0 8px 25px rgba(0, 92, 240, 0.4);
+  animation: glowEV 3s ease-in-out infinite;
+}
+
+@keyframes glowEV {
+  0%, 100% {
+    box-shadow: 0 8px 25px rgba(0, 92, 240, 0.4);
+  }
+  50% {
+    box-shadow: 0 12px 35px rgba(0, 92, 240, 0.6);
+  }
 }
 
 .brand-subtitle {
@@ -291,6 +303,7 @@
   margin-bottom: 48px;
   font-weight: 400;
   line-height: 1.6;
+  text-align: center;
 }
 
 .features-list {

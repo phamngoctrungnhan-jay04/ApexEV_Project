@@ -4,6 +4,7 @@ import { ROUTES } from './constants/routes';
 import './i18n';
 
 // Pages
+import Homepage from './pages/landing/Homepage';
 import LoginPage from './pages/auth/LoginPageModern';
 import RegisterPage from './pages/auth/RegisterPageModern';
 import CustomerDashboard from './pages/customer/Dashboard';
@@ -44,12 +45,25 @@ function ProtectedRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Landing Page - Public */}
+      <Route path="/" element={<Homepage />} />
+      
       {/* Public routes */}
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
       <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
       <Route path="/demo" element={<ComponentDemo />} />
       
-      {/* Customer routes - wrapped with CustomerLayout */}
+      {/* Homepage route - outside CustomerLayout (after login) */}
+      <Route 
+        path="/Homepage" 
+        element={
+          <ProtectedRoute>
+            <CustomerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* Customer routes - with Sidebar Layout */}
       <Route 
         path="/customer/*" 
         element={
@@ -58,7 +72,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="dashboard" element={<CustomerDashboard />} />
         <Route path="booking" element={<Booking />} />
         <Route path="history" element={<History />} />
         <Route path="invoices" element={<Invoices />} />
@@ -66,7 +79,6 @@ function AppRoutes() {
         <Route path="settings" element={<Settings />} />
         <Route path="chat" element={<Chat />} />
         <Route path="ratings" element={<Ratings />} />
-        {/* TODO: Add more customer routes here */}
       </Route>
       
       {/* Technician routes */}
@@ -85,9 +97,6 @@ function AppRoutes() {
         <Route path="parts-request" element={<PartsRequest />} />
         {/* TODO: Add more technician routes here */}
       </Route>
-      
-      {/* Default route */}
-      <Route path="/" element={<Navigate to={ROUTES.LOGIN} />} />
     </Routes>
   );
 }

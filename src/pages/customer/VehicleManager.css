@@ -1,0 +1,234 @@
+@import '../../styles/FormStyles.css';
+
+.vehicle-manager {
+  min-height: 100vh;
+  background: #F8FAFC;
+  color: #333;
+  padding: 2rem;
+}
+
+[data-theme="dark"] .vehicle-manager {
+  background: #0A0A0B;
+  color: #E5E7EB;
+}
+
+.vehicle-manager h2 {
+  color: #2D3748;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .vehicle-manager h2 {
+  color: #E5E7EB;
+}
+
+.vehicle-manager .text-muted {
+  color: #6B7280 !important;
+}
+
+[data-theme="dark"] .vehicle-manager .text-muted {
+  color: #9CA3AF !important;
+}
+
+/* Empty State */
+.empty-state {
+  background: #FFFFFF;
+  border: 1px solid rgba(138, 184, 230, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 3rem;
+  text-align: center;
+}
+
+[data-theme="dark"] .empty-state {
+  background: #1A1A1B;
+  border-color: rgba(176, 212, 241, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+/* Vehicles Grid */
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Vehicle Card */
+.vehicle-card {
+  border: 1px solid rgba(138, 184, 230, 0.15);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: #FFFFFF;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(138, 184, 230, 0.3);
+}
+
+[data-theme="dark"] .vehicle-card {
+  background: #1A1A1B;
+  border-color: rgba(176, 212, 241, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .vehicle-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.9) !important;
+  border-color: rgba(176, 212, 241, 0.3);
+}
+
+.vehicle-header {
+  flex: 1;
+}
+
+.vehicle-license {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.brand-badge {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  font-weight: 600;
+}
+
+/* Vehicle Details */
+.vehicle-details {
+  margin-top: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #2d3748;
+  text-align: right;
+}
+
+/* Modal Styling */
+.modal-content {
+  border-radius: 12px;
+  border: 1px solid rgba(138, 184, 230, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  background: #FFFFFF;
+}
+
+[data-theme="dark"] .modal-content {
+  background: #1A1A1B;
+  border-color: rgba(176, 212, 241, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #5A9BD5 0%, #8AB8E6 100%);
+  color: white;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  padding: 1.5rem 2rem;
+}
+
+[data-theme="dark"] .modal-header {
+  background: linear-gradient(135deg, #8AB8E6 0%, #B0D4F1 100%);
+}
+
+.modal-header .btn-close {
+  filter: brightness(0) invert(1);
+}
+
+.modal-title {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(138, 184, 230, 0.15);
+  padding: 1rem 2rem;
+  background: #F8FAFC;
+}
+
+[data-theme="dark"] .modal-footer {
+  border-top-color: rgba(176, 212, 241, 0.15);
+  background: #0F0F10;
+}
+
+/* Remove old form styles - using FormStyles.css now */
+
+.btn-outline-primary {
+  border-color: #667eea;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.btn-outline-danger {
+  border-color: #f56565;
+  color: #f56565;
+  font-weight: 600;
+}
+
+.btn-outline-danger:hover {
+  background-color: #f56565;
+  border-color: #f56565;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .vehicles-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .vehicle-license {
+    font-size: 1.25rem;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .detail-value {
+    text-align: left;
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vehicle-card {
+  animation: slideIn 0.3s ease-out;
+}

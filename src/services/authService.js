@@ -1,0 +1,204 @@
+// Authentication Service for API calls
+const API_BASE_URL = 'http://localhost:8081/api/auth';
+
+class AuthService {
+  // Login user
+  async login(emailOrPhone, password) {
+    try {
+      // Log request for debugging
+      console.log('Login request:', { emailOrPhone, password: '***' });
+      
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          emailOrPhone,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Login response:', { status: response.status, data });
+      console.log('📋 Full response data:', JSON.stringify(data, null, 2));
+
+      if (!response.ok) {
+        // Handle different error formats
+        const errorMessage = data.error || data.message || JSON.stringify(data) || 'Đăng nhập thất bại';
+        console.error('❌ Login failed with error:', errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      // Store tokens in localStorage
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('tokenType', data.type || 'Bearer');
+        
+        // Store user info - Map backend field names to frontend
+        const userInfo = {
+          id: data.userId,           // Backend: userId -> Frontend: id
+          email: data.email,
+          phone: data.phone,
+          fullName: data.fullName,
+          role: data.userRole,        // Backend: userRole -> Frontend: role
+        };
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+      }
+
+      // Return normalized data for consistency
+      return {
+        id: data.userId,
+        email: data.email,
+        phone: data.phone,
+        fullName: data.fullName,
+        role: data.userRole,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        type: data.type
+      };
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  }
+
+  // Register user
+  async register(userData) {
+    try {
+      console.log('Register request:', { ...userData, password: '***' });
+      
+      const response = await fetch(`${API_BASE_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...userData,
+          role: 'CUSTOMER' // Backend yêu cầu field role
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse response JSON:', jsonError);
+        data = { error: 'Server response error' };
+      }
+      
+      console.log('Register response:', { status: response.status, data });
+      console.log('📋 Full register response:', JSON.stringify(data, null, 2));
+
+      if (!response.ok) {
+        // Try to extract detailed error message
+        let errorMessage = 'Đăng ký thất bại';
+        
+        if (data.message) {
+          // Backend returns specific error message
+          const msg = data.message.toLowerCase();
+          if (msg.includes('email') && msg.includes('already') && msg.includes('exist')) {
+            errorMessage = '❌ Email này đã được sử dụng. Vui lòng sử dụng email khác.';
+          } else if (msg.includes('phone') && msg.includes('already') && msg.includes('exist')) {
+            errorMessage = '❌ Số điện thoại này đã được sử dụng. Vui lòng sử dụng số khác.';
+          } else if (msg.includes('duplicate')) {
+            errorMessage = '❌ Thông tin đã tồn tại. Email hoặc số điện thoại đã được đăng ký.';
+          } else {
+            errorMessage = data.message;
+          }
+        } else if (data.error) {
+          const err = data.error.toLowerCase();
+          if (err === 'internal server error') {
+            // Most likely duplicate email/phone causing database constraint violation
+            errorMessage = '❌ Email hoặc số điện thoại đã tồn tại trong hệ thống.\n\nVui lòng kiểm tra lại thông tin hoặc thử đăng nhập nếu bạn đã có tài khoản.';
+          } else {
+            errorMessage = data.error;
+          }
+        } else if (response.status === 400) {
+          errorMessage = '❌ Thông tin không hợp lệ. Email hoặc số điện thoại có thể đã được sử dụng.';
+        } else if (response.status === 500) {
+          errorMessage = '❌ Email hoặc số điện thoại đã tồn tại trong hệ thống.\n\nVui lòng kiểm tra lại thông tin hoặc thử đăng nhập nếu bạn đã có tài khoản.';
+        }
+        
+        console.error('❌ Register failed with error:', errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
+  }
+
+  // Refresh access token
+  async refreshToken() {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          refreshToken,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Refresh token failed');
+      }
+
+      // Update access token
+      localStorage.setItem('accessToken', data.accessToken);
+      return data;
+    } catch (error) {
+      console.error('Refresh token error:', error);
+      // Clear all auth data if refresh fails
+      this.logout();
+      throw error;
+    }
+  }
+
+  // Logout user
+  logout() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenType');
+    localStorage.removeItem('userInfo');
+  }
+
+  // Get stored user info
+  getCurrentUser() {
+    const userInfo = localStorage.getItem('userInfo');
+    return userInfo ? JSON.parse(userInfo) : null;
+  }
+
+  // Get access token
+  getAccessToken() {
+    return localStorage.getItem('accessToken');
+  }
+
+  // Check if user is authenticated
+  isAuthenticated() {
+    return !!this.getAccessToken();
+  }
+
+  // Get authorization header
+  getAuthHeader() {
+    const token = this.getAccessToken();
+    const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+    return token ? { Authorization: `${tokenType} ${token}` } : {};
+  }
+}
+
+// Create and export singleton instance
+const authService = new AuthService();
+export default authService;

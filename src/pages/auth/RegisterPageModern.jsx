@@ -3,8 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../constants/routes';
 import { useTranslation } from 'react-i18next';
-import { FiMail, FiLock, FiUser, FiPhone, FiZap, FiShield, FiClock, FiTrendingUp, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser, FiPhone, FiZap, FiShield, FiClock, FiTrendingUp, FiEye, FiEyeOff, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import { IoCarSportOutline } from 'react-icons/io5';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import authService from '../../services/authService';
 import './RegisterPage-Modern.css';
 
 const RegisterPageModern = () => {
@@ -26,6 +28,7 @@ const RegisterPageModern = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -36,6 +39,7 @@ const RegisterPageModern = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess(false);
 
     // Validation
     if (!formData.fullName || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
@@ -48,6 +52,11 @@ const RegisterPageModern = () => {
       return;
     }
 
+    if (formData.password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
     if (!agreeTerms) {
       setError('Bạn cần đồng ý với điều khoản dịch vụ');
       return;
@@ -55,19 +64,43 @@ const RegisterPageModern = () => {
 
     setLoading(true);
 
-    // Mock registration
-    setTimeout(() => {
-      const mockUser = {
-        id: Date.now(),
-        name: formData.fullName,
+    try {
+      // Call real API
+      const response = await authService.register({
+        fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
-        role: 'customer'
-      };
+        password: formData.password
+      });
+
+      // Show success message
+      setSuccess(true);
+      setLoading(false);
+
+      // Clear form
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: ''
+      });
+      setAgreeTerms(false);
+
+    } catch (err) {
+      setLoading(false);
+      setSuccess(false);
       
-      login(mockUser);
-      navigate(ROUTES.CUSTOMER.DASHBOARD);
-    }, 1500);
+      // Handle specific error messages from backend
+      if (err.error) {
+        setError(err.error);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Đăng ký thất bại. Vui lòng thử lại!');
+      }
+      console.error('Registration error:', err);
+    }
   };
 
   const handleSocialRegister = (provider) => {
@@ -121,10 +154,10 @@ const RegisterPageModern = () => {
           {/* Left Side - Brand & Features */}
           <div className="col-lg-6 register-left">
             <div className="brand-section">
-              <div className="brand-logo-large">
-                <FiZap />
+              <div className="brand-logo-simple" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
+                <span className="logo-apex">APEX</span>
+                <span className="logo-ev">EV</span>
               </div>
-              <h1 className="brand-title">APEX EV</h1>
               <p className="brand-subtitle">
                 Tham gia cộng đồng chủ xe điện thông minh
               </p>
@@ -176,18 +209,20 @@ const RegisterPageModern = () => {
           {/* Right Side - Register Form */}
           <div className="col-lg-6 register-right">
             <div className="register-form-container">
-              <div className="register-form-header">
-                <h2>Đăng ký tài khoản</h2>
-                <p>Tạo tài khoản để bắt đầu sử dụng dịch vụ</p>
-              </div>
+              {!success ? (
+                <>
+                  <div className="register-form-header">
+                    <h2>Đăng ký tài khoản</h2>
+                    <p>Tạo tài khoản để bắt đầu sử dụng dịch vụ</p>
+                  </div>
 
-              {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
-                </div>
-              )}
+                  {error && (
+                    <div className="alert alert-danger" role="alert">
+                      {error}
+                    </div>
+                  )}
 
-              <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit}>
                 {/* Full Name */}
                 <div className="form-group">
                   <label>Họ và tên *</label>
@@ -350,6 +385,23 @@ const RegisterPageModern = () => {
                 Đã có tài khoản?{' '}
                 <Link to={ROUTES.LOGIN}>Đăng nhập ngay</Link>
               </div>
+                </>
+              ) : (
+                <div className="success-message-container">
+                  <div className="success-icon-large">
+                    <FiCheckCircle />
+                  </div>
+                  <h2 className="success-title">Đăng ký thành công!</h2>
+                  <p className="success-description">
+                    Chúc mừng! Tài khoản của bạn đã được tạo thành công. 
+                    Bây giờ bạn có thể đăng nhập để bắt đầu sử dụng dịch vụ của chúng tôi.
+                  </p>
+                  <Link to={ROUTES.LOGIN} className="btn-go-login-modern">
+                    <span>Chuyển đến trang đăng nhập</span>
+                    <FiArrowRight />
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

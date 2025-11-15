@@ -8,6 +8,7 @@ export const ROUTES = {
   
   // Customer routes
   CUSTOMER: {
+    HOMEPAGE: '/Homepage',
     DASHBOARD: '/customer/dashboard',
     BOOKING: '/customer/booking',
     PROFILE: '/customer/profile',

@@ -15,6 +15,7 @@ import {
   FiArrowRight 
 } from 'react-icons/fi';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import authService from '../../services/authService';
 import './LoginPage-Modern.css';
 
 const LoginPageModern = () => {
@@ -39,19 +40,37 @@ const LoginPageModern = () => {
 
     setLoading(true);
     
-    // Mock login - accept any credentials
-    setTimeout(() => {
-      const mockUser = {
-        id: 1,
-        email: email,
-        name: 'Khách hàng Demo',
-        role: 'customer',
+    try {
+      // Call real API
+      const response = await authService.login(email, password);
+      
+      // Login successful - authService already saved tokens to localStorage
+      const user = {
+        id: response.id,
+        email: response.email,
+        fullName: response.fullName,
+        phone: response.phone,
+        role: response.role
       };
       
-      login(mockUser);
+      login(user);
+      
+      // Navigate based on role
+      if (response.role === 'CUSTOMER') {
+        navigate('/Homepage');
+      } else if (response.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/Homepage');
+      }
+    } catch (err) {
+      setError(
+        err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.'
+      );
+      console.error('Login error:', err);
+    } finally {
       setLoading(false);
-      navigate(ROUTES.CUSTOMER.DASHBOARD);
-    }, 1000);
+    }
   };
 
   const handleSocialLogin = (provider) => {
@@ -95,10 +114,10 @@ const LoginPageModern = () => {
           {/* Left Side - Brand & Features */}
           <div className="col-lg-6 login-left">
             <div className="brand-section">
-              <div className="brand-logo-large">
-                <FiZap />
+              <div className="brand-logo-simple" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
+                <span className="logo-apex">APEX</span>
+                <span className="logo-ev">EV</span>
               </div>
-              <h1 className="brand-title">APEX EV</h1>
               <p className="brand-subtitle">
                 {t('auth.loginSubtitle') || 'Hệ thống quản lý bảo dưỡng xe điện chuyên nghiệp'}
               </p>
