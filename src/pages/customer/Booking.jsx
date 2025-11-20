@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+// import serviceService from '../services/serviceService';
+import appointmentService from '../../services/appointmentService';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Badge, Modal } from 'react-bootstrap';
@@ -10,12 +13,15 @@ import {
   FiCheck,
   FiArrowRight,
   FiInfo,
+  FiLogOut,
 } from 'react-icons/fi';
 import { CustomButton, CustomInput, CustomSelect, CustomCard } from '../../components/common';
-import { services, serviceCategories, vehicles, technicians } from '../../mockData';
+import serviceService from '../../services/serviceService';
+import { serviceCategories, vehicles, technicians } from '../../mockData';
 import './Booking.css';
 
 function Booking() {
+  const { user, logout, isAuthenticated } = useAuth();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const currentLang = i18n.language;
@@ -33,33 +39,32 @@ function Booking() {
   const [selectedTime, setSelectedTime] = useState('');
   const [notes, setNotes] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [services, setServices] = useState([]);
+
+  // Toggle chọn/bỏ dịch vụ
+  const toggleService = (serviceId) => {
+    setSelectedServices(prev =>
+      prev.includes(serviceId)
+        ? prev.filter(id => id !== serviceId)
+        : [...prev, serviceId]
+    );
+  };
+
+  // Lấy danh sách dịch vụ từ BE
+  useEffect(() => {
+    serviceService.getAllServices().then(setServices);
+  }, []);
 
   // Filter services by category
   const filteredServices = selectedCategory === 'all'
     ? services
-    : services.filter(s => s.category === selectedCategory);
-
-  // Time slots
-  const timeSlots = [
-    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-    '11:00', '11:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00'
-  ];
-
-  // Handle service selection
-  const toggleService = (serviceId) => {
-    if (selectedServices.includes(serviceId)) {
-      setSelectedServices(selectedServices.filter(id => id !== serviceId));
-    } else {
-      setSelectedServices([...selectedServices, serviceId]);
-    }
-  };
+    : services.filter(s => s.service_category === selectedCategory);
 
   // Calculate total
   const calculateTotal = () => {
     return selectedServices.reduce((total, serviceId) => {
       const service = services.find(s => s.id === serviceId);
-      return total + (service?.basePrice || 0);
+      return total + (service?.unitPrice || 0);
     }, 0);
   };
 
@@ -67,7 +72,7 @@ function Booking() {
   const calculateDuration = () => {
     return selectedServices.reduce((total, serviceId) => {
       const service = services.find(s => s.id === serviceId);
-      return total + (service?.duration || 0);
+        return total + (service?.estimatedDuration || 0);
     }, 0);
   };
 
@@ -118,6 +123,60 @@ function Booking() {
 
   return (
     <div className="booking-page">
+      {/* Navbar giống Homepage */}
+      <nav className="dashboard-navbar">
+        <Container fluid>
+          <div className="navbar-content">
+            <div className="navbar-left">
+              <div className="navbar-brand" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
+                <span className="brand-text">APEX</span>
+                <span className="brand-badge">EV</span>
+              </div>
+              <div className="navbar-links">
+                <a href="/Homepage" className="nav-link active">
+                  <FiCalendar className="link-icon" />
+                  Trang chủ
+                </a>
+                <a href="#services" className="nav-link">
+                  <FiTool className="link-icon" />
+                  Dịch vụ
+                </a>
+                <a href="/customer/history" className="nav-link">
+                  <FiClock className="link-icon" />
+                  Lịch sử
+                </a>
+                <a href="/customer/vehicles" className="nav-link">
+                  <FiTruck className="link-icon" />
+                  Xe của tôi
+                </a>
+              </div>
+            </div>
+            <div className="navbar-right">
+              {isAuthenticated ? (
+                <div className="user-menu">
+                  <div className="user-avatar">
+                    <img src={`https://ui-avatars.com/api/?name=${user?.fullName}&background=005CF0&color=fff`} alt="User" />
+                  </div>
+                  <span className="user-name">{user?.fullName}</span>
+                  <button className="btn-logout" onClick={logout}>
+                    <FiLogOut />
+                    <span>Đăng xuất</span>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button className="btn-register" onClick={() => navigate('/register')}>
+                    Đăng ký
+                  </button>
+                  <button className="btn-login" onClick={() => navigate('/login')}>
+                    Đăng nhập
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </Container>
+      </nav>
       <Container fluid>
         {/* Page Header */}
         <div className="page-header mb-4">
@@ -129,8 +188,7 @@ function Booking() {
             {t('booking.subtitle') || 'Chọn dịch vụ và thời gian phù hợp với bạn'}
           </p>
         </div>
-
-        {/* Progress Steps */}
+        {/* Progress Steps và các bước booking giữ nguyên */}
         <Card className="steps-card mb-4">
           <Card.Body>
             <div className="booking-steps">
@@ -162,9 +220,10 @@ function Booking() {
             </div>
           </Card.Body>
         </Card>
-
+        {/* Bỏ sidebar, chỉ giữ phần booking chính */}
+        {/* Chỉ giữ phần booking chính, bỏ sidebar */}
         <Row>
-          <Col lg={8}>
+          <Col lg={12}>
             {/* Step 1: Select Services */}
             {step === 1 && (
               <Card className="services-card">
@@ -215,10 +274,10 @@ function Booking() {
                               </p>
                             </div>
                             <div className="text-end">
-                              <div className="service-price">{formatCurrency(service.basePrice)}</div>
+                              <div className="service-price">{formatCurrency(service.unitPrice)}</div>
                               <div className="service-duration text-muted">
                                 <FiClock className="me-1" />
-                                {service.duration} phút
+                                {service.estimatedDuration} phút
                               </div>
                             </div>
                           </div>
@@ -385,7 +444,7 @@ function Booking() {
                         return (
                           <div key={serviceId} className="summary-item">
                             <span>{currentLang === 'en' ? service.nameEn : service.name}</span>
-                            <span>{formatCurrency(service.basePrice)}</span>
+                            <span>{formatCurrency(service.unitPrice)}</span>
                           </div>
                         );
                       })}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -22,23 +23,27 @@ const CustomerLayout = () => {
     setMobileSidebarOpen(false);
   };
 
+  const location = useLocation();
+  const isBookingPage = location.pathname === '/customer/booking';
   return (
     <div className="customer-layout">
       {/* Header */}
       <Header 
         onToggleSidebar={handleToggleSidebar}
-        showSidebarToggle={true}
+        showSidebarToggle={!isBookingPage}
       />
 
-      {/* Sidebar */}
-      <Sidebar 
-        isCollapsed={sidebarCollapsed}
-        onToggle={handleToggleSidebar}
-        className={mobileSidebarOpen ? 'mobile-open' : ''}
-      />
+      {/* Sidebar chỉ render nếu không phải trang booking */}
+      {!isBookingPage && (
+        <Sidebar 
+          isCollapsed={sidebarCollapsed}
+          onToggle={handleToggleSidebar}
+          className={mobileSidebarOpen ? 'mobile-open' : ''}
+        />
+      )}
 
       {/* Mobile Overlay */}
-      {mobileSidebarOpen && (
+      {mobileSidebarOpen && !isBookingPage && (
         <div 
           className="sidebar-overlay show" 
           onClick={handleCloseMobileSidebar}
