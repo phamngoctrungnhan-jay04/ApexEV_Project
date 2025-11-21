@@ -59,7 +59,8 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
 
     @Override
     @Transactional
-    public TechnicianWorkDetailResponse updateWorkStatus(Long workId, UpdateWorkStatusRequest request, User technician) {
+    public TechnicianWorkDetailResponse updateWorkStatus(Long workId, UpdateWorkStatusRequest request,
+            User technician) {
         ServiceOrder work = findWorkAndCheckOwnership(workId, technician);
 
         OrderStatus currentStatus = work.getStatus();
@@ -82,7 +83,8 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
 
     @Override
     @Transactional
-    public TechnicianWorkDetailResponse addTechnicianNotes(Long workId, AddTechnicianNotesRequest request, User technician) {
+    public TechnicianWorkDetailResponse addTechnicianNotes(Long workId, AddTechnicianNotesRequest request,
+            User technician) {
         ServiceOrder work = findWorkAndCheckOwnership(workId, technician);
 
         // Cập nhật ghi chú
@@ -131,7 +133,8 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
                 break;
             case IN_PROGRESS:
                 // Từ IN_PROGRESS chuyển sang READY_FOR_INVOICE hoặc WAITING_FOR_PARTS
-                isValidTransition = (newStatus == OrderStatus.READY_FOR_INVOICE || newStatus == OrderStatus.WAITING_FOR_PARTS);
+                isValidTransition = (newStatus == OrderStatus.READY_FOR_INVOICE
+                        || newStatus == OrderStatus.WAITING_FOR_PARTS);
                 break;
             default:
                 isValidTransition = false;
@@ -139,8 +142,7 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
 
         if (!isValidTransition) {
             throw new IllegalStateException(
-                    String.format("Không thể chuyển từ trạng thái %s sang %s", currentStatus, newStatus)
-            );
+                    String.format("Không thể chuyển từ trạng thái %s sang %s", currentStatus, newStatus));
         }
     }
 
@@ -204,15 +206,13 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
                     if (item.getItemType() == OrderItemType.SERVICE) {
                         itemDto.setItemName(
                                 maintenanceServiceRepository.findById(item.getItemRefId())
-                                        .map(MaintenanceService::getServiceName)
-                                        .orElse("Dịch vụ không xác định")
-                        );
+                                        .map(MaintenanceService::getName)
+                                        .orElse("Dịch vụ không xác định"));
                     } else if (item.getItemType() == OrderItemType.PART) {
                         itemDto.setItemName(
                                 partRepository.findById(item.getItemRefId())
                                         .map(Part::getPartName)
-                                        .orElse("Phụ tùng không xác định")
-                        );
+                                        .orElse("Phụ tùng không xác định"));
                     }
 
                     return itemDto;

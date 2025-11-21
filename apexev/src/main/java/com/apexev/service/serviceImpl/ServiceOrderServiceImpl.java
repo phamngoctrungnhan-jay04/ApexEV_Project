@@ -33,7 +33,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     private final PartRepository partRepository;
     private final MaintenanceServiceRepository maintenanceServiceRepository;
 
-    //Lấy danh sách tóm tắt lịch sử đơn hàng
+    // Lấy danh sách tóm tắt lịch sử đơn hàng
     @Override
     public List<ServiceOrderSummaryResponse> getMyMaintenanceHistory(User loggedInUser) {
         Integer customerId = loggedInUser.getUserId(); // (UserID là Integer)
@@ -56,9 +56,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         return convertOrderToDetailDto(order);
     }
 
-
-
-    //Chuyển ServiceOrder (Entity) sang bản tóm tắt (DTO)
+    // Chuyển ServiceOrder (Entity) sang bản tóm tắt (DTO)
     private ServiceOrderSummaryResponse convertOrderToSummaryDto(ServiceOrder order) {
         ServiceOrderSummaryResponse dto = new ServiceOrderSummaryResponse();
         dto.setId(order.getId());
@@ -74,8 +72,8 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         return dto;
     }
 
-    //Chuyển ServiceOrder (Entity) sang bản chi tiết (DTO)
-    //Đây là hàm phức tạp, phải map nhiều đối tượng con
+    // Chuyển ServiceOrder (Entity) sang bản chi tiết (DTO)
+    // Đây là hàm phức tạp, phải map nhiều đối tượng con
     private ServiceOrderDetailResponse convertOrderToDetailDto(ServiceOrder order) {
         // 1. Map các trường cơ bản
         ServiceOrderDetailResponse detailDto = new ServiceOrderDetailResponse();
@@ -93,7 +91,7 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         // 3. Map nhân viên
         detailDto.setServiceAdvisorName(order.getServiceAdvisor().getFullName());
-        if(order.getTechnician() != null) {
+        if (order.getTechnician() != null) {
             detailDto.setTechnicianName(order.getTechnician().getFullName());
         }
 
@@ -122,18 +120,16 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
                     itemDto.setUnitPrice(itemEntity.getUnitPrice());
 
                     // Lấy tên món hàng (Logic "hoàn hảo")
-                    if(itemEntity.getItemType() == OrderItemType.SERVICE) {
+                    if (itemEntity.getItemType() == OrderItemType.SERVICE) {
                         itemDto.setItemName(
                                 maintenanceServiceRepository.findById(itemEntity.getItemRefId())
-                                        .map(MaintenanceService::getServiceName)
-                                        .orElse("Dịch vụ không xác định")
-                        );
+                                        .map(MaintenanceService::getName)
+                                        .orElse("Dịch vụ không xác định"));
                     } else if (itemEntity.getItemType() == OrderItemType.PART) {
                         itemDto.setItemName(
                                 partRepository.findById(itemEntity.getItemRefId())
                                         .map(Part::getPartName)
-                                        .orElse("Phụ tùng không xác định")
-                        );
+                                        .orElse("Phụ tùng không xác định"));
                     }
                     return itemDto;
                 }).collect(Collectors.toList());
@@ -142,7 +138,5 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
 
         return detailDto;
     }
-
-
 
 }
