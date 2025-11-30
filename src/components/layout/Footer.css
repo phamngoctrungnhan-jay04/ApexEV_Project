@@ -1,0 +1,111 @@
+/* =========================================
+   APEX MODERN UI - FOOTER STYLES
+   ========================================= */
+
+.vinfast-footer {
+  /* 1. Kỹ thuật Break-out Container: Giúp Footer tràn viền 100% màn hình 
+     kể cả khi nó bị nhét trong Container */
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-left: 0;
+  margin-right: 0;
+
+  /* 2. Glassmorphism Background */
+  background: rgba(36, 39, 46, 0.95); /* Tăng độ đậm chút để chữ dễ đọc */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15); /* Bóng đổ ngược lên trên */
+  
+  /* 3. Spacing & Layout */
+  color: #F8FAFC;
+  padding: 60px 0 20px 0; /* Padding trên rộng hơn cho thoáng */
+  margin-top: 60px;
+  
+  /* 4. Bo góc: Chỉ bo góc trên, KHÔNG bo góc dưới */
+  border-radius: 24px 24px 0 0; 
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* Viền sáng nhẹ phía trên */
+  z-index: 100;
+  overflow-x: hidden; /* Tránh nội dung tràn ngang */
+}
+
+/* Container bên trong để nội dung không bị dính sát lề màn hình */
+.vinfast-footer .container,
+.vinfast-footer .footer-content {
+  max-width: 1440px; /* Hoặc 1200px tùy design */
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Typography */
+.footer-title {
+  color: #338AF3; /* Màu xanh thương hiệu APEX */
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.footer-text {
+  color: #94A3B8; /* Màu xám nhạt cho text phụ */
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+/* Links List */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: #E2E8F0;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Hiệu ứng hover cho link: Sáng lên và dịch chuyển nhẹ */
+.footer-links a:hover {
+  color: #338AF3;
+  transform: translateX(4px);
+}
+
+/* Footer Bottom (Copyright area) */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 40px;
+  padding-top: 24px;
+  text-align: center;
+  color: #64748B;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vinfast-footer {
+    padding: 40px 0 20px 0;
+    margin-top: 40px;
+  }
+  
+  .footer-title {
+    font-size: 1.1rem;
+    margin-top: 24px; /* Tách các khối trên mobile */
+  }
+  
+  .footer-links a:hover {
+    transform: none; /* Mobile không cần hiệu ứng dịch chuyển */
+  }
+}

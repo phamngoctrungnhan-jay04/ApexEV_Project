@@ -127,7 +127,13 @@ function CustomerDashboard() {
                 <div className="user-avatar">
                   <img src={`https://ui-avatars.com/api/?name=${user?.fullName}&background=005CF0&color=fff`} alt="User" />
                 </div>
-                <span className="user-name">{user?.fullName}</span>
+                <span
+                  className="user-name"
+                  style={{ cursor: 'pointer', color: '#007bff' }}
+                  onClick={() => navigate('/customer/profile')}
+                >
+                  {user?.fullName}
+                </span>
                 <button className="btn-logout" onClick={handleLogout}>
                   <FiLogOut />
                   <span>Đăng xuất</span>

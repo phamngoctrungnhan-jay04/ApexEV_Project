@@ -1,10 +1,11 @@
 // User roles trong hệ thống
+
 export const USER_ROLES = {
-  CUSTOMER: 'customer',
-  TECHNICIAN: 'technician',
-  ADVISOR: 'advisor',
-  MANAGER: 'manager',
-  ADMIN: 'admin'
+  CUSTOMER: 'CUSTOMER',
+  TECHNICIAN: 'TECHNICIAN',
+  ADVISOR: 'SERVICE_ADVISOR',
+  MANAGER: 'MANAGER',
+  ADMIN: 'ADMIN'
 };
 
 export default USER_ROLES;

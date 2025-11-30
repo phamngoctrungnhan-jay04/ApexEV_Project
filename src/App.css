@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+/* File: src/index.css */
+
+html, body {
+  overflow-x: hidden; /* Cắt bỏ phần dư ngang do 100vw gây ra */
+  max-width: 100%;
+  position: relative;
+}

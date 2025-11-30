@@ -1,0 +1,249 @@
+/* ===== APEX MODERN UI CUSTOM ===== */
+.apex-glass-header {
+  width: 100%;
+  padding: 32px 0 24px 0;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.icon-title-lg {
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+.apex-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.apex-subtitle {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+.apex-filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.apex-pill {
+  border-radius: 9999px !important;
+  font-weight: 500;
+  padding: 6px 20px !important;
+}
+.apex-table-section {
+  margin-bottom: 32px;
+}
+.apex-shadow {
+  box-shadow: 0 2px 8px rgba(51, 138, 243, 0.12);
+}
+.apex-alert {
+  margin: 16px 0;
+}
+/* =========================================
+   1. VARIABLES & THEME CONFIGURATION
+   ========================================= */
+:root {
+  /* Brand Colors - Lấy tone màu từ dự án APEX */
+  --primary-color: #0ea5e9;       /* Sky Blue hiện đại */
+  --primary-dark: #0284c7;
+  --success-color: #10b981;       /* Emerald Green */
+  --danger-color: #ef4444;        /* Red */
+  --warning-color: #f59e0b;       /* Amber */
+  --text-main: #334155;           /* Slate 700 */
+  --text-light: #64748b;          /* Slate 500 */
+  --bg-surface: #ffffff;
+  --bg-hover: #f8fafc;
+  
+  /* Role Specific Colors (Background/Text) */
+  --role-admin-bg: #e0f2fe;     --role-admin-text: #0369a1; /* Blue */
+  --role-tech-bg: #dcfce7;      --role-tech-text: #15803d;  /* Green */
+  --role-advisor-bg: #fef3c7;   --role-advisor-text: #b45309; /* Amber */
+  --role-customer-bg: #f3f4f6;  --role-customer-text: #374151; /* Gray */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* =========================================
+   2. LAYOUT & HEADER
+   ========================================= */
+.admin-userlist-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-title {
+  color: var(--primary-color);
+  background: #e0f2fe; /* Nhấn nhẹ background cho icon */
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 1.2em;
+}
+
+/* Filter Group */
+.userlist-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* =========================================
+   3. MODERN TABLE DESIGN
+   ========================================= */
+.userlist-table-wrapper {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  overflow: hidden; /* Bo tròn góc bảng */
+  border: 1px solid #e2e8f0;
+}
+
+/* Hiệu ứng đổ bóng hiện đại (Soft Shadow) */
+.userlist-table-wrapper.modern-shadow {
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.3s ease;
+}
+
+.userlist-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.userlist-table thead {
+  background-color: #f1f5f9;
+}
+
+.userlist-table th {
+  padding: 16px 24px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-light);
+  font-weight: 600;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.userlist-table td {
+  padding: 16px 24px;
+  color: var(--text-main);
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.userlist-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Hover Effect cho từng dòng */
+.userlist-row {
+  transition: all 0.2s ease-in-out;
+}
+
+.userlist-row:hover {
+  background-color: var(--bg-hover);
+}
+
+/* =========================================
+   4. COMPONENTS: AVATAR, BADGES, STATUS
+   ========================================= */
+
+/* User Info Cell (Avatar + Name) */
+.userlist-table td .d-flex {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-right: 12px;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); /* Viền mỏng bên trong */
+}
+
+/* Màu Avatar theo Role */
+.avatar-admin { background: var(--role-admin-bg); color: var(--role-admin-text); }
+.avatar-technician { background: var(--role-tech-bg); color: var(--role-tech-text); }
+.avatar-service_advisor { background: var(--role-advisor-bg); color: var(--role-advisor-text); }
+.avatar-customer { background: var(--role-customer-bg); color: var(--role-customer-text); }
+
+/* Role Badge (Style dạng Pill/Viên thuốc) */
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px; /* Pill shape */
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-admin { background: var(--role-admin-bg); color: var(--role-admin-text); }
+.badge-technician { background: var(--role-tech-bg); color: var(--role-tech-text); }
+.badge-service_advisor { background: var(--role-advisor-bg); color: var(--role-advisor-text); }
+.badge-customer { background: var(--role-customer-bg); color: var(--role-customer-text); }
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  color: var(--success-color);
+}
+
+.status-badge.inactive {
+  color: var(--text-light);
+}
+
+/* Contact Info Text */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+/* =========================================
+   5. RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+  .userlist-filter-group {
+    flex-direction: column;
+  }
+  
+  .userlist-filter-group button {
+    width: 100%;
+  }
+
+  .userlist-table th, 
+  .userlist-table td {
+    padding: 12px 16px;
+  }
+}

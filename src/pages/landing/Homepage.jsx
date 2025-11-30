@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import { 
@@ -11,10 +12,13 @@ import {
   FiHome
 } from 'react-icons/fi';
 import { IoCarSportOutline } from 'react-icons/io5';
+import Header from '../../components/layout/Header';
 import './Homepage.css';
+
 
 function Homepage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -48,42 +52,8 @@ function Homepage() {
 
   return (
     <div className="vinfast-homepage">
-      {/* Navbar */}
-      <nav className="vinfast-navbar">
-        <Container>
-          <div className="navbar-content">
-            <div className="navbar-left">
-              <div className="navbar-brand" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
-                <span className="brand-text">APEX</span>
-                <span className="brand-badge">EV</span>
-              </div>
-              <div className="navbar-links">
-                <a href="/" className="nav-link">
-                  <FiHome className="link-icon" />
-                  Trang chủ
-                </a>
-                <a href="#services" className="nav-link">
-                  <FiTool className="link-icon" />
-                  Dịch vụ
-                </a>
-                <a href="#about" className="nav-link">
-                  <FiCheckCircle className="link-icon" />
-                  Giới thiệu
-                </a>
-              </div>
-            </div>
-            <div className="navbar-right">
-              <button className="btn-register" onClick={() => navigate('/register')}>
-                Đăng ký
-              </button>
-              <button className="btn-login" onClick={() => navigate('/login')}>
-                Đăng nhập
-              </button>
-            </div>
-          </div>
-        </Container>
-      </nav>
-
+      {/* Shared Header for all main pages */}
+      <Header />
       {/* Hero Section */}
       <section 
         className="hero-section" 
@@ -109,7 +79,7 @@ function Homepage() {
             <div className="hero-cta">
               <button 
                 className="btn-primary-cta glow-effect"
-                onClick={() => navigate('/register')}
+                onClick={() => user ? navigate('/customer/booking') : navigate('/register')}
               >
                 <FiCalendar className="me-2" />
                 Đặt Lịch Bảo Dưỡng Ngay
@@ -268,7 +238,7 @@ function Homepage() {
             </p>
             <button 
               className="btn-cta-large glow-effect"
-              onClick={() => navigate('/register')}
+              onClick={() => user ? navigate('/customer/booking') : navigate('/register')}
             >
               <FiCalendar className="me-2" />
               Đặt lịch ngay

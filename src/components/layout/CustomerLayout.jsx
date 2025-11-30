@@ -25,33 +25,13 @@ const CustomerLayout = () => {
 
   const location = useLocation();
   const isBookingPage = location.pathname === '/customer/booking';
+  const isProfilePage = location.pathname === '/customer/profile';
   return (
     <div className="customer-layout">
       {/* Header */}
-      <Header 
-        onToggleSidebar={handleToggleSidebar}
-        showSidebarToggle={!isBookingPage}
-      />
-
-      {/* Sidebar chỉ render nếu không phải trang booking */}
-      {!isBookingPage && (
-        <Sidebar 
-          isCollapsed={sidebarCollapsed}
-          onToggle={handleToggleSidebar}
-          className={mobileSidebarOpen ? 'mobile-open' : ''}
-        />
-      )}
-
-      {/* Mobile Overlay */}
-      {mobileSidebarOpen && !isBookingPage && (
-        <div 
-          className="sidebar-overlay show" 
-          onClick={handleCloseMobileSidebar}
-        />
-      )}
-
+      <Header />
       {/* Main Content */}
-      <main className={`main-content ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <main className="main-content">
         <div className="main-content-inner">
           <Outlet />
         </div>

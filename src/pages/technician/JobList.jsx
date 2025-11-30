@@ -1,3 +1,4 @@
+import { FaCar } from 'react-icons/fa';
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Table, Form, Button, Modal, InputGroup } from 'react-bootstrap';
 import { 
@@ -449,7 +450,7 @@ const JobList = () => {
                       <div className="info-item">
                         <span className="label">Xe:</span>
                         <span className="value">
-                          <FiTruck className="me-1" />
+                          <FaCar className="me-1" />
                           Xe #{selectedJob.vehicleId}
                         </span>
                       </div>

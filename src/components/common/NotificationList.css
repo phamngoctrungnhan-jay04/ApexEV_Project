@@ -1,0 +1,164 @@
+/* Container chính: Đặt vị trí cố định, hiệu ứng kính */
+.notification-modal {
+  position: absolute; /* Đổi thành absolute để nó dính vào cha (wrapper ở header) */
+  top: 60px; /* Cách header 1 chút */
+  right: 0;
+  width: 360px;
+  max-height: 500px; /* Chiều cao tối đa */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column; /* Quan trọng: Xếp dọc */
+  z-index: 10000;
+  overflow: hidden; /* Bo góc mượt mà */
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Hiệu ứng hiện ra */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 1. Header: Luôn nằm trên cùng */
+.notification-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0; /* Không bị co lại */
+}
+
+.notification-header .title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.notification-header .close-btn {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 4px;
+  transition: 0.2s;
+  display: flex;
+}
+.notification-header .close-btn:hover { color: #EF4444; }
+
+/* 2. Body: Phần duy nhất được cuộn */
+.notification-body {
+  flex: 1; /* Chiếm hết khoảng trống còn lại */
+  overflow-y: auto; /* Chỉ cuộn phần này */
+  padding: 0;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* Trạng thái Loading/Empty */
+.state-text {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+.state-text.error { color: #EF4444; }
+
+/* Danh sách items */
+.notification-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #F1F5F9;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: #F8FAFC;
+}
+
+.notification-item.unread {
+  background: #EFF6FF; /* Xanh nhạt cho chưa đọc */
+}
+.notification-item.unread:hover {
+  background: #E0F2FE;
+}
+
+.item-icon {
+  font-size: 1.4rem;
+  margin-top: 2px;
+}
+
+.item-content { flex: 1; }
+
+.item-message {
+  font-size: 0.95rem;
+  color: #374151;
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.item-time {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  display: block;
+}
+
+/* 3. Footer: Luôn nằm dưới cùng */
+.notification-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #f0f0f0;
+  background: #F9FAFB;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.delete-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FEF2F2;
+  color: #EF4444;
+  border: 1px solid #FECACA;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-all-btn:hover {
+  background: #EF4444;
+  color: white;
+  border-color: #EF4444;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .notification-modal {
+    position: fixed;
+    top: 70px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    height: 70vh;
+  }
+}

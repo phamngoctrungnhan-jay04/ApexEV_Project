@@ -1,0 +1,76 @@
+.advisor-dashboard-bg {
+  background: #F8FAFC;
+  min-height: 100vh;
+}
+.advisor-dashboard-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.18);
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+}
+.dashboard-title {
+  color: #338AF3;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  margin-top: 16px;
+}
+.dashboard-table th, .dashboard-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #E5E7EB;
+  text-align: left;
+  color: #1F2937;
+}
+.dashboard-table th {
+  background: #F8FAFC;
+  font-weight: 600;
+}
+.row-confirmed {
+  background: #e6f9ed;
+}
+.status-confirmed {
+  color: #34c759;
+  font-weight: 600;
+}
+.status-pending {
+  color: #338AF3;
+  font-weight: 500;
+}
+.btn-confirm {
+  background: #34c759;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.18);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-confirm:hover {
+  background: #28a745;
+  transform: translateY(-2px) scale(1.02);
+}
+.dashboard-loading, .dashboard-error, .dashboard-empty {
+  text-align: center;
+  margin: 32px 0;
+  color: #6B7280;
+  font-size: 1.1rem;
+}
+.glassmorphism {
+  backdrop-filter: blur(12px);
+}

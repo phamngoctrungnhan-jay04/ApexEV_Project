@@ -7,11 +7,30 @@ class AppointmentService {
     return localStorage.getItem('accessToken');
   }
 
+  // Lấy danh sách lịch hẹn trạng thái PENDING cho advisor
+  async getPendingAppointments() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/pending`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.getAuthToken()}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Không thể lấy danh sách lịch hẹn chờ xác nhận.');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Create appointment (Đặt lịch)
   async createAppointment(appointmentData) {
     try {
       console.log('Creating appointment:', appointmentData);
-      
       const response = await fetch(`${API_BASE_URL}/create`, {
         method: 'POST',
         headers: {

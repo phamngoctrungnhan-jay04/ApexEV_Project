@@ -220,14 +220,12 @@ const Invoices = () => {
                       </td>
                       <td>{new Date(invoice.issueDate).toLocaleDateString('vi-VN')}</td>
                       <td>
-                        <div>
-                          <div className="fw-bold">{formatCurrency(invoice.totalAmount)}</div>
-                          {invoice.discount > 0 && (
-                            <small className="text-muted">
-                              {t('invoices.discount')}: -{formatCurrency(invoice.discount)}
-                            </small>
-                          )}
-                        </div>
+                        <div className="fw-bold">{formatCurrency(invoice.totalAmount)}</div>
+                        {invoice.discount > 0 && (
+                          <small className="text-muted">
+                            {t('invoices.discount')}: -{formatCurrency(invoice.discount)}
+                          </small>
+                        )}
                       </td>
                       <td>{getPaymentMethodText(invoice.paymentMethod)}</td>
                       <td>{getPaymentStatusBadge(invoice.paymentStatus)}</td>

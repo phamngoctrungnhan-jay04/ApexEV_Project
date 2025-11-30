@@ -1,0 +1,71 @@
+/* File: src/pages/admin/AdminDashboard.css */
+:root {
+  --primary-color: #338AF3;
+  --primary-hover: #005CF0;
+  --success-color: #34c759;
+  --danger-color: #EF4444;
+  --background: #F8FAFC;
+  --text-main: #1F2937;
+  --text-sub: #6B7280;
+}
+
+.admin-dashboard-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 32px 28px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.25);
+  backdrop-filter: blur(12px);
+  color: var(--text-main);
+}
+
+.admin-dashboard-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-title {
+  color: var(--primary-color);
+  font-size: 2rem;
+}
+
+.admin-dashboard-actions {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+}
+
+.admin-dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.15);
+  padding: 24px 32px;
+  text-decoration: none;
+  color: var(--text-main);
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+}
+.admin-dashboard-card:hover {
+  background: var(--primary-color);
+  color: #fff;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 16px rgba(51, 138, 243, 0.25);
+}
+.icon-card {
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+}
+
+.glass-card {
+  backdrop-filter: blur(12px);
+}

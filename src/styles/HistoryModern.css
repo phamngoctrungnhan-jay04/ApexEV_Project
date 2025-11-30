@@ -1,0 +1,91 @@
+:root {
+  --primary-color: #338AF3;
+  --primary-hover: #005CF0;
+  --success-color: #34c759;
+  --success-hover: #28a745;
+  --danger-color: #EF4444;
+  --danger-hover: #DC2626;
+  --background: #F8FAFC;
+  --white: #fff;
+  --text-dark: #1F2937;
+  --text-gray: #6B7280;
+  --card-shadow: 0 4px 12px rgba(51, 138, 243, 0.15);
+  --border-radius: 14px;
+}
+
+.orders-card {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(12px);
+  border: none;
+  padding: 0;
+}
+
+.orders-table {
+  background: transparent;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  font-size: 15px;
+}
+
+.orders-table th {
+  background: var(--background);
+  color: var(--text-dark);
+  font-weight: 600;
+  border: none;
+  padding: 14px 10px;
+}
+
+.orders-table td {
+  background: var(--white);
+  color: var(--text-dark);
+  border: none;
+  padding: 12px 10px;
+  vertical-align: middle;
+  transition: background 0.3s cubic-bezier(.4,0,.2,1);
+}
+
+.order-row:hover td {
+  background: var(--background);
+  box-shadow: 0 2px 8px rgba(51,138,243,0.10);
+  transform: scale(1.01);
+}
+
+.status-badge {
+  font-size: 13px;
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.action-btn {
+  box-shadow: 0 2px 8px rgba(51,138,243,0.10);
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  background: rgba(255,255,255,0.7);
+  border: none;
+  color: var(--primary-color);
+}
+
+.action-btn:hover {
+  background: var(--primary-hover);
+  color: #fff;
+  transform: translateY(-2px) scale(1.05);
+}
+
+.order-date {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+@media (max-width: 900px) {
+  .orders-table th, .orders-table td {
+    font-size: 13px;
+    padding: 8px 4px;
+  }
+  .orders-card {
+    padding: 0;
+  }
+}

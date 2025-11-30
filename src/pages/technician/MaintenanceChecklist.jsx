@@ -1,3 +1,4 @@
+import { FaCar } from 'react-icons/fa';
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Badge, ProgressBar, Modal, InputGroup } from 'react-bootstrap';
 import { 
@@ -292,7 +293,7 @@ const MaintenanceChecklist = () => {
                     onClick={() => setVehicleTypeFilter(type.id)}
                     className="me-2 mb-2"
                   >
-                    {type.id !== 'all' && <FiTruck className="me-1" />}
+                    {type.id !== 'all' && <FaCar className="me-1" />}
                     {type.name}
                   </Button>
                 ))}

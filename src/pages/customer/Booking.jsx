@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-// import serviceService from '../services/serviceService';
 import appointmentService from '../../services/appointmentService';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -9,15 +8,16 @@ import {
   FiCalendar,
   FiClock,
   FiTool,
-  FiTruck,
   FiCheck,
   FiArrowRight,
   FiInfo,
   FiLogOut,
 } from 'react-icons/fi';
+import { FaCar } from 'react-icons/fa';
 import { CustomButton, CustomInput, CustomSelect, CustomCard } from '../../components/common';
 import serviceService from '../../services/serviceService';
-import { serviceCategories, vehicles, technicians } from '../../mockData';
+import { serviceCategories, technicians } from '../../mockData';
+import vehicleService from '../../services/vehicleService';
 import './Booking.css';
 
 function Booking() {
@@ -26,9 +26,21 @@ function Booking() {
   const navigate = useNavigate();
   const currentLang = i18n.language;
 
-  // Simulate logged-in customer
-  const currentCustomerId = 1;
-  const customerVehicles = vehicles.filter(v => v.customerId === currentCustomerId);
+  // Lấy danh sách xe thật của user từ BE
+  const [customerVehicles, setCustomerVehicles] = useState([]);
+  useEffect(() => {
+    async function fetchVehicles() {
+      try {
+        const data = await vehicleService.getMyVehicles();
+        console.log('API trả về xe:', data);
+        setCustomerVehicles(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Lỗi lấy xe:', err);
+        setCustomerVehicles([]);
+      }
+    }
+    fetchVehicles();
+  }, []);
 
   // Form states
   const [step, setStep] = useState(1); // 1: Select Service, 2: Select Date/Time, 3: Vehicle & Notes, 4: Confirmation
@@ -55,16 +67,17 @@ function Booking() {
     serviceService.getAllServices().then(setServices);
   }, []);
 
-  // Filter services by category
+  // KHẮC PHỤC LỖI: Lọc theo service.category (ĐÃ KHẮC PHỤC LỖI THAM CHIẾU)
   const filteredServices = selectedCategory === 'all'
     ? services
-    : services.filter(s => s.service_category === selectedCategory);
+    : services.filter(s => s.category === selectedCategory); 
 
   // Calculate total
   const calculateTotal = () => {
     return selectedServices.reduce((total, serviceId) => {
       const service = services.find(s => s.id === serviceId);
-      return total + (service?.unitPrice || 0);
+      // ĐÃ SỬA: Dùng unitPrice (camelCase từ BE)
+      return total + (service?.unitPrice || 0); 
     }, 0);
   };
 
@@ -72,7 +85,8 @@ function Booking() {
   const calculateDuration = () => {
     return selectedServices.reduce((total, serviceId) => {
       const service = services.find(s => s.id === serviceId);
-        return total + (service?.estimatedDuration || 0);
+      // ĐÃ SỬA: Dùng estimatedDuration (camelCase từ BE)
+      return total + (service?.estimatedDuration || 0);
     }, 0);
   };
 
@@ -86,22 +100,30 @@ function Booking() {
 
   // Handle booking submission
   const handleSubmit = () => {
-    // Show confirmation modal
     setShowConfirmModal(true);
   };
 
   const confirmBooking = () => {
-    // TODO: Call API to create booking
-    console.log('Booking confirmed:', {
-      services: selectedServices,
-      vehicle: selectedVehicle,
-      date: selectedDate,
-      time: selectedTime,
-      notes,
-    });
-    setShowConfirmModal(false);
-    // Navigate to success page or dashboard
-    navigate('/customer/dashboard');
+    const bookingData = {
+        // Cần chuyển vehicleId sang Integer nếu BE cần
+        vehicleId: selectedVehicle ? parseInt(selectedVehicle) : null,
+        // Format ISO: 2025-11-20T10:30:00
+        appointmentTime: selectedDate && selectedTime ? `${selectedDate}T${selectedTime}:00` : null,
+        serviceIds: selectedServices,
+        customerNotes: notes,
+    };
+
+    appointmentService.createAppointment(bookingData)
+        .then(response => {
+            console.log('Đặt lịch thành công!', response);
+            setShowConfirmModal(false);
+            navigate('/customer/history');
+        })
+        .catch(error => {
+            console.error('Lỗi đặt lịch:', error);
+            alert(`Đặt lịch thất bại: ${error.message}`);
+            setShowConfirmModal(false);
+        });
   };
 
   // Get next available dates (next 30 days, excluding Sundays)
@@ -121,62 +143,17 @@ function Booking() {
 
   const availableDates = getAvailableDates();
 
+  // KHẮC PHỤC LỖI: Định nghĩa timeSlots để tránh ReferenceError
+  const timeSlots = [
+    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+    '11:00', '11:30', '13:00', '13:30', '14:00', '14:30',
+    '15:00', '15:30', '16:00', '16:30', '17:00'
+  ];
+
   return (
     <div className="booking-page">
-      {/* Navbar giống Homepage */}
-      <nav className="dashboard-navbar">
-        <Container fluid>
-          <div className="navbar-content">
-            <div className="navbar-left">
-              <div className="navbar-brand" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
-                <span className="brand-text">APEX</span>
-                <span className="brand-badge">EV</span>
-              </div>
-              <div className="navbar-links">
-                <a href="/Homepage" className="nav-link active">
-                  <FiCalendar className="link-icon" />
-                  Trang chủ
-                </a>
-                <a href="#services" className="nav-link">
-                  <FiTool className="link-icon" />
-                  Dịch vụ
-                </a>
-                <a href="/customer/history" className="nav-link">
-                  <FiClock className="link-icon" />
-                  Lịch sử
-                </a>
-                <a href="/customer/vehicles" className="nav-link">
-                  <FiTruck className="link-icon" />
-                  Xe của tôi
-                </a>
-              </div>
-            </div>
-            <div className="navbar-right">
-              {isAuthenticated ? (
-                <div className="user-menu">
-                  <div className="user-avatar">
-                    <img src={`https://ui-avatars.com/api/?name=${user?.fullName}&background=005CF0&color=fff`} alt="User" />
-                  </div>
-                  <span className="user-name">{user?.fullName}</span>
-                  <button className="btn-logout" onClick={logout}>
-                    <FiLogOut />
-                    <span>Đăng xuất</span>
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <button className="btn-register" onClick={() => navigate('/register')}>
-                    Đăng ký
-                  </button>
-                  <button className="btn-login" onClick={() => navigate('/login')}>
-                    Đăng nhập
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </Container>
-      </nav>
+      {/* Sử dụng navbar từ Header.jsx */}
+      {/* Container fluid được dùng cho toàn bộ nội dung, CSS đã được tùy chỉnh để full layout */}
       <Container fluid>
         {/* Page Header */}
         <div className="page-header mb-4">
@@ -220,10 +197,10 @@ function Booking() {
             </div>
           </Card.Body>
         </Card>
-        {/* Bỏ sidebar, chỉ giữ phần booking chính */}
-        {/* Chỉ giữ phần booking chính, bỏ sidebar */}
+        {/* Bố cục 2 cột: Nội dung chính (lg=8) | Tóm tắt (lg=4) */}
         <Row>
-          <Col lg={12}>
+          {/* Cột Nội dung chính (Main Content) */}
+          <Col lg={8}> {/* ĐÃ CHỈNH SỬA: 12 -> 8 */}
             {/* Step 1: Select Services */}
             {step === 1 && (
               <Card className="services-card">
@@ -249,41 +226,53 @@ function Booking() {
                     ))}
                   </div>
 
-                  {/* Services List */}
-                  <div className="services-list">
-                    {filteredServices.map(service => (
-                      <div
-                        key={service.id}
-                        className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
-                        onClick={() => toggleService(service.id)}
-                      >
-                        <div className="service-check">
-                          {selectedServices.includes(service.id) && <FiCheck />}
+                  {/* Services List - Đã áp dụng thanh cuộn qua CSS class 'services-list' */}
+                  <div className="services-list"> 
+                    {/* Thêm logic kiểm tra dữ liệu để tránh lỗi khi mảng rỗng */}
+                    {filteredServices.length === 0 ? (
+                        <div className="text-center p-4">
+                          <FiInfo className="me-2 text-warning" size={24} />
+                          <p className="mb-0 text-muted">
+                            Hiện không có dịch vụ nào khả dụng trong hệ thống.
+                          </p>
                         </div>
-                        <div className="service-details">
-                          <div className="d-flex justify-content-between align-items-start">
-                            <div>
-                              <h6 className="service-name">
-                                {currentLang === 'en' ? service.nameEn : service.name}
-                                {service.popular && (
-                                  <Badge bg="success" className="ms-2">Phổ biến</Badge>
-                                )}
-                              </h6>
-                              <p className="service-description text-muted">
-                                {currentLang === 'en' ? service.descriptionEn : service.description}
-                              </p>
-                            </div>
-                            <div className="text-end">
-                              <div className="service-price">{formatCurrency(service.unitPrice)}</div>
-                              <div className="service-duration text-muted">
-                                <FiClock className="me-1" />
-                                {service.estimatedDuration} phút
+                    ) : (
+                        filteredServices.map(service => (
+                          <div
+                              key={service.id}
+                              className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
+                              onClick={() => toggleService(service.id)}
+                          >
+                              <div className="service-check">
+                                  {selectedServices.includes(service.id) && <FiCheck />}
                               </div>
-                            </div>
+                              <div className="service-details">
+                                  <div className="d-flex justify-content-between align-items-start">
+                                      <div>
+                                          <h6 className="service-name">
+                                            {/* ĐÃ SỬA: SỬ DỤNG TRƯỜNG NAME/NAMEEN TỪ BE */}
+                                            {currentLang === 'en' ? service.nameEn : service.name}
+                                            {/* ĐÃ XÓA: service.popular (MOCK FIELD) */}
+                                          </h6>
+                                          <p className="service-description text-muted">
+                                            {/* ĐÃ SỬA: SỬ DỤNG TRƯỜNG DESCRIPTION/DESCRIPTIONEN TỪ BE */}
+                                            {currentLang === 'en' ? service.descriptionEn : service.description}
+                                          </p>
+                                      </div>
+                                      <div className="text-end">
+                                          {/* ĐÃ SỬA: SỬ DỤNG unitPrice (camelCase) */}
+                                          <div className="service-price">{formatCurrency(service.unitPrice)}</div>
+                                          <div className="service-duration text-muted">
+                                            <FiClock className="me-1" />
+                                            {/* ĐÃ SỬA: SỬ DỤNG estimatedDuration (camelCase) */}
+                                            {service.estimatedDuration} phút
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
                           </div>
-                        </div>
-                      </div>
-                    ))}
+                        ))
+                    )}
                   </div>
 
                   {/* Next Button */}
@@ -373,7 +362,7 @@ function Booking() {
               <Card className="vehicle-card">
                 <Card.Body>
                   <h5 className="mb-3">
-                    <FiTruck className="me-2 text-primary" />
+                    <FaCar className="me-2 text-primary" />
                     Thông tin xe và ghi chú
                   </h5>
 
@@ -441,6 +430,7 @@ function Booking() {
                       <h6 className="summary-title">Dịch vụ đã chọn</h6>
                       {selectedServices.map(serviceId => {
                         const service = services.find(s => s.id === serviceId);
+                        // SỬ DỤNG service.name/nameEn và unitPrice (camelCase)
                         return (
                           <div key={serviceId} className="summary-item">
                             <span>{currentLang === 'en' ? service.nameEn : service.name}</span>
@@ -462,6 +452,7 @@ function Booking() {
                       </div>
                       <div className="summary-item">
                         <span>Thời gian dự kiến:</span>
+                        {/* SỬ DỤNG estimatedDuration (camelCase) */}
                         <span>{calculateDuration()} phút</span>
                       </div>
                     </div>
@@ -524,6 +515,7 @@ function Booking() {
                     <h6 className="text-muted mb-2">Dịch vụ ({selectedServices.length})</h6>
                     {selectedServices.map(serviceId => {
                       const service = services.find(s => s.id === serviceId);
+                      // SỬ DỤNG service.name/nameEn
                       return (
                         <div key={serviceId} className="selected-service-item">
                           <FiCheck className="text-success me-2" />
@@ -558,7 +550,7 @@ function Booking() {
                   <div className="mb-3">
                     <h6 className="text-muted mb-2">Xe</h6>
                     <div className="summary-info-item">
-                      <FiTruck className="me-2" />
+                      <FaCar className="me-2" />
                       {(() => {
                         const vehicle = customerVehicles.find(v => v.id === parseInt(selectedVehicle));
                         return vehicle ? `${vehicle.brand} ${vehicle.model}` : '';
@@ -573,10 +565,12 @@ function Booking() {
                 <div className="summary-total-box">
                   <div className="d-flex justify-content-between mb-2">
                     <span>Tổng thời gian:</span>
-                    <strong>{calculateDuration()} phút</strong>
+                    {/* SỬ DỤNG estimatedDuration (camelCase) */}
+                    <strong>{calculateDuration()} phút</strong> 
                   </div>
                   <div className="d-flex justify-content-between">
                     <span>Tổng chi phí:</span>
+                    {/* SỬ DỤNG unitPrice (camelCase) */}
                     <strong className="text-primary">{formatCurrency(calculateTotal())}</strong>
                   </div>
                 </div>

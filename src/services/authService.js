@@ -1,5 +1,29 @@
 // Authentication Service for API calls
+
 const API_BASE_URL = 'http://localhost:8081/api/auth';
+
+// Normalize role from backend to FE
+function normalizeRole(role) {
+  if (!role) return '';
+  // Remove ROLE_ prefix if present
+  if (role.startsWith('ROLE_')) {
+    role = role.replace('ROLE_', '');
+  }
+  switch (role) {
+    case 'SERVICE_ADVISOR':
+      return 'SERVICE_ADVISOR';
+    case 'CUSTOMER':
+      return 'CUSTOMER';
+    case 'ADMIN':
+      return 'ADMIN';
+    case 'TECHNICIAN':
+      return 'TECHNICIAN';
+    case 'MANAGER':
+      return 'MANAGER';
+    default:
+      return role.toUpperCase();
+  }
+}
 
 class AuthService {
   // Login user
@@ -35,16 +59,17 @@ class AuthService {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('tokenType', data.type || 'Bearer');
-        
+
+
         // Store user info - Map backend field names to frontend
         const userInfo = {
           id: data.userId,           // Backend: userId -> Frontend: id
           email: data.email,
           phone: data.phone,
           fullName: data.fullName,
-          role: data.userRole,        // Backend: userRole -> Frontend: role
+          role: normalizeRole(data.userRole), // FE dùng role đã normalize
         };
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        localStorage.setItem('user', JSON.stringify(userInfo));
       }
 
       // Return normalized data for consistency
@@ -53,7 +78,7 @@ class AuthService {
         email: data.email,
         phone: data.phone,
         fullName: data.fullName,
-        role: data.userRole,
+        role: normalizeRole(data.userRole),
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         type: data.type
@@ -75,8 +100,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...userData,
-          role: 'CUSTOMER' // Backend yêu cầu field role
+          ...userData
         }),
       });
 

@@ -1,0 +1,154 @@
+/* File: src/pages/admin/AdminUserRegister.css */
+:root {
+  --primary-color: #338AF3;
+  --primary-hover: #005CF0;
+  --success-color: #34c759;
+  --danger-color: #EF4444;
+  --background: #F8FAFC;
+  --text-main: #1F2937;
+  --text-sub: #6B7280;
+}
+
+.admin-register-container {
+  max-width: 640px;
+  margin: 48px auto;
+  padding: 48px 40px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(51, 138, 243, 0.25);
+  backdrop-filter: blur(12px);
+  color: var(--text-main);
+}
+
+.admin-register-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-title {
+  color: var(--primary-color);
+  font-size: 1.8rem;
+}
+
+.admin-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: 32px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input {
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid var(--primary-color);
+  background: #fff;
+  font-size: 1.15rem;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+}
+.input:focus {
+  border-color: var(--primary-hover);
+  outline: none;
+  box-shadow: 0 2px 12px rgba(51, 138, 243, 0.18);
+}
+
+.btn-primary {
+  background: var(--success-color);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 32px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 6px 18px rgba(52, 199, 89, 0.18);
+}
+.btn-primary:hover {
+  background: #28a745;
+  transform: translateY(-2px) scale(1.03);
+}
+
+.btn-secondary {
+  background: #F8FAFC;
+  color: var(--primary-color);
+  border: 1.5px solid var(--primary-color);
+  border-radius: 14px;
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  margin-left: 16px;
+}
+.btn-secondary:hover {
+  background: #e3f0ff;
+  border-color: var(--primary-hover);
+}
+
+.alert-danger {
+  margin-top: 16px;
+  color: var(--danger-color);
+  background: #fff0f0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 12px rgba(239, 68, 68, 0.12);
+}
+
+.alert-success {
+  margin-top: 16px;
+  color: var(--success-color);
+  background: #f0fff0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 12px rgba(52, 199, 89, 0.12);
+}
+
+.glass-card {
+  backdrop-filter: blur(12px);
+}
+
+/* Layout ngang cho 2 mục tạo tài khoản */
+.register-card-group-horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: 48px;
+  justify-content: center;
+  margin-top: 32px;
+}
+.register-card {
+  background: var(--background-glass, rgba(255,255,255,0.85));
+  box-shadow: 0 6px 24px rgba(51, 138, 243, 0.18);
+  border-radius: 16px;
+  padding: 48px 36px;
+  min-width: 260px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.register-card:hover {
+  box-shadow: 0 10px 32px rgba(51, 138, 243, 0.28);
+  transform: translateY(-2px) scale(1.04);
+  border-color: var(--primary-color, #338AF3);
+}
+.register-card-title {
+  margin-top: 18px;
+  font-size: 1.25rem;
+  color: var(--text-dark, #1F2937);
+  font-weight: 500;
+}

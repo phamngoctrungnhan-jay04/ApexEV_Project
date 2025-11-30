@@ -1,13 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ROUTES } from './constants/routes';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUserList from './pages/admin/AdminUserList';
+import AdminUserRegister from './pages/admin/AdminUserRegister';
 import './i18n';
 
 // Pages
 import Homepage from './pages/landing/Homepage';
 import LoginPage from './pages/auth/LoginPageModern';
 import RegisterPage from './pages/auth/RegisterPageModern';
-import CustomerDashboard from './pages/customer/Dashboard';
 import Booking from './pages/customer/Booking';
 import History from './pages/customer/History';
 import Invoices from './pages/customer/Invoices';
@@ -21,13 +23,15 @@ import MaintenanceChecklist from './pages/technician/MaintenanceChecklist';
 import UploadEvidence from './pages/technician/UploadEvidence';
 import PartsRequest from './pages/technician/PartsRequest';
 import ComponentDemo from './pages/ComponentDemo';
+import AdvisorDashboard from './pages/advisor/AdvisorDashboard';
 
 // Layout
 import { CustomerLayout } from './components/layout';
+import AdminLayout from './components/layout/AdminLayout';
 
 // Protected Route Component
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+function ProtectedRoute({ children, requiredRole }) {
+  const { isAuthenticated, loading, user } = useAuth();
   
   if (loading) {
     return (
@@ -39,7 +43,10 @@ function ProtectedRoute({ children }) {
     );
   }
   
-  return isAuthenticated ? children : <Navigate to={ROUTES.LOGIN} />;
+  if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} />;
+  if (requiredRole && user?.role !== requiredRole) return <Navigate to={ROUTES.HOME} />;
+  
+  return children;
 }
 
 function AppRoutes() {
@@ -51,6 +58,12 @@ function AppRoutes() {
       {/* Public routes */}
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
       <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+      {/* Admin - Dashboard */}
+      <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
+      {/* Admin - Danh sách tài khoản nhân sự */}
+      <Route path="/admin/users" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminUserList /></AdminLayout></ProtectedRoute>} />
+      {/* Admin - Đăng ký tài khoản nhân sự */}
+      <Route path="/admin/register-user" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminUserRegister /></AdminLayout></ProtectedRoute>} />
       <Route path="/demo" element={<ComponentDemo />} />
       
       {/* Homepage route - outside CustomerLayout (after login) */}
@@ -58,7 +71,7 @@ function AppRoutes() {
         path="/Homepage" 
         element={
           <ProtectedRoute>
-            <CustomerDashboard />
+            <Homepage />
           </ProtectedRoute>
         }
       />
@@ -97,6 +110,16 @@ function AppRoutes() {
         <Route path="parts-request" element={<PartsRequest />} />
         {/* TODO: Add more technician routes here */}
       </Route>
+
+      {/* Advisor routes */}
+      <Route 
+        path="/advisor/dashboard" 
+        element={
+          <ProtectedRoute>
+            <AdvisorDashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
@@ -111,4 +134,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

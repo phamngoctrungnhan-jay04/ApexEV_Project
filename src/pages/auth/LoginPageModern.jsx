@@ -60,6 +60,8 @@ const LoginPageModern = () => {
         navigate('/Homepage');
       } else if (response.role === 'ADMIN') {
         navigate('/admin/dashboard');
+      } else if (response.role === 'SERVICE_ADVISOR') {
+        navigate('/advisor/dashboard');
       } else {
         navigate('/Homepage');
       }

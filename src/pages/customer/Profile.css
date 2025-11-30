@@ -1,13 +1,30 @@
+/* Main row for profile and details */
+.profile-main-row {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 32px auto;
+}
 /* Profile Page Styles */
 
 .profile-page {
-  padding: 24px;
+  padding: 40px 0;
   background: #f8fafc;
   min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .page-header {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .page-title {
@@ -28,10 +45,25 @@
 /* Profile Card */
 .profile-card {
   border: none;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 90px;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(59, 130, 246, 0.08);
+  position: relative;
+  top: 0;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+}
+/* Main row for profile and details */
+.profile-main-row {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 40px auto;
 }
 
 .profile-avatar {

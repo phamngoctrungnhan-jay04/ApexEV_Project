@@ -1,9 +1,17 @@
+import { FaCar } from 'react-icons/fa';
+import '../../styles/HistoryModern.css';
+import { CustomButton } from '../../components/common';
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Badge, Form, Table, Pagination, Modal } from 'react-bootstrap';
+import { getUserHistory, getCompletedHistory, getPendingHistory, getConfirmedHistory } from '../../services/bookingService';
+import vehicleService from '../../services/vehicleService';
+import { Container, Row, Col, Card, Badge, Form, Table, Pagination } from 'react-bootstrap';
+import MaintenanceDetailModal from '../../components/features/MaintenanceDetailModal';
 import {
   FiClock,
+  // ...other icon imports...
   FiTool,
   FiTruck,
   FiUser,
@@ -18,104 +26,65 @@ import {
   FiXCircle,
   FiAlertCircle,
 } from 'react-icons/fi';
-import { CustomButton, CustomInput } from '../../components/common';
-import { 
-  orders, 
-  vehicles, 
-  technicians, 
-  services,
-  invoices,
-  getOrdersByCustomer,
-  getCompletedOrders,
-} from '../../mockData';
-import './History.css';
 
 function History() {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const currentLang = i18n.language;
-
-  // Simulate logged-in customer
-  const currentCustomerId = 1;
-
-  // States
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 5;
+  const [customerOrders, setCustomerOrders] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState('all');
 
-  // Get customer orders
-  const customerOrders = getOrdersByCustomer(currentCustomerId, orders);
+  useEffect(() => {
+    setLoading(true);
+    let fetchFn = getUserHistory;
+    if (tab === 'completed') fetchFn = getCompletedHistory;
+    else if (tab === 'pending') fetchFn = getPendingHistory;
+    else if (tab === 'confirmed') fetchFn = getConfirmedHistory;
+    else if (tab === 'cancelled') {
+      fetchFn = async () => {
+        const all = await getUserHistory();
+        return (all || []).filter(order => order.status === 'CANCELLED');
+      };
+    }
+    Promise.all([
+      fetchFn(),
+      vehicleService.getMyVehicles()
+    ]).then(([orders, vehiclesData]) => {
+      setCustomerOrders(orders);
+      setVehicles(Array.isArray(vehiclesData) ? vehiclesData : []);
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
+  }, [tab]);
 
-  // Filter orders
+  // Filter and paginate orders
   const filteredOrders = customerOrders
     .filter(order => {
       if (statusFilter !== 'all' && order.status !== statusFilter) return false;
       if (searchQuery) {
-        const vehicle = vehicles.find(v => v.id === order.vehicleId);
-        const service = services.find(s => s.id === order.serviceIds[0]);
+        // Simple search by code, vehicle, service
         const searchLower = searchQuery.toLowerCase();
         return (
-          order.orderNumber.toLowerCase().includes(searchLower) ||
-          vehicle?.licensePlate.toLowerCase().includes(searchLower) ||
-          service?.name.toLowerCase().includes(searchLower)
+          (order.code || '').toLowerCase().includes(searchLower) ||
+          (order.vehicleName || '').toLowerCase().includes(searchLower) ||
+          (order.serviceName || '').toLowerCase().includes(searchLower)
         );
       }
       return true;
-    })
-    .sort((a, b) => new Date(b.scheduledDate) - new Date(a.scheduledDate));
-
-  // Pagination
+    });
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
   const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
-  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount);
-  };
-
-  // Get status badge
-  const getStatusBadge = (status) => {
-    const statusMap = {
-      pending: { bg: 'warning', text: 'Chờ xử lý', icon: <FiClock /> },
-      confirmed: { bg: 'info', text: 'Đã xác nhận', icon: <FiCheckCircle /> },
-      'in-progress': { bg: 'primary', text: 'Đang thực hiện', icon: <FiTool /> },
-      completed: { bg: 'success', text: 'Hoàn thành', icon: <FiCheckCircle /> },
-      cancelled: { bg: 'danger', text: 'Đã hủy', icon: <FiXCircle /> },
-    };
-    const statusInfo = statusMap[status] || statusMap.pending;
-    return (
-      <Badge bg={statusInfo.bg} className="d-flex align-items-center gap-1">
-        {statusInfo.icon}
-        {statusInfo.text}
-      </Badge>
-    );
-  };
-
-  // View order details
-  const viewOrderDetails = (order) => {
-    setSelectedOrder(order);
-    setShowDetailModal(true);
-  };
-
-  // Download invoice
-  const downloadInvoice = (orderId) => {
-    // TODO: Implement invoice download
-    console.log('Download invoice for order:', orderId);
-    alert('Tính năng tải xuống hóa đơn sẽ được triển khai sau!');
-  };
 
   return (
-    <div className="history-page">
+    <>
       <Container fluid>
-        {/* Page Header */}
         <div className="page-header mb-4">
           <h2>
             <FiFileText className="me-2" />
@@ -125,398 +94,218 @@ function History() {
             Theo dõi toàn bộ lịch sử bảo dưỡng và dịch vụ của bạn
           </p>
         </div>
-
-        {/* Stats Cards */}
-        <Row className="mb-4">
-          <Col md={3}>
-            <Card className="stat-card">
-              <Card.Body>
-                <div className="stat-info">
-                  <FiCheckCircle className="stat-icon text-success" />
-                  <div>
-                    <div className="stat-value">
-                      {customerOrders.filter(o => o.status === 'completed').length}
-                    </div>
-                    <div className="stat-label">Đã hoàn thành</div>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="stat-card">
-              <Card.Body>
-                <div className="stat-info">
-                  <FiClock className="stat-icon text-warning" />
-                  <div>
-                    <div className="stat-value">
-                      {customerOrders.filter(o => o.status === 'pending' || o.status === 'confirmed').length}
-                    </div>
-                    <div className="stat-label">Sắp tới</div>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="stat-card">
-              <Card.Body>
-                <div className="stat-info">
-                  <FiTool className="stat-icon text-primary" />
-                  <div>
-                    <div className="stat-value">
-                      {customerOrders.filter(o => o.status === 'in-progress').length}
-                    </div>
-                    <div className="stat-label">Đang thực hiện</div>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="stat-card">
-              <Card.Body>
-                <div className="stat-info">
-                  <FiXCircle className="stat-icon text-danger" />
-                  <div>
-                    <div className="stat-value">
-                      {customerOrders.filter(o => o.status === 'cancelled').length}
-                    </div>
-                    <div className="stat-label">Đã hủy</div>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Filters */}
-        <Card className="mb-4">
-          <Card.Body>
-            <Row className="align-items-end">
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>
-                    <FiSearch className="me-2" />
-                    Tìm kiếm
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Tìm theo mã đơn, biển số xe, dịch vụ..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group>
-                  <Form.Label>
-                    <FiFilter className="me-2" />
-                    Trạng thái
-                  </Form.Label>
-                  <Form.Select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="pending">Chờ xử lý</option>
-                    <option value="confirmed">Đã xác nhận</option>
-                    <option value="in-progress">Đang thực hiện</option>
-                    <option value="completed">Hoàn thành</option>
-                    <option value="cancelled">Đã hủy</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={2}>
-                <CustomButton
-                  variant="outline-secondary"
-                  className="w-100"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setStatusFilter('all');
-                  }}
-                >
-                  Xóa bộ lọc
-                </CustomButton>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
-
-        {/* Orders Table */}
+        {/* Tabs cho 3 loại lịch sử */}
+        <div className="mb-3 d-flex gap-2">
+          <CustomButton variant={tab === 'all' ? 'primary' : 'outline-primary'} size="sm" onClick={() => setTab('all')}>Tất cả</CustomButton>
+          <CustomButton variant={tab === 'completed' ? 'success' : 'outline-success'} size="sm" onClick={() => setTab('completed')}>Đã hoàn thành</CustomButton>
+          <CustomButton variant={tab === 'pending' ? 'warning' : 'outline-warning'} size="sm" onClick={() => setTab('pending')}>Chờ xác nhận</CustomButton>
+          <CustomButton variant={tab === 'confirmed' ? 'info' : 'outline-info'} size="sm" onClick={() => setTab('confirmed')}>Đã xác nhận</CustomButton>
+          <CustomButton variant={tab === 'cancelled' ? 'danger' : 'outline-danger'} size="sm" onClick={() => setTab('cancelled')}>Đã hủy</CustomButton>
+        </div>
         <Card className="orders-card">
           <Card.Body>
             {currentOrders.length > 0 ? (
-              <>
-                <div className="table-responsive">
-                  <Table hover className="orders-table">
+              <div className="table-responsive">
+                <div className="apex-glass-card" style={{
+                  borderRadius: '14px',
+                  boxShadow: '0 4px 12px rgba(51, 138, 243, 0.18)',
+                  backdropFilter: 'blur(12px)',
+                  background: 'rgba(255,255,255,0.85)',
+                  padding: '24px',
+                  marginBottom: '24px',
+                  border: 'none'
+                }}>
+                  <Table className="history-table" responsive style={{marginBottom:0}}>
                     <thead>
-                      <tr>
-                        <th>Mã đơn</th>
+                      <tr style={{background:'rgba(51,138,243,0.08)'}}>
+                        <th style={{borderRadius:'12px 0 0 12px',padding:'12px 0'}}>Mã đơn</th>
                         <th>Ngày</th>
                         <th>Xe</th>
                         <th>Dịch vụ</th>
                         <th>Kỹ thuật viên</th>
                         <th>Trạng thái</th>
-                        <th>Chi phí</th>
-                        <th>Thao tác</th>
+                        <th style={{borderRadius:'0 12px 12px 0'}}>Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {currentOrders.map(order => {
-                        const vehicle = vehicles.find(v => v.id === order.vehicleId);
-                        const tech = technicians.find(t => t.id === order.technicianId);
-                        const service = services.find(s => s.id === order.serviceIds[0]);
-                        const invoice = invoices.find(inv => inv.orderId === order.id);
-
-                        return (
-                          <tr key={order.id}>
-                            <td>
-                              <strong>{order.orderNumber}</strong>
-                            </td>
-                            <td>
-                              <FiCalendar className="me-1" />
-                              {new Date(order.scheduledDate).toLocaleDateString('vi-VN')}
-                              <br />
-                              <small className="text-muted">
-                                <FiClock className="me-1" />
-                                {order.scheduledTime}
-                              </small>
-                            </td>
-                            <td>
-                              <FiTruck className="me-1" />
-                              {vehicle?.brand} {vehicle?.model}
-                              <br />
-                              <small className="text-muted">{vehicle?.licensePlate}</small>
-                            </td>
-                            <td>
-                              <FiTool className="me-1" />
-                              {currentLang === 'en' ? service?.nameEn : service?.name}
-                              {order.serviceIds.length > 1 && (
-                                <Badge bg="info" className="ms-1">
-                                  +{order.serviceIds.length - 1}
-                                </Badge>
-                              )}
-                            </td>
-                            <td>
-                              <FiUser className="me-1" />
-                              {tech?.fullName || 'Chưa phân công'}
-                            </td>
-                            <td>{getStatusBadge(order.status)}</td>
-                            <td>
-                              <strong>{formatCurrency(order.totalAmount)}</strong>
-                              <br />
-                              {invoice && (
-                                <Badge bg={invoice.status === 'paid' ? 'success' : 'warning'} className="mt-1">
-                                  {invoice.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
-                                </Badge>
-                              )}
-                            </td>
-                            <td>
-                              <div className="d-flex gap-1">
+                      {loading ? (
+                        <tr>
+                          <td colSpan={8} style={{textAlign:'center',padding:'48px 0'}}>
+                            <div className="apex-loading">
+                              <span className="spinner-border text-primary" style={{width:32,height:32}}></span>
+                              <div className="mt-3 text-primary fw-bold">Đang tải dữ liệu...</div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : currentOrders.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} style={{textAlign:'center',padding:'48px 0'}}>
+                            <div className="apex-empty">
+                              <FiAlertCircle size={32} className="text-gray-400 mb-2" />
+                              <div className="text-muted">Không có lịch sử bảo dưỡng nào.</div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        currentOrders.map(order => {
+                          // Format ngày/thời gian từ appointmentTime (LocalDateTime dạng "2025-12-01T08:00:00" hoặc mảng [yyyy,MM,dd,HH,mm])
+                          let dateStr = '';
+                          let timeStr = '';
+                          if (order.appointmentTime) {
+                            let dateObj = null;
+                            if (Array.isArray(order.appointmentTime) && order.appointmentTime.length >= 5) {
+                              dateObj = new Date(
+                                order.appointmentTime[0],
+                                order.appointmentTime[1] - 1,
+                                order.appointmentTime[2],
+                                order.appointmentTime[3],
+                                order.appointmentTime[4]
+                              );
+                            } else if (typeof order.appointmentTime === 'string') {
+                              let dateStrRaw = order.appointmentTime.trim();
+                              if (dateStrRaw.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)) {
+                                dateStrRaw = dateStrRaw.replace(' ', 'T');
+                              }
+                              if (dateStrRaw.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+                                dateStrRaw += ':00';
+                              }
+                              dateObj = new Date(dateStrRaw);
+                            } else if (typeof order.appointmentTime === 'number') {
+                              dateObj = new Date(order.appointmentTime);
+                            }
+                            if (dateObj && !isNaN(dateObj.getTime())) {
+                              dateStr = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                              timeStr = dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                            } else {
+                              dateStr = 'Không xác định';
+                              timeStr = '';
+                            }
+                          } else {
+                            dateStr = 'Không xác định';
+                            timeStr = '';
+                          }
+                          return (
+                            <tr key={order.id} className="order-row" style={{transition:'all 0.3s cubic-bezier(.4,0,.2,1)'}}>
+                              <td style={{fontWeight:'bold',padding:'12px 0'}}>{order.id}</td>
+                              <td>
+                                <div style={{lineHeight:'1.3'}}>
+                                  <FiCalendar className="me-1 text-primary" />
+                                  {dateStr}
+                                  <br />
+                                  <small className="text-muted">
+                                    <FiClock className="me-1" />
+                                    {timeStr}
+                                  </small>
+                                </div>
+                              </td>
+                              <td>
+                                <FaCar className="me-1 text-success" />
+                                <span style={{fontWeight:'500'}}>{(() => {
+                                  const found = vehicles.find(v => v.id === order.vehicleId);
+                                  if (found) {
+                                    return `${found.brand || ''} ${found.model || ''}`.trim() || found.licensePlate || 'Chưa cập nhật';
+                                  }
+                                  return order.vehicleLicensePlate || 'Chưa cập nhật';
+                                })()}</span>
+                              </td>
+                              <td>
+                                <FiTool className="me-1 text-blue" />
+                                {order.requestedService || '---'}
+                              </td>
+                              <td>
+                                <FiUser className="me-1 text-gray-500" />
+                                {order.serviceAdvisorName || 'Chưa phân công'}
+                              </td>
+                              <td>
+                                <span className={`status-badge status-${order.status.toLowerCase()}`} style={{
+                                  borderRadius:'8px',
+                                  padding:'4px 16px',
+                                  fontWeight:'bold',
+                                  background: order.status==='CANCELLED' ? 'var(--danger-bg,#FEE2E2)' : order.status==='CONFIRMED' ? 'var(--primary-bg,#E0F2FE)' : order.status==='COMPLETED' ? 'var(--success-bg,#D1FADF)' : '#F3F4F6',
+                                  color: order.status==='CANCELLED' ? '#EF4444' : order.status==='CONFIRMED' ? '#338AF3' : order.status==='COMPLETED' ? '#34c759' : '#6B7280',
+                                  boxShadow: order.status==='CANCELLED' ? '0 2px 8px rgba(239,68,68,0.12)' : order.status==='CONFIRMED' ? '0 2px 8px rgba(51,138,243,0.12)' : order.status==='COMPLETED' ? '0 2px 8px rgba(52,199,89,0.12)' : 'none',
+                                  transition:'all 0.3s cubic-bezier(.4,0,.2,1)'
+                                }}>{order.status}</span>
+                              </td>
+                              <td>
                                 <CustomButton
-                                  variant="outline-primary"
+                                  className="action-btn"
+                                  icon={<FiEye />}
                                   size="sm"
-                                  onClick={() => viewOrderDetails(order)}
+                                  variant="primary"
+                                  style={{
+                                    minWidth:36,
+                                    borderRadius:'12px',
+                                    background:'linear-gradient(90deg,#338AF3 0%,#6B47DC 100%)',
+                                    color:'#fff',
+                                    boxShadow:'0 2px 8px rgba(51,138,243,0.18)',
+                                    transition:'all 0.3s cubic-bezier(.4,0,.2,1)',
+                                    fontWeight:'bold',
+                                    padding:'10px 24px',
+                                    transform:'scale(1)',
+                                  }}
+                                  onMouseEnter={e=>e.currentTarget.style.transform='scale(1.04)'}
+                                  onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+                                  onClick={() => setSelectedOrder(order) || setShowDetailModal(true)}
                                 >
-                                  <FiEye />
+                                  Xem chi tiết
                                 </CustomButton>
-                                {invoice && invoice.status === 'paid' && (
-                                  <CustomButton
-                                    variant="outline-success"
-                                    size="sm"
-                                    onClick={() => downloadInvoice(order.id)}
-                                  >
-                                    <FiDownload />
-                                  </CustomButton>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </Table>
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="d-flex justify-content-center mt-4">
-                    <Pagination>
-                      <Pagination.First 
-                        onClick={() => setCurrentPage(1)} 
-                        disabled={currentPage === 1}
-                      />
-                      <Pagination.Prev 
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} 
-                        disabled={currentPage === 1}
-                      />
-                      {[...Array(totalPages)].map((_, index) => (
-                        <Pagination.Item
-                          key={index + 1}
-                          active={currentPage === index + 1}
-                          onClick={() => setCurrentPage(index + 1)}
-                        >
-                          {index + 1}
-                        </Pagination.Item>
-                      ))}
-                      <Pagination.Next 
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} 
-                        disabled={currentPage === totalPages}
-                      />
-                      <Pagination.Last 
-                        onClick={() => setCurrentPage(totalPages)} 
-                        disabled={currentPage === totalPages}
-                      />
-                    </Pagination>
-                  </div>
-                )}
-              </>
+                <Pagination className="justify-content-center mt-3">
+                  {/* ...pagination logic... */}
+                </Pagination>
+              </div>
             ) : (
-              <div className="text-center py-5">
-                <FiFileText size={64} className="text-muted mb-3" />
-                <h5 className="text-muted">Không tìm thấy kết quả</h5>
-                <p className="text-muted">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+              <div className="text-center text-muted py-5">
+                Không có đơn bảo dưỡng nào.
               </div>
             )}
           </Card.Body>
         </Card>
-
-        {/* Order Detail Modal */}
-        <Modal 
-          show={showDetailModal} 
-          onHide={() => setShowDetailModal(false)}
-          size="lg"
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Chi tiết đơn hàng</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {selectedOrder && (() => {
-              const vehicle = vehicles.find(v => v.id === selectedOrder.vehicleId);
-              const tech = technicians.find(t => t.id === selectedOrder.technicianId);
-              const invoice = invoices.find(inv => inv.orderId === selectedOrder.id);
-
-              return (
-                <div className="order-detail">
-                  <Row className="mb-3">
-                    <Col md={6}>
-                      <h6 className="text-muted">Mã đơn hàng</h6>
-                      <p className="mb-0"><strong>{selectedOrder.orderNumber}</strong></p>
-                    </Col>
-                    <Col md={6}>
-                      <h6 className="text-muted">Trạng thái</h6>
-                      {getStatusBadge(selectedOrder.status)}
-                    </Col>
-                  </Row>
-
-                  <Row className="mb-3">
-                    <Col md={6}>
-                      <h6 className="text-muted">Ngày hẹn</h6>
-                      <p className="mb-0">
-                        {new Date(selectedOrder.scheduledDate).toLocaleDateString('vi-VN', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </p>
-                    </Col>
-                    <Col md={6}>
-                      <h6 className="text-muted">Giờ hẹn</h6>
-                      <p className="mb-0">{selectedOrder.scheduledTime}</p>
-                    </Col>
-                  </Row>
-
-                  <Row className="mb-3">
-                    <Col>
-                      <h6 className="text-muted">Xe</h6>
-                      <p className="mb-0">
-                        <strong>{vehicle?.brand} {vehicle?.model} ({vehicle?.year})</strong>
-                        <br />
-                        Biển số: {vehicle?.licensePlate}
-                      </p>
-                    </Col>
-                  </Row>
-
-                  <Row className="mb-3">
-                    <Col>
-                      <h6 className="text-muted">Dịch vụ</h6>
-                      {selectedOrder.serviceIds.map(serviceId => {
-                        const service = services.find(s => s.id === serviceId);
-                        return (
-                          <div key={serviceId} className="mb-2">
-                            <FiCheckCircle className="text-success me-2" />
-                            {currentLang === 'en' ? service?.nameEn : service?.name}
-                          </div>
-                        );
-                      })}
-                    </Col>
-                  </Row>
-
-                  <Row className="mb-3">
-                    <Col>
-                      <h6 className="text-muted">Kỹ thuật viên</h6>
-                      <p className="mb-0">{tech?.fullName || 'Chưa phân công'}</p>
-                    </Col>
-                  </Row>
-
-                  {selectedOrder.notes && (
-                    <Row className="mb-3">
-                      <Col>
-                        <h6 className="text-muted">Ghi chú</h6>
-                        <p className="mb-0">{selectedOrder.notes}</p>
-                      </Col>
-                    </Row>
-                  )}
-
-                  {selectedOrder.internalNotes && (
-                    <Row className="mb-3">
-                      <Col>
-                        <h6 className="text-muted">Ghi chú nội bộ</h6>
-                        <p className="mb-0 text-muted">{selectedOrder.internalNotes}</p>
-                      </Col>
-                    </Row>
-                  )}
-
-                  <hr />
-
-                  <Row>
-                    <Col md={6}>
-                      <h6 className="text-muted">Tổng chi phí</h6>
-                      <h4 className="text-primary mb-0">{formatCurrency(selectedOrder.totalAmount)}</h4>
-                    </Col>
-                    {invoice && (
-                      <Col md={6}>
-                        <h6 className="text-muted">Thanh toán</h6>
-                        <Badge bg={invoice.status === 'paid' ? 'success' : 'warning'} className="fs-6">
-                          {invoice.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
-                        </Badge>
-                      </Col>
-                    )}
-                  </Row>
-                </div>
-              );
-            })()}
-          </Modal.Body>
-          <Modal.Footer>
-            <CustomButton variant="outline-secondary" onClick={() => setShowDetailModal(false)}>
-              Đóng
-            </CustomButton>
-            {selectedOrder && invoices.find(inv => inv.orderId === selectedOrder.id)?.status === 'paid' && (
-              <CustomButton 
-                variant="success" 
-                onClick={() => downloadInvoice(selectedOrder.id)}
-              >
-                <FiDownload className="me-2" />
-                Tải hóa đơn
-              </CustomButton>
-            )}
-          </Modal.Footer>
-        </Modal>
+        <MaintenanceDetailModal
+          open={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+          order={selectedOrder ? {
+            ...selectedOrder,
+            vehicleModel: (() => {
+              const found = vehicles.find(v => v.id === selectedOrder.vehicleId);
+              if (found) {
+                return found.model || '';
+              }
+              return selectedOrder.vehicleModel || '';
+            })(),
+            vehicleBrand: (() => {
+              const found = vehicles.find(v => v.id === selectedOrder.vehicleId);
+              if (found) {
+                return found.brand || '';
+              }
+              return selectedOrder.vehicleBrand || '';
+            })(),
+            vehicleLicensePlate: (() => {
+              const found = vehicles.find(v => v.id === selectedOrder.vehicleId);
+              if (found) {
+                return found.licensePlate || '';
+              }
+              return selectedOrder.vehicleLicensePlate || '';
+            })(),
+            yearManufactured: (() => {
+              const found = vehicles.find(v => v.id === selectedOrder.vehicleId);
+              if (found) {
+                return found.yearManufactured || '';
+              }
+              return selectedOrder.yearManufactured || '';
+            })(),
+          } : null}
+        />
       </Container>
-    </div>
+    </>
   );
 }
 

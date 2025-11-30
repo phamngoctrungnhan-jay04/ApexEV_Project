@@ -1,0 +1,88 @@
+/* Glassmorphism modal overlay */
+.maintenance-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(51, 138, 243, 0.08);
+  backdrop-filter: blur(12px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.maintenance-modal-card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.18);
+  min-width: 340px;
+  max-width: 420px;
+  padding: 28px 32px 22px 32px;
+  position: relative;
+  animation: modalFadeIn 0.3s cubic-bezier(.4,2,.3,1);
+}
+
+/* Modal lớn hơn cho chi tiết bảo dưỡng */
+.maintenance-modal-card--large {
+  min-width: 880px;
+  max-width: 1080px;
+  padding: 48px 64px 36px 64px;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.maintenance-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.maintenance-modal-title {
+  color: var(--primary-color, #338AF3);
+  font-size: 1.18rem;
+  font-weight: 700;
+}
+.maintenance-modal-close {
+  background: none;
+  border: none;
+  color: var(--danger-color, #EF4444);
+  font-size: 1.6rem;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.maintenance-modal-close:hover {
+  background: rgba(239,68,68,0.08);
+  color: var(--danger-hover, #DC2626);
+}
+.maintenance-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.maintenance-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 1.02rem;
+}
+.maintenance-info-label {
+  color: #6B7280;
+  font-weight: 500;
+}
+.maintenance-info-value {
+  color: #1F2937;
+  font-weight: 600;
+}
+.maintenance-info-value.status {
+  color: var(--primary-color, #338AF3);
+}
