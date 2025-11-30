@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
@@ -42,7 +41,8 @@ public class AuthController {
     private UserDetailsServiceImpl userDetailsServiceImpl;
 
     @PostMapping("/register")
-    //@PreAuthorize("hasRole('ADMIN')") // Chỉ admin mới được tạo tài khoản mới , bỏ cái này nhé
+    // @PreAuthorize("hasRole('ADMIN')") // Chỉ admin mới được tạo tài khoản mới ,
+    // bỏ cái này nhé
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         UserRole role = UserRole.valueOf(request.getRole());
         userService.registerUser(
@@ -50,8 +50,7 @@ public class AuthController {
                 request.getEmail(),
                 request.getPhone(),
                 request.getPassword(),
-                role
-        );
+                role);
         return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
     }
 
@@ -61,9 +60,7 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmailOrPhone(),
-                            loginRequest.getPassword()
-                    )
-            );
+                            loginRequest.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             String accessToken = jwtUtils.generateJwtToken(authentication);
@@ -77,8 +74,7 @@ public class AuthController {
                     userDetails.getEmail(),
                     userDetails.getPhone(),
                     userDetails.getFullName(),
-                    userDetails.getAuthorities().iterator().next().getAuthority()
-            ));
+                    userDetails.getAuthorities().iterator().next().getAuthority()));
         } catch (BadCredentialsException ex) {
             // Trả về JSON lỗi
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -94,7 +90,8 @@ public class AuthController {
             // Lấy UserDetails từ username
             UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsServiceImpl.loadUserById(userId);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
             String newAccessToken = jwtUtils.generateJwtToken(authentication);
 
             return ResponseEntity.ok(Map.of("accessToken", newAccessToken, "type", "Bearer"));

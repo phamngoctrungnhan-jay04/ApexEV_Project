@@ -73,7 +73,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         serviceOrderRepository.save(order);
 
         // 8. Gửi notification cho customer
-        String message = String.format("Đơn bảo dưỡng #%d của bạn đã hoàn thành. Hóa đơn: %,.0f VNĐ. Vui lòng thanh toán trước %s.",
+        String message = String.format(
+                "Đơn bảo dưỡng #%d của bạn đã hoàn thành. Hóa đơn: %,.0f VNĐ. Vui lòng thanh toán trước %s.",
                 order.getId(),
                 totalAmount,
                 invoice.getDueDate().toLocalDate().toString());
@@ -88,7 +89,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng với ID: " + orderId));
 
         // Kiểm tra quyền: chỉ customer của đơn hàng hoặc nhân viên mới xem được
-        if (loggedInUser.getRole() == UserRole.CUSTOMER 
+        if (loggedInUser.getRole() == UserRole.CUSTOMER
                 && !order.getCustomer().getUserId().equals(loggedInUser.getUserId())) {
             throw new AccessDeniedException("Bạn không có quyền xem hóa đơn này.");
         }
@@ -103,7 +104,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional
     public InvoiceResponse markAsPaid(Long invoiceId, User serviceAdvisor) {
         // 1. Kiểm tra quyền
-        if (serviceAdvisor.getRole() != UserRole.SERVICE_ADVISOR 
+        if (serviceAdvisor.getRole() != UserRole.SERVICE_ADVISOR
                 && serviceAdvisor.getRole() != UserRole.BUSINESS_MANAGER) {
             throw new AccessDeniedException("Chỉ cố vấn dịch vụ hoặc quản lý mới có thể xác nhận thanh toán.");
         }
@@ -122,9 +123,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice savedInvoice = invoiceRepository.save(invoice);
 
         // 5. Gửi notification cho customer
-        String message = String.format("Thanh toán cho đơn bảo dưỡng #%d đã được xác nhận. Cảm ơn bạn đã sử dụng dịch vụ!",
+        String message = String.format(
+                "Thanh toán cho đơn bảo dưỡng #%d đã được xác nhận. Cảm ơn bạn đã sử dụng dịch vụ!",
                 invoice.getServiceOrder().getId());
-        notificationService.sendNotification(invoice.getServiceOrder().getCustomer(), message, invoice.getServiceOrder());
+        notificationService.sendNotification(invoice.getServiceOrder().getCustomer(), message,
+                invoice.getServiceOrder());
 
         return modelMapper.map(savedInvoice, InvoiceResponse.class);
     }

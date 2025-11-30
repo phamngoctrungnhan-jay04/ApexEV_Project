@@ -1,6 +1,7 @@
 package com.apexev.entity;
 
 import com.apexev.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore; // <--- QUAN TRỌNG: Thêm dòng này
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,19 +22,20 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Integer userId; // Nên dùng Long cho ID
+    private Integer userId;
 
-    @Nationalized // Áp dụng cho fullName
+    @Nationalized
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @Column(length = 100, unique = true) // Thêm 'unique = true'
+    @Column(length = 100, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 20, unique = true) // Thêm 'unique = true'
+    @Column(nullable = false, length = 20, unique = true)
     private String phone;
 
     @Column(name = "password_hash", nullable = false, length = 255)
+    @JsonIgnore // Che mật khẩu khi trả về API
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
@@ -47,49 +49,59 @@ public class User {
     @Column(name = "is_active")
     private boolean isActive = true;
 
-    // --- Relationships ---
+    // Thông tin bổ sung (Bạn đã thêm đúng)
+    @Column(name = "date_of_birth", length = 20)
+    private String dateOfBirth;
 
-    // 1-1 với Hồ sơ nhân viên (chỉ nhân viên mới có)
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+    @Column(name = "address", length = 255)
+    private String address;
+
+    // --- Relationships (THÊM @JsonIgnore VÀO TẤT CẢ) ---
+
+    @JsonIgnore // <--- Thêm vào đây
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StaffProfile staffProfile;
 
-    // 1-N với Xe (với vai trò Khách hàng)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Vehicle> vehicles;
 
-    // 1-N với Lịch hẹn (với vai trò Khách hàng)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private Set<Appointment> appointmentsAsCustomer;
 
-    // 1-N với Lịch hẹn (với vai trò Cố vấn)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "serviceAdvisor")
     private Set<Appointment> appointmentsAsAdvisor;
 
-    // 1-N với Đơn bảo dưỡng (với vai trò Khách hàng)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "customer")
     private Set<ServiceOrder> serviceOrdersAsCustomer;
 
-    // 1-N với Đơn bảo dưỡng (với vai trò Cố vấn)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "serviceAdvisor")
     private Set<ServiceOrder> serviceOrdersAsAdvisor;
 
-    // 1-N với Đơn bảo dưỡng (với vai trò Kỹ thuật viên)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "technician")
     private Set<ServiceOrder> serviceOrdersAsTechnician;
 
-    // 1-N với Đánh giá (với vai trò Khách hàng)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "customer")
     private Set<Review> reviews;
 
-    // 1-N với Thông báo (người nhận)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "user")
     private Set<Notification> notifications;
 
-    // 1-N với Chat (với vai trò Khách hàng)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "customer")
     private Set<ChatConversation> chatsAsCustomer;
 
-    // 1-N với Chat (với vai trò Cố vấn)
+    @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "serviceAdvisor")
     private Set<ChatConversation> chatsAsAdvisor;
 }

@@ -14,4 +14,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // Đếm số thông báo chưa đọc
     Integer countByUserUserIdAndIsReadFalse(Integer userId);
+
+    // Xóa tất cả thông báo của user
+    void deleteByUserUserId(Integer userId);
 }

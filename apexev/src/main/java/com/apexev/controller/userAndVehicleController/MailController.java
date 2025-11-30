@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.*;
 public class MailController {
     @Autowired
     private MailService mailService;
-    @PostMapping(path = "/sendMail"  )
-//    @PreAuthorize("permitAll()")
+
+    @PostMapping(path = "/sendMail")
+    // @PreAuthorize("permitAll()")
     public ResponseEntity<?> sendMail(@RequestBody MailRequest mailRequest) {
         try {
             mailService.sendEmail(mailRequest.getTo(), mailRequest.getSubject(), mailRequest.getBody(), null);

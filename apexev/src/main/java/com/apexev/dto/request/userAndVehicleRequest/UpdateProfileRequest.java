@@ -15,4 +15,9 @@ public class UpdateProfileRequest {
 
     @NotEmpty(message = "Số điện thoại không được để trống")
     private String phone;
+
+    // Thêm các trường mới
+    private String dateOfBirth; // yyyy-MM-dd
+    private String gender;
+    private String address;
 }

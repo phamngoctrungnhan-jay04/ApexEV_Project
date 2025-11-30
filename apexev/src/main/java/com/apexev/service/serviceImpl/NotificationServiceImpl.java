@@ -33,7 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setMessage(message);
             notification.setRelatedOrder(relatedOrder);
             notification.setRead(false);
-            
+
             notificationRepository.save(notification);
             log.info("Đã gửi notification cho user ID: {} - Message: {}", recipient.getUserId(), message);
         } catch (Exception e) {
@@ -43,10 +43,17 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
+    public void deleteAllNotifications(User loggedInUser) {
+        notificationRepository.deleteByUserUserId(loggedInUser.getUserId());
+        log.info("Đã xóa tất cả thông báo cho user ID: {}", loggedInUser.getUserId());
+    }
+
+    @Override
     public List<NotificationResponse> getMyNotifications(User loggedInUser) {
         List<Notification> notifications = notificationRepository
                 .findByUserUserIdOrderByCreatedAtDesc(loggedInUser.getUserId());
-        
+
         return notifications.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -57,12 +64,12 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAsRead(Long notificationId, User loggedInUser) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông báo với ID: " + notificationId));
-        
+
         // Kiểm tra quyền sở hữu
         if (!notification.getUser().getUserId().equals(loggedInUser.getUserId())) {
             throw new AccessDeniedException("Bạn không có quyền truy cập thông báo này.");
         }
-        
+
         notification.setRead(true);
         notificationRepository.save(notification);
     }
@@ -75,7 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .stream()
                 .filter(n -> !n.isRead())
                 .collect(Collectors.toList());
-        
+
         unreadNotifications.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(unreadNotifications);
     }
@@ -88,12 +95,12 @@ public class NotificationServiceImpl implements NotificationService {
     // Helper method để convert Entity sang DTO
     private NotificationResponse convertToDto(Notification notification) {
         NotificationResponse dto = modelMapper.map(notification, NotificationResponse.class);
-        
+
         // Map relatedOrderId riêng vì ModelMapper có thể không tự động map được
         if (notification.getRelatedOrder() != null) {
             dto.setRelatedOrderId(notification.getRelatedOrder().getId());
         }
-        
+
         return dto;
     }
 }

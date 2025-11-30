@@ -20,8 +20,7 @@ public class NotificationController {
     // Lấy danh sách notification của tôi
     @GetMapping("/my-notifications")
     public ResponseEntity<List<NotificationResponse>> getMyNotifications(
-            @AuthenticationPrincipal User loggedInUser
-    ) {
+            @AuthenticationPrincipal User loggedInUser) {
         List<NotificationResponse> notifications = notificationService.getMyNotifications(loggedInUser);
         return ResponseEntity.ok(notifications);
     }
@@ -29,8 +28,7 @@ public class NotificationController {
     // Đếm số notification chưa đọc
     @GetMapping("/unread-count")
     public ResponseEntity<Map<String, Integer>> getUnreadCount(
-            @AuthenticationPrincipal User loggedInUser
-    ) {
+            @AuthenticationPrincipal User loggedInUser) {
         Integer count = notificationService.countUnread(loggedInUser);
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }
@@ -39,8 +37,7 @@ public class NotificationController {
     @PatchMapping("/{id}/mark-read")
     public ResponseEntity<Map<String, String>> markAsRead(
             @PathVariable Long id,
-            @AuthenticationPrincipal User loggedInUser
-    ) {
+            @AuthenticationPrincipal User loggedInUser) {
         notificationService.markAsRead(id, loggedInUser);
         return ResponseEntity.ok(Map.of("message", "Đã đánh dấu thông báo là đã đọc"));
     }
@@ -48,9 +45,18 @@ public class NotificationController {
     // Đánh dấu tất cả notification đã đọc
     @PatchMapping("/mark-all-read")
     public ResponseEntity<Map<String, String>> markAllAsRead(
-            @AuthenticationPrincipal User loggedInUser
-    ) {
+            @AuthenticationPrincipal User loggedInUser) {
         notificationService.markAllAsRead(loggedInUser);
         return ResponseEntity.ok(Map.of("message", "Đã đánh dấu tất cả thông báo là đã đọc"));
+    }
+
+    // Xóa tất cả thông báo của user
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<Map<String, String>> deleteAllNotifications(
+            @AuthenticationPrincipal User loggedInUser) {
+        notificationService.deleteAllNotifications(loggedInUser);
+        return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "message", "Đã xóa tất cả thông báo thành công"));
     }
 }

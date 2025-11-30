@@ -27,12 +27,13 @@ public class VehicleImpl implements VehicleService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<VehicleResponse> getMyVehicles(User loggedInUser) { // trả về phải là 1 list data được chuẩn hóa -> VehicleResponse
+    public List<VehicleResponse> getMyVehicles(User loggedInUser) { // trả về phải là 1 list data được chuẩn hóa ->
+                                                                    // VehicleResponse
         // 1. lấy danh sách xe từ db theo id của user
         List<Vehicle> vehicles = vehicleRepository.findByCustomerUserId(loggedInUser.getUserId());
         // 2. danh sách nên dùng stream để map sang danh sách response
         return vehicles.stream() // đặt lên băng chuyền
-                .map(vehicle -> modelMapper.map(vehicles, VehicleResponse.class)) //mapper
+                .map(vehicle -> modelMapper.map(vehicle, VehicleResponse.class)) // mapper
                 .collect(Collectors.toList()); // đóng gói
     }
 
@@ -51,7 +52,8 @@ public class VehicleImpl implements VehicleService {
             throw new IllegalArgumentException("Biển số xe " + request.getLicensePlate() + " đã tồn tại.");
         });
         // 2. chuyển request người dung gửi -> form vehicle
-        // mục đích chuyển data thô của người dùng thành entity Vehicle để ứng dụng có thể hiểu -> chuẩn hóa dữ liệu
+        // mục đích chuyển data thô của người dùng thành entity Vehicle để ứng dụng có
+        // thể hiểu -> chuẩn hóa dữ liệu
         Vehicle newVehicle = modelMapper.map(request, Vehicle.class);
         // 3. gán chủ sở hữu xe -> tức là người đang đăng nhập để tạo thông tin xe
         newVehicle.setCustomer(loggedInUser);
@@ -81,14 +83,16 @@ public class VehicleImpl implements VehicleService {
 
         // giải thích bước 3
         /*
-        modelMapper.map() -> có 2 cách : map(source, Class): Tạo một đối tượng mới (dùng cho create).
-                                         map(source, destination): Cập nhật một đối tượng đã tồn tại (dùng cho update).
-        dòng code ở bước 3 tương đương với:
-            existingVehicle.setLicensePlate(request.getLicensePlate());
-            existingVehicle.setBrand(request.getBrand());
-            existingVehicle.setModel(request.getModel());
-            existingVehicle.setYearManufactured(request.getYearManufactured());
-        => modelMapper hỗ trợ chuyển đổi response và update cũng khá hay
+         * modelMapper.map() -> có 2 cách : map(source, Class): Tạo một đối tượng mới
+         * (dùng cho create).
+         * map(source, destination): Cập nhật một đối tượng đã tồn tại (dùng cho
+         * update).
+         * dòng code ở bước 3 tương đương với:
+         * existingVehicle.setLicensePlate(request.getLicensePlate());
+         * existingVehicle.setBrand(request.getBrand());
+         * existingVehicle.setModel(request.getModel());
+         * existingVehicle.setYearManufactured(request.getYearManufactured());
+         * => modelMapper hỗ trợ chuyển đổi response và update cũng khá hay
          */
     }
 
@@ -96,7 +100,8 @@ public class VehicleImpl implements VehicleService {
     public void deleteVehicle(Long vehicleId, User loggedInUser) {
         // 1. Tìm xe và kiểm tra quyền sở hữu
         Vehicle vehicle = findVehicleAndCheckOwnership(vehicleId, loggedInUser);
-        // 2. Kiểm tra xem xe này đang có lịch hẹn hay đang chờ duyệt lịch hẹn ko pending/confirm
+        // 2. Kiểm tra xem xe này đang có lịch hẹn hay đang chờ duyệt lịch hẹn ko
+        // pending/confirm
         List<AppointmentStatus> activeStatuses = Arrays.asList(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED);
         boolean hasActiveAppointments = appointmentRepository.existsByVehicleIdAndStatusIn(vehicleId, activeStatuses);
 
@@ -114,7 +119,8 @@ public class VehicleImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy xe với ID: " + vehicleId));
 
-        // 2. Kiểm tra quyền (Chỉ CUSTOMER mới bị check, ADMIN/Advisor thì không bị check)
+        // 2. Kiểm tra quyền (Chỉ CUSTOMER mới bị check, ADMIN/Advisor thì không bị
+        // check)
         if (loggedInUser.getRole() == UserRole.CUSTOMER &&
                 !vehicle.getCustomer().getUserId().equals(loggedInUser.getUserId())) {
 
