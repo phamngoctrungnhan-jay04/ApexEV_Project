@@ -1,0 +1,6 @@
+RDS_ENDPOINT=apexev-db.ct6ukeiewt5e.ap-southeast-1.rds.amazonaws.com
+RDS_PORT=3306
+DB_NAME=apexev
+DB_USERNAME=admin
+DB_PASSWORD=TrungNhan2024
+RDS_SG_ID=sg-04ea06412514ac455
