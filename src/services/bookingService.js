@@ -1,6 +1,6 @@
-import axios from 'axios';
 
-// Helper: get JWT token from localStorage
+import axios from 'axios';
+const API_BASE_URL = import.meta.env.VITE_API_URL + '/api/appointments' || 'http://localhost:8081/api/appointments';
 import authService from './authService';
 
 function getAuthHeader() {
@@ -10,7 +10,7 @@ function getAuthHeader() {
 // Lấy lịch sử bảo dưỡng của khách hàng (tất cả)
 export async function getUserHistory() {
   try {
-    const response = await axios.get('/api/appointments/my-appointment-customer', {
+    const response = await axios.get(`${API_BASE_URL}/my-appointment-customer`, {
       headers: getAuthHeader()
     });
     return response.data;
@@ -23,7 +23,7 @@ export async function getUserHistory() {
 // Lấy lịch sử bảo dưỡng đã hoàn thành
 export async function getCompletedHistory() {
   try {
-    const response = await axios.get('/api/appointments/my-appointment-customer', {
+    const response = await axios.get(`${API_BASE_URL}/my-appointment-customer`, {
       headers: getAuthHeader()
     });
     return (response.data || []).filter(order => order.status === 'COMPLETED');
@@ -36,7 +36,7 @@ export async function getCompletedHistory() {
 // Lấy lịch sử bảo dưỡng chờ xác nhận (PENDING)
 export async function getPendingHistory() {
   try {
-    const response = await axios.get('/api/appointments/my-appointment-customer', {
+    const response = await axios.get(`${API_BASE_URL}/my-appointment-customer`, {
       headers: getAuthHeader()
     });
     return (response.data || []).filter(order => order.status === 'PENDING');
@@ -49,7 +49,7 @@ export async function getPendingHistory() {
 // Lấy lịch sử bảo dưỡng đã xác nhận (CONFIRMED)
 export async function getConfirmedHistory() {
   try {
-    const response = await axios.get('/api/appointments/my-appointment-customer', {
+    const response = await axios.get(`${API_BASE_URL}/my-appointment-customer`, {
       headers: getAuthHeader()
     });
     return (response.data || []).filter(order => order.status === 'CONFIRMED');

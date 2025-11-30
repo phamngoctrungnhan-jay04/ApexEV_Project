@@ -70,7 +70,8 @@ const RegisterPageModern = () => {
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
-        password: formData.password
+        password: formData.password,
+        role: 'CUSTOMER'
       });
 
       // Show success message
