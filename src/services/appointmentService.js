@@ -1,5 +1,5 @@
 // Appointment Service for API calls
-const API_BASE_URL = 'http://localhost:8081/api/appointments';
+const API_BASE_URL = import.meta.env.VITE_API_URL + '/api/appointments' || 'http://localhost:8081/api/appointments';
 
 class AppointmentService {
   // Get auth token from localStorage

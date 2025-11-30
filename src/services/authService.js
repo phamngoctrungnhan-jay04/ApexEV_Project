@@ -1,6 +1,6 @@
 // Authentication Service for API calls
 
-const API_BASE_URL = 'http://localhost:8081/api/auth';
+const API_BASE_URL = import.meta.env.VITE_API_URL + '/api/auth' || 'http://localhost:8081/api/auth';
 
 // Normalize role from backend to FE
 function normalizeRole(role) {

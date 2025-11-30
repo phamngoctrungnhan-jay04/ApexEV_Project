@@ -1,5 +1,5 @@
 // Service client for fetching available services
-const API_BASE_URL = 'http://localhost:8081/api/services';
+const API_BASE_URL = import.meta.env.VITE_API_URL + '/api/services' || 'http://localhost:8081/api/services';
 
 class ServiceService {
   getAuthToken() {

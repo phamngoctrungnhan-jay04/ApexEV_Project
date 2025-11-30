@@ -1,5 +1,5 @@
 // Vehicle Service for API calls
-const API_BASE_URL = 'http://localhost:8081/vehicles';
+const API_BASE_URL = import.meta.env.VITE_API_URL + '/vehicles' || 'http://localhost:8081/vehicles';
 
 class VehicleService {
   // Get auth token from localStorage

@@ -1,7 +1,7 @@
 // File: src/services/userService.js
 // Service gọi API lấy danh sách user theo role
 
-const API_BASE_URL = 'http://localhost:8081/user-profile';
+const API_BASE_URL = import.meta.env.VITE_API_URL + '/user-profile' || 'http://localhost:8081/user-profile';
 
 const userService = {
   async getUsersByRole(role) {
