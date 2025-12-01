@@ -20,4 +20,40 @@ public class ServiceServiceImpl implements ServiceService {
         // Gọi findAll() để lấy dữ liệu từ Database
         return serviceRepository.findAll();
     }
+
+    @Override
+    public MaintenanceService createService(MaintenanceService service) {
+        // Lưu service mới vào database
+        return serviceRepository.save(service);
+    }
+
+    @Override
+    public MaintenanceService updateService(Long id, MaintenanceService service) {
+        // Tìm service theo ID
+        MaintenanceService existingService = serviceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Service not found with id: " + id));
+
+        // Cập nhật các trường
+        existingService.setName(service.getName());
+        existingService.setNameEn(service.getNameEn());
+        existingService.setDescription(service.getDescription());
+        existingService.setDescriptionEn(service.getDescriptionEn());
+        existingService.setCategory(service.getCategory());
+        existingService.setUnitPrice(service.getUnitPrice());
+        existingService.setEstimatedDuration(service.getEstimatedDuration());
+        existingService.setIsActive(service.getIsActive());
+
+        // Lưu lại
+        return serviceRepository.save(existingService);
+    }
+
+    @Override
+    public void deleteService(Long id) {
+        // Kiểm tra tồn tại
+        if (!serviceRepository.existsById(id)) {
+            throw new RuntimeException("Service not found with id: " + id);
+        }
+        // Xóa
+        serviceRepository.deleteById(id);
+    }
 }
