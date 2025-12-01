@@ -14,6 +14,8 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 
 @RestController
+
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/chat")
 public class ChatBotController {
 
@@ -45,7 +47,6 @@ public class ChatBotController {
         }
     }
     //Chat History By User
-
     @GetMapping("/history")
     public ResponseEntity<List<Message>> getChatHistory(Authentication authentication) {
         try{

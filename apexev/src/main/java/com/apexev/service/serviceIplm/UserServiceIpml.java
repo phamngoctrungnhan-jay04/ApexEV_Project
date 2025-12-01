@@ -49,16 +49,13 @@ public class UserServiceIpml implements UserService {
         if (userRepository.existsByPhone(phone)) {
             throw new UserAlreadyExistsException("phone", "User with this phone already exists");
         }
-
         User newUser = new User();
-        System.out.println(newUser.getUserId()+"////////////////");
         newUser.setFullName(fullName);
         newUser.setEmail(email);
         newUser.setPhone(phone);
         newUser.setPasswordHash(passwordEncoder.encode(plainPassword));
         newUser.setRole(role);
         publisher.publishEvent(new UserRegisterEvent(newUser));
-        System.out.println(newUser.getUserId()+"////////////////");
         return userRepository.save(newUser) ;
     }
     public Optional<User> getUserByEmail(String email) {

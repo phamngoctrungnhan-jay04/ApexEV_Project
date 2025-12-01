@@ -5,29 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a6878cd1-54c8-42c2-8ec9-8656b8a6f16d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/ChatBotController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/MessageRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterStaffRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/StaffUpdateRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/ChatHistoryResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/event/user/UserRegisterEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/event/user/listener/UserRegisterEventListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/userAndVehicle/StaffRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/ChatBoxService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/UserController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/ChangePasswordRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/BulkImportResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/ExcelService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/config/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/config/JwtAuthenticationFilter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/entity/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/enums/UserRole.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/enums/UserRole.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/InvoiceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/InvoiceRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/PaymentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/PaymentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/ReviewRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/ReviewRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/maintenance/ServiceChecklistRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/maintenance/ServiceChecklistRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/supportAndSystem/NotificationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/supportAndSystem/NotificationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/userAndVehicle/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/userAndVehicle/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/ChatBotController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/ChatBotController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/MailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/MailController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterStaffRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterStaffRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/entity/StaffProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/entity/StaffProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/event/user/listener/UserRegisterEventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/event/user/listener/UserRegisterEventListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/ChatBoxService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/ChatBoxService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/UserServiceIpml.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/UserServiceIpml.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
     </list>
@@ -41,9 +33,9 @@
       <list>
         <option value="Enum" />
         <option value="Exception" />
-        <option value="Class" />
         <option value="Record" />
         <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -132,7 +124,12 @@
       <workItem from="1761098517641" duration="11897000" />
       <workItem from="1762323890535" duration="5993000" />
       <workItem from="1762496053708" duration="3008000" />
-      <workItem from="1762764210351" duration="10304000" />
+      <workItem from="1762764210351" duration="11329000" />
+      <workItem from="1762928886438" duration="4711000" />
+      <workItem from="1762934904402" duration="1071000" />
+      <workItem from="1762936054469" duration="9879000" />
+      <workItem from="1763287277032" duration="8440000" />
+      <workItem from="1764459006825" duration="4751000" />
     </task>
     <servers />
   </component>
@@ -149,5 +146,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/apexev/controller/MailController.java</url>
+          <line>12</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

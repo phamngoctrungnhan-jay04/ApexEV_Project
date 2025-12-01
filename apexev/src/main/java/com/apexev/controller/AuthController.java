@@ -10,6 +10,7 @@ import com.apexev.security.jwt.JwtUtils;
 import com.apexev.security.services.UserDetailsImpl;
 import com.apexev.security.services.UserDetailsServiceImpl;
 import com.apexev.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @Validated
+@Tag(name = "AuthController", description = "Quản lí tài khoản")
 public class AuthController {
 
     @Autowired
@@ -46,16 +48,27 @@ public class AuthController {
     @PostMapping("/register-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registerStaff(@RequestBody @Valid RegisterStaffRequest request) {
-        UserRole role = UserRole.valueOf(request.getRole());
-        userService.registerUser(
-                request.getFullName(),
-                request.getEmail(),
-                request.getPhone(),
-                request.getPassword(),
-                role
-        );
+        int number = request.getNumbers();
+        while(number>0){
+            UserRole role = UserRole.valueOf(request.getRole());
+            userService.registerUser(
+                    request.getFullName(),
+                    String.valueOf(number)+ request.getEmail(),
+                    request.getPhone(),
+                    request.getPassword(),
+                    role
+            );
+        }
+
         return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
     }
+    @GetMapping("/check-auth")
+    public String checkAuth() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Quyền thực tế: " + authentication.getAuthorities());
+        return "Quyền thực tế: " + authentication.getAuthorities();
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         UserRole role = UserRole.valueOf("CUSTOMER");

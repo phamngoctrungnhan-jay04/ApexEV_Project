@@ -123,9 +123,4 @@ public class ChatBoxService {
             return memoryRepository.findByConversationId(userId);
         }
 
-//        public ChatHistoryResponse mapToChatHistoryResponse(){
-//            ChatHistoryResponse chatHistoryResponse;
-//            chatHistoryResponse.s
-//
-//        }
 }

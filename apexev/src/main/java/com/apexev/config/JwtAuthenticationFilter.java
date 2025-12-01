@@ -28,26 +28,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        // Danh sách các đường dẫn muốn bộ lọc này BỎ QUA
-        String[] permitAllPaths = {
-                "/api/auth/**",
-                "/api/admin/vaccination-campaigns",
-                "/swagger-ui/**", // Swagger UI
-                "/v3/api-docs/**", // Swagger JSON
-                "/error"
-        };
-
-        AntPathMatcher pathMatcher = new AntPathMatcher();
-        String path = request.getRequestURI();
-
-        // Nếu request path khớp với bất kỳ đường dẫn nào trong danh sách
-        // -> trả về true (nghĩa là "không filter")
-        return Arrays.stream(permitAllPaths)
-                .anyMatch(p -> pathMatcher.match(p, path));
-    }
+//
+//    @Override
+//    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+//        // Danh sách các đường dẫn muốn bộ lọc này BỎ QUA
+//        String[] permitAllPaths = {
+//                "/api/auth/**",
+//                "/swagger-ui/**", // Swagger UI
+//                "/v3/api-docs/**", // Swagger JSON
+//                "/error"
+//        };
+//
+//        AntPathMatcher pathMatcher = new AntPathMatcher();
+//        String path = request.getRequestURI();
+//
+//        // Nếu request path khớp với bất kỳ đường dẫn nào trong danh sách
+//        // -> trả về true (nghĩa là "không filter")
+//        return Arrays.stream(permitAllPaths)
+//                .anyMatch(p -> pathMatcher.match(p, path));
+//    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

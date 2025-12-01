@@ -31,4 +31,8 @@ public class RegisterStaffRequest {
 
     @NotBlank
     private String role;
+
+    @NotBlank
+    private Integer numbers;
+
 }
