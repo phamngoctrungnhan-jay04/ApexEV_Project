@@ -1,8 +1,8 @@
 package com.apexev.service.service_Interface;
 
-import com.apexev.dto.request.AssignShiftRequest;
-import com.apexev.dto.request.CreateShiftRequest;
-import com.apexev.dto.response.ShiftResponse;
+import com.apexev.dto.request.coreBussinessRequest.AssignShiftRequest;
+import com.apexev.dto.request.coreBussinessRequest.CreateShiftRequest;
+import com.apexev.dto.response.coreBussinessResponse.ShiftResponse;
 
 import java.util.List;
 

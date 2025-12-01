@@ -1,7 +1,8 @@
 package com.apexev.controller.userAndVehicleController;
 
 
-import com.apexev.dto.request.RegisterStaffRequest;
+import com.apexev.dto.request.userAndVehicleRequest.RegisterStaffRequest;
+import com.apexev.dto.request.userAndVehicleRequest.ChangePasswordRequest;
 
 import com.apexev.dto.request.userAndVehicleRequest.LoginRequest;
 import com.apexev.dto.request.userAndVehicleRequest.RefreshRequest;

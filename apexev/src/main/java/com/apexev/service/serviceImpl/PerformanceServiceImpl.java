@@ -1,7 +1,7 @@
 package com.apexev.service.serviceImpl;
 
-import com.apexev.dto.request.CreatePerformanceReviewRequest;
-import com.apexev.dto.response.PerformanceReviewResponse;
+import com.apexev.dto.request.coreBussinessRequest.CreatePerformanceReviewRequest;
+import com.apexev.dto.response.coreBussinessResponse.PerformanceReviewResponse;
 import com.apexev.entity.KPI;
 import com.apexev.entity.PerformanceReview;
 import com.apexev.entity.ReviewKPI;

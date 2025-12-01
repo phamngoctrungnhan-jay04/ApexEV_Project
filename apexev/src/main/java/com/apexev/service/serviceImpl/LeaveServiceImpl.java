@@ -1,8 +1,8 @@
 package com.apexev.service.serviceImpl;
 
-import com.apexev.dto.request.ApproveLeaveRequest;
-import com.apexev.dto.request.CreateLeaveRequestRequest;
-import com.apexev.dto.response.LeaveRequestResponse;
+import com.apexev.dto.request.coreBussinessRequest.ApproveLeaveRequest;
+import com.apexev.dto.request.coreBussinessRequest.CreateLeaveRequestRequest;
+import com.apexev.dto.response.coreBussinessResponse.LeaveRequestResponse;
 import com.apexev.entity.LeaveRequest;
 import com.apexev.entity.LeaveType;
 import com.apexev.entity.StaffProfile;

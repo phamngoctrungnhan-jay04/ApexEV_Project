@@ -1,7 +1,7 @@
 package com.apexev.service.serviceImpl;
 
-import com.apexev.dto.request.UpdateStaffProfileRequest;
-import com.apexev.dto.response.StaffProfileResponse;
+import com.apexev.dto.request.coreBussinessRequest.UpdateStaffProfileRequest;
+import com.apexev.dto.response.coreBussinessResponse.StaffProfileResponse;
 import com.apexev.entity.StaffProfile;
 import com.apexev.entity.User;
 import com.apexev.exception.ResourceNotFoundException;

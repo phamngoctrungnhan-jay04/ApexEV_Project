@@ -1,7 +1,7 @@
 package com.apexev.service.service_Interface;
 
-import com.apexev.dto.request.UpdateStaffProfileRequest;
-import com.apexev.dto.response.StaffProfileResponse;
+import com.apexev.dto.request.coreBussinessRequest.UpdateStaffProfileRequest;
+import com.apexev.dto.response.coreBussinessResponse.StaffProfileResponse;
 
 import java.util.List;
 

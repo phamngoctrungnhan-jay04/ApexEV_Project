@@ -1,6 +1,6 @@
 package com.apexev.controller.userAndVehicleController;
 
-import com.apexev.dto.request.ChangePasswordRequest;
+import com.apexev.dto.request.userAndVehicleRequest.ChangePasswordRequest;
 
 import com.apexev.dto.request.userAndVehicleRequest.UserUpdateRequest;
 import com.apexev.dto.response.coreBussinessResponse.BulkImportResponse;

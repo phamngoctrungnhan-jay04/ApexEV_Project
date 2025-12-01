@@ -1,13 +1,17 @@
 // Part.java
 package com.apexev.entity;
 
+import com.apexev.enums.PartStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "parts")
@@ -36,4 +40,16 @@ public class Part {
 
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal price; // giá bán lẻ, chưa tính công thợ
+    
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private PartStatus status = PartStatus.ACTIVE; // Trạng thái phụ tùng
+    
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

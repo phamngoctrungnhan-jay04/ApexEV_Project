@@ -1,7 +1,7 @@
 package com.apexev.service.service_Interface;
 
-import com.apexev.dto.request.CreatePerformanceReviewRequest;
-import com.apexev.dto.response.PerformanceReviewResponse;
+import com.apexev.dto.request.coreBussinessRequest.CreatePerformanceReviewRequest;
+import com.apexev.dto.response.coreBussinessResponse.PerformanceReviewResponse;
 
 import java.util.List;
 

@@ -1,13 +1,13 @@
 package com.apexev.service.service_Interface;
 
-import com.apexev.dto.request.CreateAppointmentRequest;
-import com.apexev.dto.request.CreateServiceOrderRequest;
-import com.apexev.dto.request.UpdateAppointmentRequest;
-import com.apexev.dto.request.UpdateServiceOrderRequest;
-import com.apexev.dto.request.SendQuotationRequest;
+import com.apexev.dto.request.coreBussinessRequest.CreateAppointmentRequest;
+import com.apexev.dto.request.coreBussinessRequest.CreateServiceOrderRequest;
+import com.apexev.dto.request.coreBussinessRequest.UpdateAppointmentRequest;
+import com.apexev.dto.request.coreBussinessRequest.UpdateServiceOrderRequest;
+import com.apexev.dto.request.coreBussinessRequest.SendQuotationRequest;
 import com.apexev.dto.response.AppointmentResponse;
-import com.apexev.dto.response.ServiceOrderResponse;
-import com.apexev.dto.response.QuotationResponse;
+import com.apexev.dto.response.coreBussinessResponse.ServiceOrderResponse;
+import com.apexev.dto.response.coreBussinessResponse.QuotationResponse;
 import com.apexev.enums.AppointmentStatus;
 import com.apexev.enums.OrderStatus;
 

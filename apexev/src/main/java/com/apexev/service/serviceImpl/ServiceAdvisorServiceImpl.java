@@ -1,9 +1,9 @@
 package com.apexev.service.serviceImpl;
 
-import com.apexev.dto.request.*;
+import com.apexev.dto.request.coreBussinessRequest.*;
 import com.apexev.dto.response.AppointmentResponse;
-import com.apexev.dto.response.QuotationResponse;
-import com.apexev.dto.response.ServiceOrderResponse;
+import com.apexev.dto.response.coreBussinessResponse.QuotationResponse;
+import com.apexev.dto.response.coreBussinessResponse.ServiceOrderResponse;
 import com.apexev.entity.*;
 import com.apexev.enums.AppointmentStatus;
 import com.apexev.enums.OrderItemStatus;

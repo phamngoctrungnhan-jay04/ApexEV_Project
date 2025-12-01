@@ -1,8 +1,8 @@
 package com.apexev.service.service_Interface;
 
-import com.apexev.dto.request.ApproveLeaveRequest;
-import com.apexev.dto.request.CreateLeaveRequestRequest;
-import com.apexev.dto.response.LeaveRequestResponse;
+import com.apexev.dto.request.coreBussinessRequest.ApproveLeaveRequest;
+import com.apexev.dto.request.coreBussinessRequest.CreateLeaveRequestRequest;
+import com.apexev.dto.response.coreBussinessResponse.LeaveRequestResponse;
 
 import java.util.List;
 

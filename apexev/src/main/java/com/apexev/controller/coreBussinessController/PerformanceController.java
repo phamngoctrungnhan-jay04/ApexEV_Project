@@ -1,7 +1,7 @@
 package com.apexev.controller.coreBussinessController;
 
-import com.apexev.dto.request.CreatePerformanceReviewRequest;
-import com.apexev.dto.response.PerformanceReviewResponse;
+import com.apexev.dto.request.coreBussinessRequest.CreatePerformanceReviewRequest;
+import com.apexev.dto.response.coreBussinessResponse.PerformanceReviewResponse;
 import com.apexev.security.services.UserDetailsImpl;
 import com.apexev.service.service_Interface.PerformanceService;
 import io.swagger.v3.oas.annotations.Operation;
