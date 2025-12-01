@@ -1,4 +1,4 @@
-package com.apexev.dto.request;
+package com.apexev.dto.request.userAndVehicleRequest;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RegisterRequest {
+public class UserUpdateRequest {
 
     @NotBlank(message = "Họ tên không được để trống")
     @Size(max = 100, message = "Họ tên tối đa 100 ký tự")
@@ -24,9 +24,5 @@ public class RegisterRequest {
     @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Số điện thoại không hợp lệ")
     @Size(max = 10, message = "Số điện thoại tối đa 10 ký tự")
     private String phone;
-
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, max = 128, message = "Mật khẩu phải từ 6 đến 128 ký tự")
-    private String password;
 
 }

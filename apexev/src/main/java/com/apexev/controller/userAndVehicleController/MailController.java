@@ -1,14 +1,10 @@
-package com.apexev.controller;
+package com.apexev.controller.userAndVehicleController;
 
-import com.apexev.dto.request.MailRequest;
-import com.apexev.service.serviceIplm.MailService;
-import jakarta.mail.MessagingException;
+import com.apexev.dto.request.userAndVehicleRequest.MailRequest;
+import com.apexev.service.serviceImpl.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 

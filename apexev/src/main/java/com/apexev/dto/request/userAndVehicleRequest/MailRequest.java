@@ -1,8 +1,7 @@
-package com.apexev.dto.request;
+package com.apexev.dto.request.userAndVehicleRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Schema(description = "Thông tin yêu cầu gửi mail")

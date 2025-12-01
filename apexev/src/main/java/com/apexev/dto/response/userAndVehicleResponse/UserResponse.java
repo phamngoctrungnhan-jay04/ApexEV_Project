@@ -1,4 +1,4 @@
-package com.apexev.dto.response;
+package com.apexev.dto.response.userAndVehicleResponse;
 
 
 import lombok.AllArgsConstructor;

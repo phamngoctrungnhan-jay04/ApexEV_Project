@@ -1,13 +1,13 @@
-package com.apexev.service.serviceIplm;
+package com.apexev.service.serviceImpl;
 
-import com.apexev.dto.request.UserUpdateRequest;
-import com.apexev.dto.response.UserResponse;
+import com.apexev.dto.request.userAndVehicleRequest.UserUpdateRequest;
+import com.apexev.dto.response.userAndVehicleResponse.UserResponse;
 import com.apexev.entity.User;
 import com.apexev.enums.UserRole;
 import com.apexev.event.user.UserRegisterEvent;
 import com.apexev.exception.UserAlreadyExistsException;
 import com.apexev.repository.userAndVehicle.UserRepository;
-import com.apexev.service.UserService;
+import com.apexev.service.service_Interface.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;

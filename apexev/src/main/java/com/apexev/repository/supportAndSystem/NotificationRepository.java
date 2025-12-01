@@ -13,5 +13,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 //    List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     // Đếm số thông báo chưa đọc
-//    long countByUserIdAndIsReadFalse(Long userId);
+    long countByUserIdAndIsReadFalse(Long userId);
 }
