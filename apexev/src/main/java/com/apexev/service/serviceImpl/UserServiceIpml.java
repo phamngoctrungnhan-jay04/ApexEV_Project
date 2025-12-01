@@ -4,10 +4,12 @@ import com.apexev.dto.request.userAndVehicleRequest.UserUpdateRequest;
 import com.apexev.dto.response.userAndVehicleResponse.UserResponse;
 import com.apexev.entity.User;
 import com.apexev.enums.UserRole;
+import com.apexev.event.user.UserRegisterEvent;
 import com.apexev.exception.UserAlreadyExistsException;
 import com.apexev.repository.userAndVehicle.UserRepository;
 import com.apexev.service.service_Interface.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +26,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceIpml implements UserService {
-
+    @Autowired
+    private ApplicationEventPublisher publisher;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -46,15 +49,14 @@ public class UserServiceIpml implements UserService {
         if (userRepository.existsByPhone(phone)) {
             throw new UserAlreadyExistsException("phone", "User with this phone already exists");
         }
-
         User newUser = new User();
         newUser.setFullName(fullName);
         newUser.setEmail(email);
         newUser.setPhone(phone);
         newUser.setPasswordHash(passwordEncoder.encode(plainPassword));
         newUser.setRole(role);
-
-        return userRepository.save(newUser);
+        publisher.publishEvent(new UserRegisterEvent(newUser));
+        return userRepository.save(newUser) ;
     }
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);

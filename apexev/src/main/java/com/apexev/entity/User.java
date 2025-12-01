@@ -15,7 +15,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     @Id
@@ -92,4 +92,6 @@ public class User {
     // 1-N với Chat (với vai trò Cố vấn)
     @OneToMany(mappedBy = "serviceAdvisor")
     private Set<ChatConversation> chatsAsAdvisor;
+
+
 }

@@ -24,6 +24,15 @@ public class StaffProfile {
     private LocalDate hireDate; //ngày vào làm
 
 
+    @Column(name = "annual_leave_balance")
+    private Integer annualLeaveBalance = 12; // Số ngày nghỉ phép năm còn lại
+
+    @Column(name = "sick_leave_balance")
+    private Integer sickLeaveBalance = 7; // Số ngày nghỉ ốm còn lại
+
+    @Column(name = "is_active")
+    private Boolean isActive = true; // Trạng thái làm việc
+
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "staff_id")
