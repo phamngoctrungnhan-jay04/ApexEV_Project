@@ -12,9 +12,15 @@ import java.util.Map;
 import org.springframework.web.server.ResponseStatusException;
 import com.apexev.enums.UserRole;
 import com.apexev.repository.userAndVehicle.UserRepository;
+import com.apexev.repository.userAndVehicle.VehicleRepository;
+import com.apexev.repository.supportAndSystem.NotificationRepository;
+import com.apexev.repository.coreBussiness.AppointmentRepository;
+import com.apexev.repository.coreBussiness.ServiceOrderRepository;
+import com.apexev.repository.financeAndReviews.ReviewRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +28,11 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
     private final UserService userService;
     private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
+    private final NotificationRepository notificationRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final ServiceOrderRepository serviceOrderRepository;
+    private final ReviewRepository reviewRepository;
 
     // lấy hồ sơ của tôi
     @GetMapping("/myProfile")
@@ -81,11 +92,19 @@ public class ProfileController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Cập nhật vai trò thành công", null));
     }
 
-    // API xóa tài khoản
+    // API xóa tài khoản (xóa cả dữ liệu liên quan để tránh FK constraint)
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> deleteUser(@RequestBody Map<String, Object> req) {
         Integer userId = (Integer) req.get("userId");
+        // Xóa dữ liệu liên quan trước khi xóa user
+        notificationRepository.deleteByUserUserId(userId);
+        reviewRepository.deleteByCustomerUserId(userId);
+        serviceOrderRepository.deleteByCustomerUserId(userId);
+        appointmentRepository.deleteByCustomerUserId(userId);
+        vehicleRepository.deleteByCustomerUserId(userId);
+        // Cuối cùng xóa user
         userRepository.deleteById(userId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Xóa tài khoản thành công", null));
     }

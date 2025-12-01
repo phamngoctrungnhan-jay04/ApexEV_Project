@@ -26,6 +26,9 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     // Tìm lịch sử của tôi
     List<ServiceOrder> findByCustomerUserIdAndStatusOrderByCompletedAtDesc(Integer customerId, OrderStatus status);
 
-    //Xem chi tiết đơn hàng
+    // Xem chi tiết đơn hàng
     Optional<ServiceOrder> findByIdAndCustomerUserId(Long orderId, Integer customerId);
+
+    // Xóa tất cả đơn hàng của 1 khách hàng
+    void deleteByCustomerUserId(Integer customerId);
 }
