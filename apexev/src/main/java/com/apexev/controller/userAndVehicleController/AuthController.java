@@ -3,6 +3,7 @@ package com.apexev.controller.userAndVehicleController;
 import com.apexev.dto.request.userAndVehicleRequest.LoginRequest;
 import com.apexev.dto.request.userAndVehicleRequest.RefreshRequest;
 import com.apexev.dto.request.userAndVehicleRequest.RegisterRequest;
+import com.apexev.dto.request.RegisterStaffRequest;
 import com.apexev.dto.response.userAndVehicleResponse.LoginSuccessResponse;
 import com.apexev.enums.UserRole;
 import com.apexev.security.jwt.JwtUtils;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,10 +42,9 @@ public class AuthController {
     @Autowired
     private UserDetailsServiceImpl userDetailsServiceImpl;
 
-    @PostMapping("/register")
-    // @PreAuthorize("hasRole('ADMIN')") // Chỉ admin mới được tạo tài khoản mới ,
-    // bỏ cái này nhé
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
+    @PostMapping("/register-staff")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> registerStaff(@RequestBody @Valid RegisterStaffRequest request) {
         UserRole role = UserRole.valueOf(request.getRole());
         userService.registerUser(
                 request.getFullName(),
@@ -51,6 +52,18 @@ public class AuthController {
                 request.getPhone(),
                 request.getPassword(),
                 role);
+        return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
+    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
+        UserRole role = UserRole.valueOf("CUSTOMER");
+        userService.registerUser(
+                request.getFullName(),
+                request.getEmail(),
+                request.getPhone(),
+                request.getPassword(),
+                role
+        );
         return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
     }
 

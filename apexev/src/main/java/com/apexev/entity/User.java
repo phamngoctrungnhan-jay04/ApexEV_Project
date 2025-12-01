@@ -16,7 +16,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     @Id
@@ -104,4 +104,6 @@ public class User {
     @JsonIgnore // <--- Thêm vào đây
     @OneToMany(mappedBy = "serviceAdvisor")
     private Set<ChatConversation> chatsAsAdvisor;
+
+
 }
