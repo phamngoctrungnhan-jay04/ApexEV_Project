@@ -1,8 +1,8 @@
-package com.apexev.controller;
+package com.apexev.controller.userAndVehicleController;
 
 import com.apexev.dto.request.UpdateStaffProfileRequest;
 import com.apexev.dto.response.StaffProfileResponse;
-import com.apexev.service.EmployeeService;
+import com.apexev.service.service_Interface.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

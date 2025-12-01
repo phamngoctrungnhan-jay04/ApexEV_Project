@@ -1,4 +1,4 @@
-package com.apexev.dto.response;
+package com.apexev.dto.response.coreBussinessResponse;
 
 import lombok.Getter;
 import lombok.Setter;

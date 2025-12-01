@@ -1,4 +1,4 @@
-package com.apexev.service;
+package com.apexev.service.serviceImpl;
 
 import com.apexev.dto.request.ApproveLeaveRequest;
 import com.apexev.dto.request.CreateLeaveRequestRequest;
@@ -15,6 +15,7 @@ import com.apexev.repository.hr.LeaveTypeRepository;
 import com.apexev.repository.hr.ShiftAssignmentRepository;
 import com.apexev.repository.userAndVehicle.StaffRepository;
 import com.apexev.repository.userAndVehicle.UserRepository;
+import com.apexev.service.service_Interface.LeaveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class LeaveService {
+public class LeaveServiceImpl implements LeaveService {
 
     private final LeaveRequestRepository leaveRequestRepository;
     private final LeaveTypeRepository leaveTypeRepository;

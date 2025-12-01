@@ -1,6 +1,6 @@
-package com.apexev.service.serviceIplm;
+package com.apexev.service.serviceImpl;
 
-import com.apexev.dto.response.ChatHistoryResponse;
+import com.apexev.service.service_Interface.ChatBoxService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -18,7 +18,7 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 
 @Service
-public class ChatBoxService {
+public class ChatBoxServiceImpl implements ChatBoxService {
 //    @Autowired
     private final ChatClient chatClient;
 //    @Autowired
@@ -26,7 +26,7 @@ public class ChatBoxService {
 
 
 
-    public ChatBoxService(ChatClient.Builder builder, JdbcChatMemoryRepository memoryRepository, StreamingChatModel streamingChatModel) {
+    public ChatBoxServiceImpl(ChatClient.Builder builder, JdbcChatMemoryRepository memoryRepository, StreamingChatModel streamingChatModel) {
         this.memoryRepository = memoryRepository;
         MessageWindowChatMemory memory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(memoryRepository)
@@ -37,6 +37,7 @@ public class ChatBoxService {
                 .build();
     }
 
+    @Override
     public String getResponse(String message) {
         String id="1";
         SystemMessage systemMessage = new SystemMessage("""
@@ -81,6 +82,7 @@ public class ChatBoxService {
 
 
 
+    @Override
     public Flux<String> ChatProcess(String id,String message) {
 
         SystemMessage systemMessage = new SystemMessage("""
@@ -100,8 +102,9 @@ public class ChatBoxService {
                 })
                 .stream()
                 .content();
-
     }
+
+    @Override
     public Flux<String> ChatProcess(String message) {
 
         SystemMessage systemMessage = new SystemMessage("""
@@ -119,8 +122,10 @@ public class ChatBoxService {
                 .content();
 
     }
-        public List<Message> ChatHistory(String userId) {
-            return memoryRepository.findByConversationId(userId);
-        }
+
+    @Override
+    public List<Message> ChatHistory(String userId) {
+        return memoryRepository.findByConversationId(userId);
+    }
 
 }

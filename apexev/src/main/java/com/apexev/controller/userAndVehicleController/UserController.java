@@ -1,13 +1,16 @@
-package com.apexev.controller;
+package com.apexev.controller.userAndVehicleController;
 
 import com.apexev.dto.request.ChangePasswordRequest;
-import com.apexev.dto.request.UserUpdateRequest;
-import com.apexev.dto.response.BulkImportResponse;
-import com.apexev.dto.response.UserResponse;
+
+import com.apexev.dto.request.userAndVehicleRequest.UserUpdateRequest;
+import com.apexev.dto.response.coreBussinessResponse.BulkImportResponse;
+
+import com.apexev.dto.response.userAndVehicleResponse.UserResponse;
 import com.apexev.entity.User;
 import com.apexev.security.services.UserDetailsImpl;
-import com.apexev.service.ExcelService;
-import com.apexev.service.UserService;
+import com.apexev.service.service_Interface.ExcelService;
+
+import com.apexev.service.service_Interface.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;

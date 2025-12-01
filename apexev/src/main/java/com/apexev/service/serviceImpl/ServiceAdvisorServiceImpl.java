@@ -1,4 +1,4 @@
-package com.apexev.service.serviceIplm;
+package com.apexev.service.serviceImpl;
 
 import com.apexev.dto.request.*;
 import com.apexev.dto.response.AppointmentResponse;
@@ -14,8 +14,8 @@ import com.apexev.repository.coreBussiness.ServiceOrderItemRepository;
 import com.apexev.repository.coreBussiness.ServiceOrderRepository;
 import com.apexev.repository.userAndVehicle.UserRepository;
 import com.apexev.repository.userAndVehicle.VehicleRepository;
-import com.apexev.service.ServiceAdvisorService;
-import com.apexev.service.serviceIplm.MailService;
+import com.apexev.service.service_Interface.ServiceAdvisorService;
+import com.apexev.service.service_Interface.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +53,7 @@ public class ServiceAdvisorServiceImpl implements ServiceAdvisorService {
     @Override
     public List<AppointmentResponse> getAppointmentsByAdvisor(Long advisorId) {
         List<Appointment> appointments = appointmentRepository
-                .findByServiceAdvisorUserIdOrderByAppointmentTimeAsc(advisorId);
+                .findByServiceAdvisorUserIdOrderByAppointmentTimeAsc(advisorId.intValue());
         return appointments.stream()
                 .map(this::mapToAppointmentResponse)
                 .collect(Collectors.toList());

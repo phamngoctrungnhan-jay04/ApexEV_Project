@@ -1,4 +1,4 @@
-package com.apexev.service;
+package com.apexev.service.serviceImpl;
 
 import com.apexev.dto.request.CreatePerformanceReviewRequest;
 import com.apexev.dto.response.PerformanceReviewResponse;
@@ -12,6 +12,7 @@ import com.apexev.repository.hr.KPIRepository;
 import com.apexev.repository.hr.PerformanceReviewRepository;
 import com.apexev.repository.hr.ReviewKPIRepository;
 import com.apexev.repository.userAndVehicle.UserRepository;
+import com.apexev.service.service_Interface.PerformanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PerformanceService {
+public class PerformanceServiceImpl implements PerformanceService {
 
     private final PerformanceReviewRepository reviewRepository;
     private final ReviewKPIRepository reviewKPIRepository;

@@ -1,15 +1,18 @@
-package com.apexev.controller;
+package com.apexev.controller.userAndVehicleController;
 
-import com.apexev.dto.request.LoginRequest;
-import com.apexev.dto.request.RefreshRequest;
-import com.apexev.dto.request.RegisterRequest;
+
 import com.apexev.dto.request.RegisterStaffRequest;
-import com.apexev.dto.response.LoginSuccessResponse;
+
+import com.apexev.dto.request.userAndVehicleRequest.LoginRequest;
+import com.apexev.dto.request.userAndVehicleRequest.RefreshRequest;
+import com.apexev.dto.request.userAndVehicleRequest.RegisterRequest;
+import com.apexev.dto.response.userAndVehicleResponse.LoginSuccessResponse;
 import com.apexev.enums.UserRole;
 import com.apexev.security.jwt.JwtUtils;
 import com.apexev.security.services.UserDetailsImpl;
 import com.apexev.security.services.UserDetailsServiceImpl;
-import com.apexev.service.UserService;
+
+import com.apexev.service.service_Interface.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.apexev.service;
+package com.apexev.service.serviceImpl;
 
 import com.apexev.dto.request.UpdateStaffProfileRequest;
 import com.apexev.dto.response.StaffProfileResponse;
@@ -7,6 +7,7 @@ import com.apexev.entity.User;
 import com.apexev.exception.ResourceNotFoundException;
 import com.apexev.repository.userAndVehicle.StaffRepository;
 import com.apexev.repository.userAndVehicle.UserRepository;
+import com.apexev.service.service_Interface.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class EmployeeService {
+public class EmployeeServiceImpl implements EmployeeService {
 
     private final StaffRepository staffRepository;
     private final UserRepository userRepository;
