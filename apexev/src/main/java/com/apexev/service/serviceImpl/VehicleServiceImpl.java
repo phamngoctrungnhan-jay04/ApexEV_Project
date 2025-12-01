@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class VehicleImpl implements VehicleService {
+public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository vehicleRepository;
     private final AppointmentRepository appointmentRepository;
     private final ModelMapper modelMapper;
@@ -32,7 +32,7 @@ public class VehicleImpl implements VehicleService {
         List<Vehicle> vehicles = vehicleRepository.findByCustomerUserId(loggedInUser.getUserId());
         // 2. danh sách nên dùng stream để map sang danh sách response
         return vehicles.stream() // đặt lên băng chuyền
-                .map(vehicle -> modelMapper.map(vehicles, VehicleResponse.class)) //mapper
+                .map(vehicle -> modelMapper.map(vehicle, VehicleResponse.class)) //mapper
                 .collect(Collectors.toList()); // đóng gói
     }
 

@@ -1,4 +1,4 @@
-package com.apexev.service;
+package com.apexev.service.service_Interface;
 
 import com.apexev.dto.request.CreateAppointmentRequest;
 import com.apexev.dto.request.CreateServiceOrderRequest;

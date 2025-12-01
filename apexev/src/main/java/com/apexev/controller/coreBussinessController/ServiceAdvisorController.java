@@ -1,4 +1,4 @@
-package com.apexev.controller;
+package com.apexev.controller.coreBussinessController;
 
 import com.apexev.dto.request.*;
 import com.apexev.dto.response.AppointmentResponse;
@@ -7,7 +7,7 @@ import com.apexev.dto.response.ServiceOrderResponse;
 import com.apexev.enums.AppointmentStatus;
 import com.apexev.enums.OrderStatus;
 import com.apexev.security.services.UserDetailsImpl;
-import com.apexev.service.ServiceAdvisorService;
+import com.apexev.service.service_Interface.ServiceAdvisorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

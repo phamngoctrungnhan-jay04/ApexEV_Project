@@ -1,7 +1,7 @@
-package com.apexev.controller;
+package com.apexev.controller.coreBussinessController;
 
 import com.apexev.security.services.UserDetailsImpl;
-import com.apexev.service.serviceIplm.ChatBoxService;
+import com.apexev.service.service_Interface.ChatBoxService;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

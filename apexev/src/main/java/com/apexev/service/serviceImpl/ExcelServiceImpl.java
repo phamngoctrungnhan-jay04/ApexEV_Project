@@ -1,10 +1,11 @@
-package com.apexev.service;
+package com.apexev.service.serviceImpl;
 
-import com.apexev.dto.response.BulkImportResponse;
+import com.apexev.dto.response.coreBussinessResponse.BulkImportResponse;
 import com.apexev.entity.User;
 import com.apexev.enums.UserRole;
 import com.apexev.event.user.UserRegisterEvent;
 import com.apexev.repository.userAndVehicle.UserRepository;
+import com.apexev.service.service_Interface.ExcelService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ExcelService {
+public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private UserRepository userRepository;
     @Autowired

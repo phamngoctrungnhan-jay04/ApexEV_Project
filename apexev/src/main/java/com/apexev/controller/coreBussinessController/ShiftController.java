@@ -1,10 +1,10 @@
-package com.apexev.controller;
+package com.apexev.controller.coreBussinessController;
 
 import com.apexev.dto.request.AssignShiftRequest;
 import com.apexev.dto.request.CreateShiftRequest;
 import com.apexev.dto.response.ShiftResponse;
 import com.apexev.security.services.UserDetailsImpl;
-import com.apexev.service.ShiftService;
+import com.apexev.service.service_Interface.ShiftService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
