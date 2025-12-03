@@ -30,6 +30,7 @@ export const ROUTES = {
   // Service Advisor routes
   ADVISOR: {
     DASHBOARD: '/advisor/dashboard',
+    PROFILE: '/advisor/profile',
     APPOINTMENTS: '/advisor/appointments',
     ORDERS: '/advisor/orders',
     ORDER_DETAIL: '/advisor/orders/:id',
@@ -49,6 +50,8 @@ export const ROUTES = {
   ADMIN: {
     DASHBOARD: '/admin/dashboard',
     USERS: '/admin/users',
+    REGISTER_USER: '/admin/register-user',
+    PROFILE: '/admin/profile',
     ROLES: '/admin/roles',
     SERVICES: '/admin/services',
     CHECKLISTS: '/admin/checklists',

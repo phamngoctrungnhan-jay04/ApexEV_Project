@@ -8,6 +8,7 @@ function CustomAlert({
   dismissible = false,
   onClose,
   icon = true,
+  floating = false,
   ...props 
 }) {
   const icons = {
@@ -17,12 +18,23 @@ function CustomAlert({
     info: <FiInfo size={20} />
   };
 
+  const floatingStyle = floating ? {
+    position: 'fixed',
+    top: '20px',
+    right: '20px',
+    zIndex: 9999,
+    minWidth: '300px',
+    maxWidth: '400px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
+  } : {};
+
   return (
     <Alert 
       variant={variant} 
       dismissible={dismissible}
       onClose={onClose}
       className="d-flex align-items-start gap-2"
+      style={floatingStyle}
       {...props}
     >
       {icon && <div className="mt-1">{icons[variant]}</div>}

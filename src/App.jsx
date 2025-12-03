@@ -2,9 +2,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ROUTES } from './constants/routes';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminUserList from './pages/admin/AdminUserList';
 import AdminUserRegister from './pages/admin/AdminUserRegister';
+import AdminServiceManager from './pages/admin/AdminServiceManager';
+import AdminProfile from './pages/admin/AdminProfile';
 import './i18n';
+import './styles/Alert.css';
 
 // Pages
 import Homepage from './pages/landing/Homepage';
@@ -13,7 +15,7 @@ import RegisterPage from './pages/auth/RegisterPageModern';
 import Booking from './pages/customer/Booking';
 import History from './pages/customer/History';
 import Invoices from './pages/customer/Invoices';
-import Profile from './pages/customer/Profile';
+import CustomerProfile from './pages/customer/CustomerProfile';
 import Settings from './pages/customer/Settings';
 import Chat from './pages/customer/Chat';
 import Ratings from './pages/customer/Ratings';
@@ -24,6 +26,7 @@ import UploadEvidence from './pages/technician/UploadEvidence';
 import PartsRequest from './pages/technician/PartsRequest';
 import ComponentDemo from './pages/ComponentDemo';
 import AdvisorDashboard from './pages/advisor/AdvisorDashboard';
+import AdvisorProfile from './pages/advisor/AdvisorProfile';
 
 // Layout
 import { CustomerLayout } from './components/layout';
@@ -60,10 +63,12 @@ function AppRoutes() {
       <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
       {/* Admin - Dashboard */}
       <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
-      {/* Admin - Danh sách tài khoản nhân sự */}
-      <Route path="/admin/users" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminUserList /></AdminLayout></ProtectedRoute>} />
+      {/* Admin - Hồ sơ quản trị */}
+      <Route path="/admin/profile" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminProfile /></AdminLayout></ProtectedRoute>} />
       {/* Admin - Đăng ký tài khoản nhân sự */}
       <Route path="/admin/register-user" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminUserRegister /></AdminLayout></ProtectedRoute>} />
+      {/* Admin - Quản lý dịch vụ */}
+      <Route path="/admin/services" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminServiceManager /></AdminLayout></ProtectedRoute>} />
       <Route path="/demo" element={<ComponentDemo />} />
       
       {/* Homepage route - outside CustomerLayout (after login) */}
@@ -88,7 +93,7 @@ function AppRoutes() {
         <Route path="booking" element={<Booking />} />
         <Route path="history" element={<History />} />
         <Route path="invoices" element={<Invoices />} />
-        <Route path="profile" element={<Profile />} />
+        <Route path="profile" element={<CustomerProfile />} />
         <Route path="settings" element={<Settings />} />
         <Route path="chat" element={<Chat />} />
         <Route path="ratings" element={<Ratings />} />
@@ -117,6 +122,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AdvisorDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route 
+        path="/advisor/profile" 
+        element={
+          <ProtectedRoute>
+            <AdvisorProfile />
           </ProtectedRoute>
         }
       />

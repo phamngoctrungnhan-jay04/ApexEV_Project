@@ -1,0 +1,231 @@
+﻿/* Global Alert / Toast Styles - APEX Modern UI */
+/* Áp dụng cho tất cả trang Admin & Advisor */
+
+/* ==================== TOAST NOTIFICATION ==================== */
+.admin-service-manager-page .alert,
+.admin-user-register-page .alert,
+.admin-dashboard-container .alert,
+.admin-profile-page .alert,
+.advisor-dashboard-bg .alert,
+.advisor-layout .alert {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  min-width: 300px;
+  max-width: 450px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: toastDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  border: none;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes toastDrop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-80px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* SUCCESS */
+.admin-service-manager-page .alert-success,
+.admin-user-register-page .alert-success,
+.admin-dashboard-container .alert-success,
+.admin-profile-page .alert-success,
+.advisor-dashboard-bg .alert-success,
+.advisor-layout .alert-success {
+  background: #fff;
+  color: #059669;
+  border-left: 4px solid #10b981;
+  box-shadow: 0 20px 50px -12px rgba(16, 185, 129, 0.35);
+}
+
+.admin-service-manager-page .alert-success svg,
+.admin-user-register-page .alert-success svg,
+.admin-dashboard-container .alert-success svg,
+.admin-profile-page .alert-success svg,
+.advisor-dashboard-bg .alert-success svg,
+.advisor-layout .alert-success svg {
+  color: #10b981;
+  width: 22px;
+  height: 22px;
+}
+
+/* DANGER */
+.admin-service-manager-page .alert-danger,
+.admin-user-register-page .alert-danger,
+.admin-dashboard-container .alert-danger,
+.admin-profile-page .alert-danger,
+.advisor-dashboard-bg .alert-danger,
+.advisor-layout .alert-danger {
+  background: #fff;
+  color: #dc2626;
+  border-left: 4px solid #ef4444;
+  box-shadow: 0 20px 50px -12px rgba(239, 68, 68, 0.35);
+}
+
+.admin-service-manager-page .alert-danger svg,
+.admin-user-register-page .alert-danger svg,
+.admin-dashboard-container .alert-danger svg,
+.admin-profile-page .alert-danger svg,
+.advisor-dashboard-bg .alert-danger svg,
+.advisor-layout .alert-danger svg {
+  color: #ef4444;
+  width: 22px;
+  height: 22px;
+}
+
+/* WARNING */
+.admin-service-manager-page .alert-warning,
+.admin-user-register-page .alert-warning,
+.admin-dashboard-container .alert-warning,
+.admin-profile-page .alert-warning,
+.advisor-dashboard-bg .alert-warning,
+.advisor-layout .alert-warning {
+  background: #fff;
+  color: #d97706;
+  border-left: 4px solid #f59e0b;
+  box-shadow: 0 20px 50px -12px rgba(245, 158, 11, 0.35);
+}
+
+.admin-service-manager-page .alert-warning svg,
+.admin-user-register-page .alert-warning svg,
+.admin-dashboard-container .alert-warning svg,
+.admin-profile-page .alert-warning svg,
+.advisor-dashboard-bg .alert-warning svg,
+.advisor-layout .alert-warning svg {
+  color: #f59e0b;
+  width: 22px;
+  height: 22px;
+}
+
+/* INFO */
+.admin-service-manager-page .alert-info,
+.admin-user-register-page .alert-info,
+.admin-dashboard-container .alert-info,
+.admin-profile-page .alert-info,
+.advisor-dashboard-bg .alert-info,
+.advisor-layout .alert-info {
+  background: #fff;
+  color: #2563eb;
+  border-left: 4px solid #3b82f6;
+  box-shadow: 0 20px 50px -12px rgba(59, 130, 246, 0.35);
+}
+
+.admin-service-manager-page .alert-info svg,
+.admin-user-register-page .alert-info svg,
+.admin-dashboard-container .alert-info svg,
+.admin-profile-page .alert-info svg,
+.advisor-dashboard-bg .alert-info svg,
+.advisor-layout .alert-info svg {
+  color: #3b82f6;
+  width: 22px;
+  height: 22px;
+}
+
+/* Hide close button - auto dismiss */
+.admin-service-manager-page .alert .btn-close,
+.admin-user-register-page .alert .btn-close,
+.admin-dashboard-container .alert .btn-close,
+.admin-profile-page .alert .btn-close,
+.advisor-dashboard-bg .alert .btn-close,
+.advisor-layout .alert .btn-close {
+  display: none !important;
+}
+
+/* Text styling */
+.admin-service-manager-page .alert .flex-grow-1,
+.admin-user-register-page .alert .flex-grow-1,
+.admin-dashboard-container .alert .flex-grow-1,
+.admin-profile-page .alert .flex-grow-1,
+.advisor-dashboard-bg .alert .flex-grow-1,
+.advisor-layout .alert .flex-grow-1 {
+  flex: 1;
+}
+
+.admin-service-manager-page .alert .flex-grow-1 div,
+.admin-user-register-page .alert .flex-grow-1 div,
+.admin-dashboard-container .alert .flex-grow-1 div,
+.admin-profile-page .alert .flex-grow-1 div,
+.advisor-dashboard-bg .alert .flex-grow-1 div,
+.advisor-layout .alert .flex-grow-1 div {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ==================== LEGACY ALERT WRAPPER ==================== */
+/* Floating toast container (for other pages) */
+.alert-wrapper {
+  position: fixed;
+  top: 19.2px;
+  right: 19.2px;
+  z-index: 9999;
+  min-width: 240px;
+  max-width: 312px;
+  animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alert-wrapper .alert {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 20px 28px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.alert-wrapper .alert svg {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.alert-wrapper .alert-success {
+  color: #059669;
+  border-left: 4px solid #10b981;
+}
+.alert-wrapper .alert-success svg { color: #10b981; }
+
+.alert-wrapper .alert-danger {
+  color: #dc2626;
+  border-left: 4px solid #ef4444;
+}
+.alert-wrapper .alert-danger svg { color: #ef4444; }
+
+.alert-wrapper .alert-warning {
+  color: #d97706;
+  border-left: 4px solid #f59e0b;
+}
+.alert-wrapper .alert-warning svg { color: #f59e0b; }
+
+.alert-wrapper .alert-info {
+  color: #2563eb;
+  border-left: 4px solid #3b82f6;
+}
+.alert-wrapper .alert-info svg { color: #3b82f6; }
+
+@keyframes toastSlideIn {
+  0% { opacity: 0; transform: translateX(100%) scale(0.9); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}

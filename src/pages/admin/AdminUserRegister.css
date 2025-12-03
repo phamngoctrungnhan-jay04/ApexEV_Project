@@ -1,33 +1,6 @@
-.admin-register-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  margin-top: 12px;
-}
+﻿/* File: src/pages/admin/AdminUserRegister.css */
+/* Quản lý tài khoản - APEX Modern UI */
 
-.admin-register-fields label {
-  font-size: 1.08rem;
-  font-weight: 500;
-  color: var(--text-main);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.admin-register-fields .input {
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 0px;
-}
-
-.register-btn-group {
-  display: flex;
-  flex-direction: row;
-  gap: 18px;
-  margin-top: 18px;
-}
-/* File: src/pages/admin/AdminUserRegister.css */
 :root {
   --primary-color: #338AF3;
   --primary-hover: #005CF0;
@@ -36,148 +9,841 @@
   --background: #F8FAFC;
   --text-main: #1F2937;
   --text-sub: #6B7280;
+  --border-color: #E5E7EB;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(51, 138, 243, 0.15);
+  --shadow-lg: 0 8px 24px rgba(51, 138, 243, 0.2);
 }
 
-.admin-register-container {
-  max-width: 640px;
-  margin: 48px auto;
-  padding: 48px 40px;
-  background: rgba(255,255,255,0.7);
-  border-radius: 18px;
-  box-shadow: 0 6px 24px rgba(51, 138, 243, 0.25);
-  backdrop-filter: blur(12px);
-  color: var(--text-main);
+* {
+  box-sizing: border-box;
 }
 
-.admin-register-title {
-  font-size: 2rem;
+.admin-user-register-page {
+  width: 100%;
+  padding: 24px 0;
+}
+
+.admin-user-register-page .user-manager-container {
+  padding: 0;
+  width: 100%;
+}
+
+/* ==================== HEADER ==================== */
+.admin-user-register-page .user-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0 12px 0;
+  margin: 0;
+}
+
+.admin-user-register-page .user-manager-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-user-register-page .user-manager-header .header-title {
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 32px;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.admin-user-register-page .user-manager-header .header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(51, 138, 243, 0.1);
+  border-radius: 14px;
+  color: var(--primary-color);
+  font-size: 24px;
+}
+
+.admin-user-register-page .btn-add-user {
+  background: var(--success-color);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.admin-user-register-page .btn-add-user:hover {
+  background: #28a745;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ==================== ROLE CATEGORY GRID ==================== */
+.admin-user-register-page .role-category-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin: 12px 0 20px 0;
+  width: 100%;
+}
+
+.admin-user-register-page .role-category-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  min-height: 90px;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-user-register-page .role-category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-user-register-page .role-category-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.icon-title {
-  color: var(--primary-color);
-  font-size: 1.8rem;
-}
-
-.admin-register-form {
+.admin-user-register-page .role-category-info > div {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  margin-top: 32px;
+  gap: 2px;
+}
+
+.admin-user-register-page .role-category-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.admin-user-register-page .role-category-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.admin-user-register-page .role-category-count {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.admin-user-register-page .role-category-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #F3F4F6;
+  color: var(--text-sub);
+}
+
+/* Role Category Colors - ADMIN */
+.admin-user-register-page .role-category-card[data-role="admin"] {
+  border-color: rgba(171, 71, 188, 0.5);
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0DDFF 100%);
+}
+
+.admin-user-register-page .role-category-dot[data-role="admin"] {
+  background: #AB47BC;
+}
+
+.admin-user-register-page .role-category-card[data-role="admin"] .role-category-pill {
+  background: rgba(171, 71, 188, 0.2);
+  color: #7A1B87;
+}
+
+/* Role Category Colors - BUSINESS_MANAGER */
+.admin-user-register-page .role-category-card[data-role="business_manager"] {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFE0E0 100%);
+}
+
+.admin-user-register-page .role-category-dot[data-role="business_manager"] {
+  background: #FF6B6B;
+}
+
+.admin-user-register-page .role-category-card[data-role="business_manager"] .role-category-pill {
+  background: rgba(255, 107, 107, 0.2);
+  color: #C73333;
+}
+
+/* Role Category Colors - SERVICE_ADVISOR */
+.admin-user-register-page .role-category-card[data-role="service_advisor"] {
+  border-color: rgba(51, 138, 243, 0.5);
+  background: linear-gradient(135deg, #FFFFFF 0%, #D6E9FF 100%);
+}
+
+.admin-user-register-page .role-category-dot[data-role="service_advisor"] {
+  background: #338AF3;
+}
+
+.admin-user-register-page .role-category-card[data-role="service_advisor"] .role-category-pill {
+  background: rgba(51, 138, 243, 0.15);
+  color: #005CF0;
+}
+
+/* Role Category Colors - TECHNICIAN */
+.admin-user-register-page .role-category-card[data-role="technician"] {
+  border-color: rgba(255, 167, 38, 0.5);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFE5CC 100%);
+}
+
+.admin-user-register-page .role-category-dot[data-role="technician"] {
+  background: #FFA726;
+}
+
+.admin-user-register-page .role-category-card[data-role="technician"] .role-category-pill {
+  background: rgba(255, 167, 38, 0.2);
+  color: #C77800;
+}
+
+/* Role Category Colors - CUSTOMER */
+.admin-user-register-page .role-category-card[data-role="customer"] {
+  border-color: rgba(52, 199, 89, 0.5);
+  background: linear-gradient(135deg, #FFFFFF 0%, #D5F5E3 100%);
+}
+
+.admin-user-register-page .role-category-dot[data-role="customer"] {
+  background: #34c759;
+}
+
+.admin-user-register-page .role-category-card[data-role="customer"] .role-category-pill {
+  background: rgba(52, 199, 89, 0.18);
+  color: #1F8A3E;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .admin-user-register-page .role-category-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-user-register-page .role-category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-user-register-page .role-category-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==================== ROLE FILTER ==================== */
+.admin-user-register-page .role-filter {
+  display: flex;
+  gap: 10px;
+  padding: 0 0 8px 0;
+  margin: 0 0 8px 0;
+  flex-wrap: wrap;
+}
+
+.admin-user-register-page .filter-btn {
+  background: #fff;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.admin-user-register-page .filter-btn.chip-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.admin-user-register-page .role-dot {
+  display: none;
+}
+
+/* Filter Button Colors by Role */
+.admin-user-register-page .filter-btn[data-role="admin"] {
+  color: #AB47BC;
+  border-color: rgba(171, 71, 188, 0.35);
+  background: rgba(171, 71, 188, 0.08);
+}
+
+.admin-user-register-page .filter-btn[data-role="business_manager"] {
+  color: #FF6B6B;
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(255, 107, 107, 0.08);
+}
+
+.admin-user-register-page .filter-btn[data-role="service_advisor"] {
+  color: #338AF3;
+  border-color: rgba(51, 138, 243, 0.35);
+  background: rgba(51, 138, 243, 0.08);
+}
+
+.admin-user-register-page .filter-btn[data-role="technician"] {
+  color: #FFA726;
+  border-color: rgba(255, 167, 38, 0.4);
+  background: rgba(255, 167, 38, 0.08);
+}
+
+.admin-user-register-page .filter-btn[data-role="customer"] {
+  color: #34c759;
+  border-color: rgba(52, 199, 89, 0.35);
+  background: rgba(52, 199, 89, 0.08);
+}
+
+.admin-user-register-page .filter-btn:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(51,138,243,.15);
+}
+
+/* Filter Button Active States */
+.admin-user-register-page .filter-btn.active {
+  background: linear-gradient(120deg, #93c5fd, #3b82f6);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.25);
+  border-color: transparent;
+}
+
+.admin-user-register-page .filter-btn[data-role="admin"].active {
+  background: linear-gradient(120deg, #d946ef, #ab47bc);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(171, 71, 188, 0.25);
+}
+
+.admin-user-register-page .filter-btn[data-role="business_manager"].active {
+  background: linear-gradient(120deg, #ff8a8a, #ff6b6b);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(255, 107, 107, 0.25);
+}
+
+.admin-user-register-page .filter-btn[data-role="service_advisor"].active {
+  background: linear-gradient(120deg, #3b82f6, #2563eb);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+}
+
+.admin-user-register-page .filter-btn[data-role="technician"].active {
+  background: linear-gradient(120deg, #ffb347, #ff8c00);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(255, 140, 0, 0.25);
+}
+
+.admin-user-register-page .filter-btn[data-role="customer"].active {
+  background: linear-gradient(120deg, #34c759, #16a34a);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(52, 199, 89, 0.25);
+}
+
+/* Dot colors for filter chips */
+.admin-user-register-page .role-dot[data-role="admin"] {
+  background: #AB47BC;
+}
+
+.admin-user-register-page .role-dot[data-role="business_manager"] {
+  background: #FF6B6B;
+}
+
+.admin-user-register-page .role-dot[data-role="service_advisor"] {
+  background: #338AF3;
+}
+
+.admin-user-register-page .role-dot[data-role="technician"] {
+  background: #FFA726;
+}
+
+.admin-user-register-page .role-dot[data-role="customer"] {
+  background: #34c759;
+}
+
+/* ==================== TABLE ==================== */
+.admin-user-register-page .user-table-container {
+  background: #fff;
+  margin: 8px 0 0 0;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.admin-user-register-page .user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-user-register-page .user-table thead {
+  background: var(--background);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.admin-user-register-page .user-table thead th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-user-register-page .user-table thead th:nth-child(1) { width: 60px; }
+.admin-user-register-page .user-table thead th:nth-child(2) { width: 20%; }
+.admin-user-register-page .user-table thead th:nth-child(3) { width: 22%; }
+.admin-user-register-page .user-table thead th:nth-child(4) { width: 15%; }
+.admin-user-register-page .user-table thead th:nth-child(5) { width: 15%; }
+.admin-user-register-page .user-table thead th:nth-child(6) { width: 12%; }
+.admin-user-register-page .user-table thead th:nth-child(7) { width: 180px; }
+
+/* ==================== USER ROWS BY ROLE ==================== */
+.admin-user-register-page .user-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.admin-user-register-page .user-table tbody tr:hover {
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Row background colors by role */
+.admin-user-register-page .user-table tbody tr[data-role="admin"] {
+  background: #fff;
+  border-left-color: #AB47BC;
+}
+
+.admin-user-register-page .user-table tbody tr[data-role="business_manager"] {
+  background: #fff;
+  border-left-color: #FF6B6B;
+}
+
+.admin-user-register-page .user-table tbody tr[data-role="service_advisor"] {
+  background: #fff;
+  border-left-color: #338AF3;
+}
+
+.admin-user-register-page .user-table tbody tr[data-role="technician"] {
+  background: #fff;
+  border-left-color: #FFA726;
+}
+
+.admin-user-register-page .user-table tbody tr[data-role="customer"] {
+  background: #fff;
+  border-left-color: #34c759;
+}
+
+.admin-user-register-page .user-table tbody tr[data-role="default"] {
+  background: #fff;
+  border-left-color: #6B7280;
+}
+
+.admin-user-register-page .user-table tbody td {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+/* ==================== USER INFO & AVATAR ==================== */
+.admin-user-register-page .user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-user-register-page .user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+}
+
+.admin-user-register-page .user-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(51, 138, 243, 0.15);
+}
+
+.admin-user-register-page .user-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #1f2937;
+  background: #e5e7eb;
+  text-transform: uppercase;
+}
+
+/* Avatar fallback colors by role */
+.admin-user-register-page .user-avatar-fallback.role-admin,
+.admin-user-register-page .user-avatar-fallback[data-role="admin"] {
+  background: #F3E5F5;
+  color: #AB47BC;
+}
+
+.admin-user-register-page .user-avatar-fallback.role-business_manager,
+.admin-user-register-page .user-avatar-fallback[data-role="business_manager"] {
+  background: #FFF0F0;
+  color: #FF6B6B;
+}
+
+.admin-user-register-page .user-avatar-fallback.role-service_advisor,
+.admin-user-register-page .user-avatar-fallback[data-role="service_advisor"] {
+  background: #E3F2FD;
+  color: #338AF3;
+}
+
+.admin-user-register-page .user-avatar-fallback.role-technician,
+.admin-user-register-page .user-avatar-fallback[data-role="technician"] {
+  background: #FFF3E0;
+  color: #FFA726;
+}
+
+.admin-user-register-page .user-avatar-fallback.role-customer,
+.admin-user-register-page .user-avatar-fallback[data-role="customer"] {
+  background: #E6F9EE;
+  color: #34c759;
+}
+
+.admin-user-register-page .user-avatar-fallback.role-default,
+.admin-user-register-page .user-avatar-fallback[data-role="default"] {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.admin-user-register-page .user-fullname {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.admin-user-register-page .user-email,
+.admin-user-register-page .user-phone {
+  color: var(--text-sub);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==================== ROLE BADGE ==================== */
+.admin-user-register-page .user-role {
+  text-align: center;
+}
+
+.admin-user-register-page .role-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.admin-user-register-page .role-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-user-register-page .role-badge.role-admin,
+.admin-user-register-page .role-badge[data-role="admin"] {
+  background: #F3E5F5;
+  color: #AB47BC;
+  border-color: #AB47BC;
+}
+
+.admin-user-register-page .role-badge.role-business_manager,
+.admin-user-register-page .role-badge[data-role="business_manager"] {
+  background: #FFF0F0;
+  color: #FF6B6B;
+  border-color: #FF6B6B;
+}
+
+.admin-user-register-page .role-badge.role-service_advisor,
+.admin-user-register-page .role-badge[data-role="service_advisor"] {
+  background: #E3F2FD;
+  color: #338AF3;
+  border-color: #338AF3;
+}
+
+.admin-user-register-page .role-badge.role-technician,
+.admin-user-register-page .role-badge[data-role="technician"] {
+  background: #FFF3E0;
+  color: #FFA726;
+  border-color: #FFA726;
+}
+
+.admin-user-register-page .role-badge.role-customer,
+.admin-user-register-page .role-badge[data-role="customer"] {
+  background: #E6F9EE;
+  color: #34c759;
+  border-color: #34c759;
+}
+
+/* ==================== STATUS BADGE ==================== */
+.admin-user-register-page .user-status {
+  text-align: center;
+}
+
+.admin-user-register-page .status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-user-register-page .status-badge.active {
+  background: rgba(52, 199, 89, 0.1);
+  color: var(--success-color);
+}
+
+.admin-user-register-page .status-badge.inactive {
+  background: rgba(107, 114, 128, 0.1);
+  color: var(--text-sub);
+}
+
+/* ==================== ACTIONS ==================== */
+.admin-user-register-page .user-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.admin-user-register-page .btn-toggle,
+.admin-user-register-page .btn-edit,
+.admin-user-register-page .btn-delete {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  min-width: 36px;
+  height: 36px;
+}
+
+.admin-user-register-page .btn-toggle {
+  background: rgba(51, 138, 243, 0.1);
+  color: var(--primary-color);
+}
+
+.admin-user-register-page .btn-toggle.active {
+  background: rgba(52, 199, 89, 0.1);
+  color: var(--success-color);
+}
+
+.admin-user-register-page .btn-toggle.inactive {
+  background: rgba(107, 114, 128, 0.1);
+  color: var(--text-sub);
+}
+
+.admin-user-register-page .btn-toggle:hover {
+  transform: scale(1.1);
+}
+
+.admin-user-register-page .btn-toggle.active:hover {
+  background: var(--success-color);
+  color: #fff;
+}
+
+.admin-user-register-page .btn-toggle.inactive:hover {
+  background: var(--text-sub);
+  color: #fff;
+}
+
+.admin-user-register-page .btn-edit {
+  background: rgba(51, 138, 243, 0.1);
+  color: var(--primary-color);
+}
+
+.admin-user-register-page .btn-edit:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.admin-user-register-page .btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+.admin-user-register-page .btn-delete:hover {
+  background: var(--danger-color);
+  color: #fff;
+}
+
+/* ==================== LOADING & EMPTY ==================== */
+.admin-user-register-page .loading,
+.admin-user-register-page .empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-sub);
+  font-size: 14px;
+}
+
+/* ==================== FORM STYLES ==================== */
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-form.modern {
+  gap: 20px;
+}
+
+.form-section {
+  background: rgba(248, 250, 252, 0.9);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(51, 138, 243, 0.08);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.form-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  margin-bottom: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-.input {
-  padding: 14px 18px;
-  border-radius: 14px;
-  border: 1.5px solid var(--primary-color);
-  background: #fff;
-  font-size: 1.15rem;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
-}
-.input:focus {
-  border-color: var(--primary-hover);
-  outline: none;
-  box-shadow: 0 2px 12px rgba(51, 138, 243, 0.18);
-}
-
-.btn-primary {
-  background: var(--success-color);
-  color: #fff;
-  border: none;
-  border-radius: 14px;
-  padding: 14px 32px;
-  font-size: 1.15rem;
+.user-form label {
+  font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
-  box-shadow: 0 6px 18px rgba(52, 199, 89, 0.18);
-}
-.btn-primary:hover {
-  background: #28a745;
-  transform: translateY(-2px) scale(1.03);
+  color: var(--text-main);
+  margin-bottom: 6px;
+  display: block;
 }
 
-.btn-secondary {
-  background: #F8FAFC;
-  color: var(--primary-color);
-  border: 1.5px solid var(--primary-color);
-  border-radius: 14px;
-  padding: 14px 32px;
-  font-size: 1.1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
-  margin-left: 16px;
-}
-.btn-secondary:hover {
-  background: #e3f0ff;
-  border-color: var(--primary-hover);
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
-.alert-danger {
-  margin-top: 16px;
+.form-input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 10px 25px rgba(51, 138, 243, 0.15), inset 0 1px 3px rgba(15,23,42,0.15);
+  transform: translateY(-1px);
+}
+
+.helper-text {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.form-input:disabled {
+  background: #F3F4F6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.warning-text {
   color: var(--danger-color);
-  background: #fff0f0;
-  border-radius: 10px;
-  padding: 12px 18px;
-  font-size: 1.05rem;
-  box-shadow: 0 2px 12px rgba(239, 68, 68, 0.12);
-}
-
-.alert-success {
-  margin-top: 16px;
-  color: var(--success-color);
-  background: #f0fff0;
-  border-radius: 10px;
-  padding: 12px 18px;
-  font-size: 1.05rem;
-  box-shadow: 0 2px 12px rgba(52, 199, 89, 0.12);
-}
-
-.glass-card {
-  backdrop-filter: blur(12px);
-}
-
-/* Layout ngang cho 2 mục tạo tài khoản */
-.register-card-group-horizontal {
-  display: flex;
-  flex-direction: row;
-  gap: 48px;
-  justify-content: center;
-  margin-top: 32px;
-}
-.register-card {
-  background: var(--background-glass, rgba(255,255,255,0.85));
-  box-shadow: 0 6px 24px rgba(51, 138, 243, 0.18);
-  border-radius: 16px;
-  padding: 48px 36px;
-  min-width: 260px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
-  border: 2px solid transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.register-card:hover {
-  box-shadow: 0 10px 32px rgba(51, 138, 243, 0.28);
-  transform: translateY(-2px) scale(1.04);
-  border-color: var(--primary-color, #338AF3);
-}
-.register-card-title {
-  margin-top: 18px;
-  font-size: 1.25rem;
-  color: var(--text-dark, #1F2937);
   font-weight: 500;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* ==================== MODAL STYLES ==================== */
+.apex-modal .modal-content {
+  border-radius: 24px;
+  border: none;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
+  backdrop-filter: blur(20px);
+}
+
+.apex-modal .modal-header {
+  border: none;
+  padding: 24px;
+  background: linear-gradient(120deg, #338AF3, #6C63FF);
+  color: #fff;
+  border-radius: 24px 24px 0 0;
+}
+
+.apex-modal .modal-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.apex-modal .modal-body {
+  padding: 28px;
+}
+
+.apex-modal .modal-footer {
+  border: none;
+  padding: 20px 28px 28px;
+}
+
+.apex-modal .btn-primary {
+  background: linear-gradient(120deg, #005CF0, #338AF3);
+  border: none;
+  box-shadow: 0 10px 20px rgba(0, 92, 240, 0.3);
+}
+
+.apex-modal .btn-primary:hover {
+  filter: brightness(1.05);
 }

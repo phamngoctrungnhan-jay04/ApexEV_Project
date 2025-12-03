@@ -12,10 +12,11 @@ function CustomModal({
   onConfirm,
   confirmVariant = 'primary',
   loading = false,
+  dialogClassName = '',
   ...props 
 }) {
   return (
-    <Modal show={show} onHide={onHide} size={size} centered {...props}>
+    <Modal show={show} onHide={onHide} size={size} centered dialogClassName={dialogClassName} {...props}>
       {title && (
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>

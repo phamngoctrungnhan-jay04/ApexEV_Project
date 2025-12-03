@@ -3,13 +3,14 @@
 
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiHome, FiUserPlus, FiUsers, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiUserPlus, FiUsers, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
 import './AdminSidebar.css';
 
 const adminLinks = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: <FiHome /> },
-  { to: '/admin/register-user', label: 'Tạo tài khoản', icon: <FiUserPlus /> },
-  { to: '/admin/users', label: 'Danh sách nhân sự', icon: <FiUsers /> }
+  { to: '/admin/profile', label: 'Hồ sơ cá nhân', icon: <FiUser /> },
+  { to: '/admin/register-user', label: 'Quản lý tài khoản', icon: <FiUsers /> },
+  { to: '/admin/services', label: 'Quản lý dịch vụ', icon: <FiSettings /> },
 ];
 
 const AdminSidebar = () => {
