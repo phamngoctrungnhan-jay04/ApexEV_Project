@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 @Table(name = "services") // Ánh xạ CHÍNH XÁC tới tên bảng mới
@@ -52,4 +54,9 @@ public class MaintenanceService {
     // 8. Trạng thái hoạt động
     @Column(name = "is_active")
     private Boolean isActive = true;
+    
+    // 9. Các bước kiểm tra (checklist items) của dịch vụ này
+    @JsonIgnore
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ServiceChecklistItem> checklistItems;
 }
