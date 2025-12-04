@@ -134,5 +134,4 @@ public class AuthController {
                     .body(Map.of("error", "Invalid refresh token"));
         }
     }
-
 }

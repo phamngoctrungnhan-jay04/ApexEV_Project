@@ -6,47 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="a6878cd1-54c8-42c2-8ec9-8656b8a6f16d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/LeaveController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/LeaveController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/NotificationTemplateController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/NotificationTemplateController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/PerformanceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/PerformanceController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/ServiceAdvisorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/ServiceAdvisorController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/ShiftController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/ShiftController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/userAndVehicleController/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/userAndVehicleController/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/userAndVehicleController/EmployeeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/userAndVehicleController/EmployeeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/userAndVehicleController/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/userAndVehicleController/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/ApproveLeaveRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/AssignShiftRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/ChangePasswordRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/CreateAppointmentRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/CreateLeaveRequestRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/CreatePerformanceReviewRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/CreateServiceOrderRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/CreateShiftRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/MessageRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterStaffRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/SendQuotationRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/StaffUpdateRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/UpdateAppointmentRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/UpdateServiceOrderRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/UpdateStaffProfileRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/ChatHistoryResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/LeaveRequestResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/PerformanceReviewResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/QuotationResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/ServiceOrderResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/ShiftResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/StaffProfileResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/entity/Part.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/entity/Part.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/coreBussiness/PartRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/coreBussiness/PartRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/EmployeeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/EmployeeServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/LeaveServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/LeaveServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/PerformanceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/PerformanceServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/ServiceAdvisorServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/ServiceAdvisorServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/ShiftServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceImpl/ShiftServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/EmployeeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/LeaveService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/LeaveService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/PerformanceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/PerformanceService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/ServiceAdvisorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/ServiceAdvisorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/ShiftService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/service_Interface/ShiftService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,10 +69,13 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "ml.llm.AIAssistantPromptsLibrary",
+    "settings.editor.selected.configurable": "reactor",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="com.apexev.event.user" />
@@ -162,6 +129,9 @@
       <workItem from="1764557324031" duration="915000" />
       <workItem from="1764558304053" duration="473000" />
       <workItem from="1764558803198" duration="1425000" />
+      <workItem from="1764641518432" duration="1708000" />
+      <workItem from="1764632262032" duration="1015000" />
+      <workItem from="1764835233487" duration="1648000" />
     </task>
     <servers />
   </component>

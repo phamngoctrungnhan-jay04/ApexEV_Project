@@ -24,7 +24,7 @@ public class PerformanceController {
     private final PerformanceService performanceService;
 
     @PostMapping("/reviews")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Tạo đánh giá hiệu suất", description = "Chỉ BUSINESS_MANAGER")
     public ResponseEntity<PerformanceReviewResponse> createReview(
             @Valid @RequestBody CreatePerformanceReviewRequest request,
@@ -34,7 +34,7 @@ public class PerformanceController {
     }
 
     @PutMapping("/reviews/{reviewId}/finalize")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Hoàn tất đánh giá hiệu suất")
     public ResponseEntity<PerformanceReviewResponse> finalizeReview(@PathVariable Integer reviewId) {
         PerformanceReviewResponse response = performanceService.finalizeReview(reviewId);
@@ -42,21 +42,21 @@ public class PerformanceController {
     }
 
     @GetMapping("/reviews")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Lấy danh sách tất cả đánh giá")
     public ResponseEntity<List<PerformanceReviewResponse>> getAllReviews() {
         return ResponseEntity.ok(performanceService.getAllReviews());
     }
 
     @GetMapping("/reviews/staff/{staffId}")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Lấy danh sách đánh giá của nhân viên")
     public ResponseEntity<List<PerformanceReviewResponse>> getReviewsByStaff(@PathVariable Integer staffId) {
         return ResponseEntity.ok(performanceService.getReviewsByStaff(staffId));
     }
 
     @GetMapping("/reviews/{reviewId}")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Lấy chi tiết đánh giá")
     public ResponseEntity<PerformanceReviewResponse> getReviewById(@PathVariable Integer reviewId) {
         return ResponseEntity.ok(performanceService.getReviewById(reviewId));

@@ -25,7 +25,7 @@ public class ShiftController {
     private final ShiftService shiftService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Tạo ca làm việc mới", description = "Chỉ BUSINESS_MANAGER")
     public ResponseEntity<ShiftResponse> createShift(
             @Valid @RequestBody CreateShiftRequest request,
@@ -35,7 +35,7 @@ public class ShiftController {
     }
 
     @PostMapping("/assign")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Phân công nhân viên vào ca làm việc", description = "Chỉ BUSINESS_MANAGER")
     public ResponseEntity<String> assignStaff(
             @Valid @RequestBody AssignShiftRequest request,
@@ -45,21 +45,21 @@ public class ShiftController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Lấy danh sách tất cả ca làm việc")
     public ResponseEntity<List<ShiftResponse>> getAllShifts() {
         return ResponseEntity.ok(shiftService.getAllShifts());
     }
 
     @GetMapping("/{shiftId}")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Lấy thông tin chi tiết ca làm việc")
     public ResponseEntity<ShiftResponse> getShiftById(@PathVariable Integer shiftId) {
         return ResponseEntity.ok(shiftService.getShiftById(shiftId));
     }
 
     @DeleteMapping("/{shiftId}")
-    @PreAuthorize("hasAuthority('BUSINESS_MANAGER')")
+    @PreAuthorize("hasRole('BUSINESS_MANAGER')")
     @Operation(summary = "Xóa ca làm việc")
     public ResponseEntity<String> deleteShift(@PathVariable Integer shiftId) {
         shiftService.deleteShift(shiftId);

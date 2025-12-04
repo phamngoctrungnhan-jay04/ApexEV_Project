@@ -23,25 +23,21 @@ public class NotificationTemplateController {
     public ResponseEntity<NotificationTemplateResponse> create(@Valid @RequestBody NotificationTemplateRequest request) {
         return ResponseEntity.ok(notificationTemplateService.create(request));
     }
-
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<NotificationTemplateResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(notificationTemplateService.getById(id));
     }
-
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<NotificationTemplateResponse>> getAll() {
         return ResponseEntity.ok(notificationTemplateService.getAll());
     }
-
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<NotificationTemplateResponse> update(@PathVariable Long id, @Valid @RequestBody NotificationTemplateRequest request) {
         return ResponseEntity.ok(notificationTemplateService.update(id, request));
     }
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
