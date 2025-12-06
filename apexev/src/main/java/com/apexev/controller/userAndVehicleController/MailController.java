@@ -1,7 +1,6 @@
 package com.apexev.controller.userAndVehicleController;
 
 import com.apexev.dto.request.userAndVehicleRequest.MailRequest;
-import com.apexev.service.serviceImpl.MailService;
 import com.apexev.service.service_Interface.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

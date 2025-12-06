@@ -13,7 +13,7 @@ import org.hibernate.annotations.Nationalized;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ServiceChecklistResult { // chứa thông tin chi tiết của cuốn sách -> khi ktv ktra xong và điền thông tin vào form và bấm nộp -> sẽ lưu vào bảng này
+public class ServiceChecklistResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "result_id")
@@ -27,8 +27,8 @@ public class ServiceChecklistResult { // chứa thông tin chi tiết của cu�
     @Column(name = "technician_notes", columnDefinition = "TEXT")
     private String technicianNotes;
 
-    @Column(name = "media_url", length = 1000)
-    private String s3Key; // Link ảnh/video bằng chứng
+    @Column(name = "media_url", length = 255)
+    private String mediaUrl; // Link ảnh/video bằng chứng
 
     // --- Relationships ---
 

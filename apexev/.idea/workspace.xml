@@ -5,32 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a6878cd1-54c8-42c2-8ec9-8656b8a6f16d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/ChatBotController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/MessageRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterStaffRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/StaffUpdateRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/response/ChatHistoryResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/event/user/UserRegisterEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/event/user/listener/UserRegisterEventListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/userAndVehicle/StaffRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/ChatBoxService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/dto/request/RegisterRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/entity/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/enums/UserRole.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/enums/UserRole.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/InvoiceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/InvoiceRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/PaymentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/PaymentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/ReviewRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/financeAndReviews/ReviewRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/maintenance/ServiceChecklistRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/maintenance/ServiceChecklistRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/supportAndSystem/NotificationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/supportAndSystem/NotificationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/repository/userAndVehicle/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/repository/userAndVehicle/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/UserServiceIpml.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/service/serviceIplm/UserServiceIpml.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/NotificationTemplateController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apexev/controller/coreBussinessController/NotificationTemplateController.java" afterDir="false" />
@@ -57,18 +31,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "phamngoctrungnhan-jay04"
-  }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/phamngoctrungnhan-jay04/ApexEV_Project.git",
-    "accountId": "701a05d1-55b9-4666-be2b-c670dcf0a495"
-  }
-}]]></component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -135,6 +97,14 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.25410.129" />
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-IU-251.25410.129" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

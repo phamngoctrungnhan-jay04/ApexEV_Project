@@ -20,41 +20,41 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AppointmentController {
     private final AppointmentService appointmentService;
-
     // Đặt lịch
-    @PostMapping("/create")
-    public ResponseEntity<AppointmentResponse> createAppointment(
+    @PostMapping ("/create")
+    public ResponseEntity<AppointmentResponse> createAppointment (
             @Valid @RequestBody AppointmentRequest request,
             @AuthenticationPrincipal User loggedInUser // lấy user đã đăng nhập
-    ) {
+            ) {
         AppointmentResponse newAppointment = appointmentService.createAppointment(request, loggedInUser);
         return new ResponseEntity<>(newAppointment, HttpStatus.CREATED);
     }
 
     // Dời lịch
-    @PatchMapping("/{id}/reschedule") // patch cập nhật một phần dữ liệu -> ko thay thế hết như put
-    public ResponseEntity<AppointmentResponse> rescheduleAppointment(
+    @PatchMapping("/{id}/reschedule") //patch cập nhật một phần dữ liệu -> ko thay thế hết như put
+    public ResponseEntity<AppointmentResponse> rescheduleAppointment (
             @PathVariable("id") Long appointmentId,
             @Valid @RequestBody RescheduleAppointmentRequest request,
-            @AuthenticationPrincipal User loggedInUser) {
-        AppointmentResponse updateAppointment = appointmentService.rescheduleAppointment(appointmentId, request,
-                loggedInUser);
+            @AuthenticationPrincipal User loggedInUser
+            ) {
+        AppointmentResponse updateAppointment = appointmentService.rescheduleAppointment(appointmentId, request, loggedInUser);
         return ResponseEntity.ok(updateAppointment);
     }
 
     // Hủy lịch - dùng patch mục đích chỉ đổi trạng thái PENDING -> CANCEL
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<AppointmentResponse> cancelAppointment(
+    public ResponseEntity<AppointmentResponse> cancelAppointment (
             @PathVariable("id") Long appointmentId,
-            @AuthenticationPrincipal User loggedInUser) {
+            @AuthenticationPrincipal User loggedInUser
+    ) {
         AppointmentResponse cancelledAppointment = appointmentService.cancelAppointment(appointmentId, loggedInUser);
         return ResponseEntity.ok(cancelledAppointment);
     }
 
-    // confirm lịch hẹn bởi cố vấn
+    //confirm lịch hẹn bởi cố vấn
     @PatchMapping("/{id}/confirm")
     @PreAuthorize("hasRole('SERVICE_ADVISOR')")
-    public ResponseEntity<AppointmentResponse> confirmAppointment(
+    public ResponseEntity<AppointmentResponse> confirmAppointment (
             @PathVariable("id") Long appointmentId,
             @AuthenticationPrincipal User loggedInUser // data user cố vấn
     ) {
@@ -62,11 +62,12 @@ public class AppointmentController {
         return ResponseEntity.ok(confirmedAppointment);
     }
 
-    // Lấy lịch hẹn theo id lịch hẹn
+    //Lấy lịch hẹn theo id lịch hẹn
     @GetMapping("/{id}")
-    public ResponseEntity<AppointmentResponse> getAppointmentById(
+    public ResponseEntity<AppointmentResponse> getAppointmentById (
             @PathVariable("id") Long appointmentId,
-            @AuthenticationPrincipal User loggedInUser) {
+            @AuthenticationPrincipal User loggedInUser
+    ) {
         AppointmentResponse appointmentById = appointmentService.getAppointmentById(appointmentId, loggedInUser);
         return ResponseEntity.ok(appointmentById);
     }
@@ -74,8 +75,9 @@ public class AppointmentController {
     // lấy lịch hẹn theo id khách hàng
     @GetMapping("/customer/{id}")
     @PreAuthorize("hasAnyRole('SERVICE_ADVISOR', 'ADMIN', 'BUSINESS_MANAGER')")
-    public ResponseEntity<List<AppointmentResponse>> getAppointmentsForCustomer(
-            @PathVariable("id") Integer customerId) {
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsForCustomer (
+            @PathVariable("id") Integer customerId
+    ) {
         List<AppointmentResponse> appointmentsByCustomerId = appointmentService.getAppointmentsForCustomer(customerId);
         return ResponseEntity.ok(appointmentsByCustomerId);
     }
@@ -83,38 +85,30 @@ public class AppointmentController {
     // customer lấy xem lịch hẹn của họ
     @GetMapping("/my-appointment-customer")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<List<AppointmentResponse>> getMyAppointmentHistory(
-            @AuthenticationPrincipal User loggedInUser) {
-        List<AppointmentResponse> myAppointment = appointmentService
-                .getAppointmentsForCustomer(loggedInUser.getUserId());
+    public ResponseEntity<List<AppointmentResponse>> getMyAppointmentHistory (
+            @AuthenticationPrincipal User loggedInUser
+    ) {
+        List<AppointmentResponse> myAppointment = appointmentService.getAppointmentsForCustomer(loggedInUser.getUserId());
         return ResponseEntity.ok(myAppointment);
     }
 
     // cố vấn lấy xem lịch hẹn của họ
     @GetMapping("/advisor/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SERVICE_ADVISOR')")
-    public ResponseEntity<List<AppointmentResponse>> getAppointmentsForAdvisor(
-            @PathVariable("id") Integer advisorId) {
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsForAdvisor (
+            @PathVariable("id") Integer advisorId
+    ) {
         List<AppointmentResponse> getAdvisorAppointment = appointmentService.getAppointmentsForAdvisor(advisorId);
         return ResponseEntity.ok(getAdvisorAppointment);
     }
 
     @GetMapping("/my-appointment-advisor")
     @PreAuthorize("hasRole('SERVICE_ADVISOR')")
-    public ResponseEntity<List<AppointmentResponse>> getMyAdvisorAppointmentHistory(
-            @AuthenticationPrincipal User loggedInUser) {
+    public ResponseEntity<List<AppointmentResponse>> getMyAdvisorAppointmentHistory (
+            @AuthenticationPrincipal User loggedInUser
+    ) {
         List<AppointmentResponse> myAppoinment = appointmentService.getAppointmentsForAdvisor(loggedInUser.getUserId());
         return ResponseEntity.ok(myAppoinment);
-    }
-
-    // Lấy danh sách lịch hẹn trạng thái PENDING cho advisor xác nhận
-    @GetMapping("/pending")
-    @PreAuthorize("hasRole('SERVICE_ADVISOR')")
-    public ResponseEntity<List<AppointmentResponse>> getPendingAppointmentsForAdvisor(
-            @AuthenticationPrincipal User advisor) {
-        List<AppointmentResponse> pendingAppointments = appointmentService
-                .getPendingAppointmentsForAdvisor(advisor.getUserId());
-        return ResponseEntity.ok(pendingAppointments);
     }
 
 }

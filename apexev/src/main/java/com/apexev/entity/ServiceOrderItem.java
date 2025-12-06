@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ServiceOrderItem { // form yêu cầu phụ tùng cần thay hoặc dịch vụ cần làm thêm
+public class ServiceOrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
