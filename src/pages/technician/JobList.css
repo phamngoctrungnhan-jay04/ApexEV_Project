@@ -1,701 +1,1395 @@
-/* Job List Page Styles */
+/* src/pages/technician/JobList.css */
+/* APEX Modern UI - Technician Job List */
 
-.job-list-page {
-  padding: 30px 0;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+/* ========== Base Styles ========== */
+.joblist-container {
+  padding: 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
 }
 
-/* Page Header */
-.page-header {
+/* ========== Loading & Error States ========== */
+.joblist-loading,
+.joblist-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: #64748b;
+}
+
+.joblist-error svg {
+  color: #ef4444;
+}
+
+.btn-retry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #338af3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-retry:hover {
+  background: #005cf0;
+}
+
+/* ========== Header ========== */
+.joblist-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding: 20px;
+  margin-bottom: 20px;
+  padding: 20px 24px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.1);
+}
+
+.joblist-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.joblist-header h1 svg {
+  color: #338af3;
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #338af3 0%, #005cf0 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-refresh:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+/* ========== Tabs ========== */
+.joblist-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 8px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.page-header h2 {
-  margin: 0;
-  color: #2c3e50;
-  font-weight: 700;
-  font-size: 28px;
-}
-
-.page-header p {
-  margin: 5px 0 0 0;
-  font-size: 14px;
-}
-
-.header-stats {
-  display: flex;
-  gap: 20px;
-}
-
-.stat-item {
-  font-size: 14px;
-  color: #6c757d;
-}
-
-.stat-item strong {
-  color: #2c3e50;
-  font-size: 20px;
-  margin-right: 5px;
-}
-
-/* Filters Card */
-.filters-card {
+.tab-btn {
+  padding: 10px 20px;
+  background: transparent;
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  background: white;
-}
-
-.filters-card .card-body {
-  padding: 25px;
-}
-
-.filter-label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 14px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-label svg {
-  color: #667eea;
-}
-
-.search-input,
-.filter-select {
   border-radius: 8px;
-  border: 2px solid #e9ecef;
-  padding: 10px 15px;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.search-input:focus,
-.filter-select:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+.tab-btn:hover {
+  background: #f3f4f6;
+  color: #1f2937;
 }
 
-/* Active Filters */
-.active-filters {
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
+.tab-btn.active {
+  background: #338af3;
+  color: white;
+}
+
+/* ========== Main Content - Split Panel ========== */
+.joblist-content {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.joblist-panel {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+/* ========== Left Panel - Orders List ========== */
+.orders-panel {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.panel-title {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 10px;
-}
-
-.filter-label-text {
+  padding: 16px 20px;
+  margin: 0;
+  font-size: 16px;
   font-weight: 600;
-  color: #6c757d;
-  font-size: 14px;
+  color: #1f2937;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.active-filters .badge {
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  display: inline-flex;
+.panel-title svg {
+  color: #338af3;
+}
+
+.orders-list {
+  padding: 12px;
+}
+
+.empty-orders {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
-  cursor: pointer;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #94a3b8;
 }
 
-.active-filters .badge svg {
-  cursor: pointer;
-  transition: transform 0.2s ease;
+.empty-orders svg {
+  margin-bottom: 16px;
+  opacity: 0.5;
 }
 
-.active-filters .badge svg:hover {
-  transform: scale(1.2);
-}
-
-/* Jobs Table Card */
-.jobs-table-card {
-  border: none;
+/* ========== Order Card ========== */
+.order-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #fafbfc;
+  border: 2px solid transparent;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.jobs-table-card .card-body {
-  padding: 25px;
+.order-card:hover {
+  background: #f1f5f9;
+  border-color: #338af3;
+  transform: translateX(4px);
 }
 
-/* Jobs Table */
-.jobs-table {
-  margin-bottom: 0;
+.order-card.selected {
+  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+  border-color: #338af3;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.2);
 }
 
-.jobs-table thead th {
-  background: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  border: none;
-  padding: 15px;
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.order-id {
+  font-weight: 700;
+  color: #1f2937;
   font-size: 14px;
+}
+
+.order-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.order-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.order-info svg {
+  width: 14px;
+  height: 14px;
+  color: #94a3b8;
+}
+
+.order-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.vehicle-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.vehicle-info svg {
+  color: #338af3;
+}
+
+.order-card-footer > svg {
+  color: #94a3b8;
+}
+
+/* ========== Status Badges ========== */
+.job-status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.jobs-table tbody td {
-  padding: 15px;
-  vertical-align: middle;
-  border-color: #f1f3f5;
+/* CONFIRMED - Đã xác nhận */
+.status-confirmed {
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
-.jobs-table tbody tr {
-  transition: all 0.2s ease;
+/* RECEPTION - Tiếp nhận */
+.status-reception {
+  background: #fef3c7;
+  color: #d97706;
 }
 
-.jobs-table tbody tr:hover {
-  background-color: #f8f9fa;
-  transform: scale(1.01);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+/* INSPECTION - Đang kiểm tra */
+.status-inspection {
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
-/* Table Content Styles */
-.order-number {
-  color: #667eea;
-  font-weight: 700;
-  font-size: 15px;
+/* QUOTING - Đang báo giá */
+.status-quoting {
+  background: #ede9fe;
+  color: #7c3aed;
 }
 
-.customer-info,
-.date-info,
-.time-info {
+/* WAITING_APPROVAL - Chờ duyệt */
+.status-waiting {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+/* WAITING_FOR_PARTS - Chờ phụ tùng */
+.status-waiting-parts {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+/* IN_PROGRESS - Đang thực hiện */
+.status-in-progress {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* READY_FOR_INVOICE - Sẵn sàng xuất hóa đơn */
+.status-ready {
+  background: #d1fae5;
+  color: #059669;
+}
+
+/* INVOICED - Đã xuất hóa đơn */
+.status-invoiced {
+  background: #cffafe;
+  color: #0891b2;
+}
+
+/* COMPLETED - Hoàn thành */
+.status-completed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* CANCELLED - Đã hủy */
+.status-cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ========== Right Panel - Detail ========== */
+.detail-panel {
+  padding: 24px;
+  min-height: calc(100vh - 220px);
+}
+
+.no-selection {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  font-weight: 500;
-  color: #495057;
-}
-
-.customer-info svg,
-.date-info svg,
-.time-info svg {
-  color: #667eea;
-  flex-shrink: 0;
-}
-
-.service-count {
-  padding: 5px 12px;
-  background: linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%);
-  color: #1971c2;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Badges */
-.status-badge,
-.priority-badge {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.status-badge svg {
-  font-size: 14px;
-}
-
-/* Empty State */
-.empty-state {
+  justify-content: center;
+  min-height: 400px;
+  color: #94a3b8;
   text-align: center;
-  padding: 80px 20px;
-  color: #6c757d;
 }
 
-.empty-state svg {
-  color: #dee2e6;
+.no-selection svg {
+  opacity: 0.3;
   margin-bottom: 20px;
 }
 
-.empty-state p {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #495057;
+.no-selection h3 {
+  color: #64748b;
+  margin-bottom: 8px;
 }
 
-.empty-state small {
-  font-size: 14px;
-}
-
-/* Pagination */
-.pagination-wrapper {
+/* ========== Detail Header ========== */
+.detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 2px solid #f1f3f5;
-}
-
-.pagination-info {
-  font-size: 14px;
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.pagination-controls {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.pagination-controls .btn {
-  min-width: 40px;
-  height: 38px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.pagination-controls .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-}
-
-.pagination-controls .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.pagination-controls .btn-outline-primary {
-  border: 2px solid #667eea;
-  color: #667eea;
-}
-
-.pagination-controls .btn-outline-primary:hover {
-  background: #667eea;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.pagination-ellipsis {
-  padding: 0 8px;
-  color: #6c757d;
-  font-weight: 600;
-}
-
-/* Job Detail Modal */
-.job-detail-modal .modal-content {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-}
-
-.job-detail-modal .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
-  padding: 20px 25px;
-}
-
-.job-detail-modal .modal-title {
-  font-weight: 700;
-  font-size: 20px;
-}
-
-.job-detail-modal .btn-close {
-  filter: brightness(0) invert(1);
-}
-
-.job-detail-modal .modal-body {
-  padding: 30px;
-}
-
-.job-detail-modal .modal-footer {
-  border-top: 2px solid #f1f3f5;
-  padding: 20px 25px;
-}
-
-/* Detail Content */
-.job-detail-content {
-  color: #495057;
-}
-
-.detail-header {
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f1f3f5;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .detail-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
+  gap: 16px;
 }
 
-.detail-title h4 {
+.detail-title h2 {
   margin: 0;
-  color: #2c3e50;
+  font-size: 20px;
   font-weight: 700;
+  color: #1f2937;
 }
 
-.detail-badges {
+.detail-actions {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
 
-/* Info Sections */
-.info-section {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
-}
-
-.section-title {
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 15px;
+.btn-start,
+.btn-complete,
+.btn-request-parts {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 16px;
-}
-
-.section-title svg {
-  color: #667eea;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.info-item:last-child {
-  border-bottom: none;
-}
-
-.info-item .label {
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
   font-weight: 600;
-  color: #6c757d;
-  font-size: 14px;
-}
-
-.info-item .value {
-  font-weight: 500;
-  color: #2c3e50;
-  text-align: right;
-}
-
-/* Service List */
-.service-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.service-item {
-  padding: 10px;
-  background: white;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  font-weight: 500;
-}
-
-/* Notes */
-.note-item {
-  padding: 15px;
-  background: white;
-  border-radius: 6px;
-  margin-bottom: 10px;
-}
-
-.note-item:last-child {
-  margin-bottom: 0;
-}
-
-.note-item strong {
-  color: #495057;
-  font-size: 14px;
-}
-
-.note-item p {
-  margin: 8px 0 0 0;
-  color: #6c757d;
-  line-height: 1.6;
-}
-
-/* Rating Display */
-.rating-display {
-  color: #ffc107;
-  font-size: 24px;
-  letter-spacing: 3px;
-  display: flex;
-  align-items: center;
-}
-
-.rating-display span {
-  color: #495057;
-  font-size: 16px;
-  font-weight: 600;
-  margin-left: 10px;
-}
-
-/* Buttons */
-.btn-sm {
-  padding: 6px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+.btn-start {
+  background: linear-gradient(135deg, #338af3 0%, #005cf0 100%);
+  color: white;
 }
 
-.btn-primary:hover {
+.btn-start:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
 }
 
-.btn-success {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  border: none;
+.btn-complete {
+  background: linear-gradient(135deg, #34c759 0%, #22c55e 100%);
+  color: white;
 }
 
-.btn-success:hover {
+.btn-complete:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
-/* Utilities */
-.cursor-pointer {
+.btn-request-parts {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.btn-request-parts:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* ========== Detail Info Grid ========== */
+.detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-card h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.info-card h4 svg {
+  color: #338af3;
+}
+
+.info-card p {
+  margin: 6px 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.info-card p strong {
+  color: #1f2937;
+}
+
+/* ========== Services Section ========== */
+.services-section {
+  margin-top: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.section-title svg {
+  color: #338af3;
+}
+
+.empty-services {
+  padding: 40px;
+  text-align: center;
+  color: #94a3b8;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+/* ========== Service Accordion ========== */
+.services-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-accordion-item {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.service-accordion-item.expanded {
+  border-color: #338af3;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.15);
+}
+
+.service-accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
   cursor: pointer;
+  background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+  transition: all 0.3s ease;
 }
 
-/* Responsive Design */
+.service-accordion-header:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
 
-/* Tablet (768px - 991px) */
-@media (max-width: 991px) {
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+.service-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.service-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #338af3 0%, #005cf0 100%);
+  border-radius: 10px;
+  color: white;
+}
+
+.service-details h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.service-price {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.service-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.service-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #338af3;
+}
+
+.mini-progress-bar {
+  width: 60px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #34c759 0%, #22c55e 100%);
+  transition: width 0.3s ease;
+}
+
+.accordion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  color: #94a3b8;
+}
+
+.accordion-icon.rotated {
+  transform: rotate(180deg);
+  color: #338af3;
+}
+
+.service-accordion-body {
+  padding: 0 20px 20px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-
-  .header-stats {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .page-header h2 {
-    font-size: 24px;
-  }
-
-  .pagination-wrapper {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-
-  .pagination-controls {
-    width: 100%;
-    justify-content: center;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Mobile (576px - 767px) */
-@media (max-width: 767px) {
-  .job-list-page {
-    padding: 20px 0;
-  }
+/* ========== Inline Checklist ========== */
+.inline-checklist {
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
 
-  .page-header {
-    padding: 15px;
-    margin-bottom: 20px;
-  }
+.checklist-loading,
+.checklist-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 20px;
+  color: #94a3b8;
+  font-size: 14px;
+}
 
-  .page-header h2 {
-    font-size: 20px;
-  }
+.checklist-progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
 
-  .filters-card .card-body,
-  .jobs-table-card .card-body {
-    padding: 15px;
-  }
+.checklist-progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #34c759 0%, #22c55e 100%);
+  transition: width 0.5s ease;
+}
 
-  .filter-label {
-    font-size: 13px;
-  }
+.checklist-progress-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 20px;
+  text-align: right;
+}
 
-  .search-input,
-  .filter-select {
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ========== Checklist Item (SỬA LỖI UI) ========== */
+.checklist-item {
+  position: relative;
+  padding: 20px;
+  background: #fafbfc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+  /* FIX: Đảm bảo container luôn đủ cao cho nội dung */
+  min-height: auto;
+  overflow: visible;
+}
+
+.checklist-item.passed {
+  background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%);
+  border-color: #34c759;
+}
+
+.checklist-item.failed {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: #ef4444;
+}
+
+.checklist-item.needs_attention {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #f59e0b;
+}
+
+.checklist-item-header {
+  display: flex;
+  /* FIX: Dùng flex-start để icon và text bắt đầu cùng hàng, tránh đè nhau */
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  /* FIX: Đảm bảo container đủ cao cho nội dung bên trong */
+  min-height: 32px;
+  width: 100%;
+}
+
+.checklist-item-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* FIX: Đảm bảo icon luôn giữ hình tròn và không bị co */
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  background: #338af3;
+  color: white;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  /* FIX: Quan trọng - không cho icon bị co khi container hẹp */
+  flex-shrink: 0;
+  /* FIX: Đảm bảo vị trí top khi align-items: flex-start */
+  margin-top: 2px;
+}
+
+.checklist-item.passed .checklist-item-number {
+  background: #16a34a;
+}
+
+.checklist-item.failed .checklist-item-number {
+  background: #dc2626;
+}
+
+.checklist-item.needs_attention .checklist-item-number {
+  background: #d97706;
+}
+
+.checklist-item-info {
+  flex: 1;
+  /* FIX: Cho phép text wrap và không bị tràn */
+  min-width: 0;
+  overflow: visible;
+}
+
+.checklist-item-name {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  /* FIX: Line-height đủ lớn để text không bị dính */
+  line-height: 1.6;
+  /* FIX: Dùng block thay vì flex để badge không đẩy text lên */
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.checklist-item-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  /* FIX: Line-height để text mô tả không bị dính */
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.checklist-item-category {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 8px;
+  background: rgba(51, 138, 243, 0.1);
+  color: #338af3;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.required-badge {
+  /* FIX: Badge nằm bên phải, không đẩy layout */
+  display: inline-block;
+  padding: 4px 8px;
+  background: #ef4444;
+  color: white;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 8px;
+  vertical-align: middle;
+  /* FIX: Không co lại khi container hẹp */
+  flex-shrink: 0;
+}
+
+/* ========== Checklist Item Body ========== */
+.checklist-item-body {
+  position: relative;
+  padding-top: 16px;
+  border-top: 1px dashed #e2e8f0;
+  /* FIX: Đảm bảo body luôn hiển thị đầy đủ */
+  width: 100%;
+  overflow: visible;
+}
+
+/* ========== Checklist Status Row (Status Buttons + Add Image) ========== */
+.checklist-status-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  /* FIX: Bỏ flex-wrap để nút không xuống hàng */
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.checklist-status-buttons {
+  display: flex;
+  gap: 10px;
+  /* FIX: Bỏ flex-wrap để 3 nút nằm cùng hàng */
+  flex-wrap: nowrap;
+  /* FIX: Không chiếm hết không gian */
+  flex: 0 1 auto;
+  align-items: center;
+}
+
+.status-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  /* FIX: Chiều cao cố định để nút cân bằng */
+  height: 40px;
+  /* FIX: Không co khi container hẹp */
+  flex-shrink: 0;
+}
+
+.status-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.status-btn.passed {
+  color: #16a34a;
+}
+
+.status-btn.passed:hover,
+.status-btn.passed.active {
+  background: #34c759;
+  border-color: #34c759;
+  color: white;
+}
+
+.status-btn.failed {
+  color: #dc2626;
+}
+
+.status-btn.failed:hover,
+.status-btn.failed.active {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
+}
+
+.status-btn.attention {
+  color: #d97706;
+}
+
+.status-btn.attention:hover,
+.status-btn.attention.active {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: white;
+}
+
+/* Nút Thay thế (Replacement) */
+.status-btn.replacement {
+  color: #2563eb;
+}
+
+.status-btn.replacement:hover,
+.status-btn.replacement.active {
+  background: linear-gradient(135deg, #338af3 0%, #005cf0 100%);
+  border-color: #338af3;
+  color: white;
+}
+
+/* Badge số lượng replacement trên nút Yêu cầu phụ tùng */
+.btn-request-parts .replacement-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 8px;
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+}
+
+/* ========== Checklist Item Content Row (2 columns) ========== */
+.checklist-item-content-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+/* ========== Checklist Item Notes ========== */
+.checklist-item-notes {
+  flex: 1;
+  min-width: 0;
+}
+
+.checklist-item-notes textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 80px;
+  padding: 10px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.checklist-item-notes textarea:focus {
+  outline: none;
+  border-color: #338af3;
+}
+
+/* ========== Checklist Item Actions ========== */
+.checklist-item-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-save-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #338af3 0%, #005cf0 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-save-item:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+.btn-save-item:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ========== Notes Section ========== */
+.notes-section {
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+}
+
+.notes-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.notes-section p {
+  margin: 0;
+  font-size: 13px;
+  color: #78350f;
+}
+
+/* ========== Spinner Animation ========== */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1200px) {
+  .joblist-content {
+    grid-template-columns: 340px 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .joblist-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .orders-panel {
+    max-height: 400px;
+  }
+  
+  .detail-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .joblist-container {
+    padding: 16px;
+  }
+  
+  .joblist-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .joblist-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    min-width: calc(50% - 8px);
+    font-size: 12px;
     padding: 8px 12px;
-    font-size: 14px;
   }
-
-  .active-filters {
-    padding: 12px;
+  
+  .detail-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
   }
-
-  .active-filters .badge {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
-
-  /* Make table scrollable */
-  .table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .jobs-table {
-    min-width: 800px;
-  }
-
-  .jobs-table thead th {
-    padding: 12px 10px;
-    font-size: 12px;
-  }
-
-  .jobs-table tbody td {
-    padding: 12px 10px;
-    font-size: 13px;
-  }
-
-  .pagination-controls .btn {
-    min-width: 36px;
-    height: 36px;
-    padding: 6px 10px;
-    font-size: 13px;
-  }
-
-  /* Hide some pagination pages on mobile */
-  .pagination-controls .btn:nth-child(n+6) {
-    display: none;
-  }
-
-  /* Modal adjustments */
-  .job-detail-modal .modal-body {
-    padding: 20px;
-  }
-
+  
   .detail-title {
     flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
   }
-
-  .info-section {
-    padding: 15px;
+  
+  .detail-actions {
+    justify-content: stretch;
   }
-
-  .section-title {
-    font-size: 15px;
+  
+  .detail-actions button {
+    flex: 1;
+    justify-content: center;
   }
-
-  .info-item {
-    flex-direction: column;
+  
+  .detail-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* FIX RESPONSIVE: Checklist items trên mobile */
+  .checklist-item {
+    padding: 16px;
+  }
+  
+  .checklist-item-header {
+    flex-direction: row;
     align-items: flex-start;
-    gap: 5px;
   }
-
-  .info-item .value {
-    text-align: left;
-  }
-}
-
-/* Small Mobile (<576px) */
-@media (max-width: 575px) {
-  .page-header h2 {
-    font-size: 18px;
-  }
-
-  .stat-item strong {
-    font-size: 18px;
-  }
-
-  .header-stats {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .jobs-table {
-    min-width: 700px;
-  }
-
-  .pagination-info {
+  
+  .checklist-item-number {
+    min-width: 28px;
+    width: 28px;
+    height: 28px;
     font-size: 12px;
   }
-
-  .pagination-controls {
+  
+  .checklist-item-name {
+    font-size: 13px;
+  }
+  
+  /* FIX: Cho phép wrap trên tablet */
+  .checklist-status-row {
     flex-wrap: wrap;
   }
-
-  .job-detail-modal .modal-title {
-    font-size: 18px;
+  
+  .checklist-status-buttons {
+    flex-wrap: nowrap;
   }
-
-  .detail-title h4 {
-    font-size: 20px;
-  }
-
-  .rating-display {
-    font-size: 20px;
-  }
-
-  .empty-state {
-    padding: 60px 15px;
-  }
-
-  .empty-state svg {
-    font-size: 36px;
-  }
-
-  .empty-state p {
-    font-size: 16px;
+  
+  .status-btn {
+    padding: 8px 12px;
   }
 }
 
-/* Print Styles */
-@media print {
-  .job-list-page {
-    background: white;
+@media (max-width: 480px) {
+  /* FIX: Checklist item trên mobile nhỏ */
+  .checklist-item {
+    padding: 14px;
   }
-
-  .filters-card,
-  .pagination-wrapper,
-  .btn,
-  .modal {
-    display: none;
+  
+  .checklist-item-header {
+    gap: 10px;
   }
-
-  .jobs-table tbody tr:hover {
-    transform: none;
-    box-shadow: none;
+  
+  .checklist-item-number {
+    min-width: 26px;
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
   }
+  
+  .checklist-status-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .status-btn {
+    width: 100%;
+    min-width: unset;
+    padding: 10px;
+    justify-content: center;
+  }
+  
+  /* Hiển thị text trên mobile nhỏ */
+  .status-btn span {
+    display: inline;
+  }
+}
 
-  .page-header {
-    box-shadow: none;
+/* ========== Checklist Item Images Upload ========== */
+.checklist-item-images {
+  width: 200px;
+  min-width: 200px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 80px;
+}
+
+.images-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: center;
+  padding: 10px;
+  height: 100%;
+}
+
+.images-placeholder svg {
+  font-size: 24px;
+  margin-bottom: 6px;
+  opacity: 0.5;
+}
+
+/* Button Add Image (inline with status buttons) */
+.btn-add-image {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #338af3 0%, #005cf0 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-add-image:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+.btn-add-image:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-add-image svg.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Images Grid */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.image-thumbnail {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.image-thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(51, 138, 243, 0.25);
+}
+
+.image-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-image {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.image-thumbnail:hover .btn-remove-image {
+  opacity: 1;
+}
+
+.btn-remove-image:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+/* ========== Image Preview Modal ========== */
+.image-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.image-preview-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.image-preview-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.btn-close-preview {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: #1f2937;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-close-preview:hover {
+  background: #f1f5f9;
+  transform: scale(1.1);
+}
+
+/* ========== Responsive for Content Row & Images ========== */
+@media (max-width: 768px) {
+  .checklist-status-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .checklist-status-row .btn-add-image {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .checklist-item-content-row {
+    flex-direction: column;
+  }
+  
+  .checklist-item-images {
+    width: 100%;
+    min-width: unset;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .btn-add-image {
+    width: auto;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .images-grid {
+    flex: 1;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .images-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .image-thumbnail {
+    aspect-ratio: 1;
+  }
+  
+  .btn-close-preview {
+    top: 10px;
+    right: 10px;
   }
 }

@@ -77,13 +77,18 @@
   animation: fadeInUp 0.5s ease-out;
 }
 
+.profile-page-container {
+  padding: 0;
+  width: 100%;
+}
+
 /* ==================== PROFILE HERO ==================== */
 .profile-hero {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  border-radius: 20px;
-  padding: 48px 32px;
-  margin: 0 24px 24px 24px;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
+  border-radius: 0;
+  padding: 48px 0;
+  margin: 0 0 32px 0;
+  box-shadow: none;
   position: relative;
   overflow: hidden;
 }
@@ -548,7 +553,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .insight-card {

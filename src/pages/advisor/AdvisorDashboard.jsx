@@ -1,91 +1,162 @@
+// File: src/pages/advisor/AdvisorDashboard.jsx
+// Trang Dashboard mới cho Advisor - APEX Modern UI
+
 import { useEffect, useState } from 'react';
-import { FiCheckCircle, FiClock, FiUser, FiCalendar } from 'react-icons/fi';
-import Header from '../../components/layout/Header';
+import { Link } from 'react-router-dom';
+import {
+  FiCalendar,
+  FiClipboard,
+  FiMessageSquare,
+  FiUser,
+  FiTrendingUp,
+  FiClock,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiChevronRight,
+  FiActivity,
+  FiPackage
+} from 'react-icons/fi';
 import AdvisorLayout from './AdvisorLayout';
 import './AdvisorDashboard.css';
 import appointmentService from '../../services/appointmentService';
-import { services as serviceList } from '../../mockData/services';
 
 function AdvisorDashboard() {
-          // Hàm lấy tổng giá dịch vụ từ tên dịch vụ
-          function getTotalServicePrice(requestedService) {
-            if (!requestedService) return 0;
-            // Tách từng dịch vụ nếu là chuỗi dài có dấu phẩy
-            let names = Array.isArray(requestedService) ? requestedService : [requestedService];
-            let allNames = [];
-            names.forEach(name => {
-              if (typeof name === 'string' && name.includes(',')) {
-                allNames.push(...name.split(',').map(item => item.trim()));
-              } else if (typeof name === 'string') {
-                allNames.push(name.trim());
-              }
-            });
-            let total = 0;
-            allNames.forEach(n => {
-              const found = serviceList.find(s => s.name === n);
-              if (found) total += found.basePrice;
-            });
-            return total;
-          }
-        const [rejectingId, setRejectingId] = useState(null);
-      // Xử lý từ chối lịch hẹn
-      const handleReject = async (id) => {
-        try {
-          setRejectingId(id);
-          await appointmentService.cancelAppointment(id);
-          // Reload lại danh sách lịch chờ xác nhận
-          const data = await appointmentService.getPendingAppointments();
-          setAppointments(data);
-          setRejectingId(null);
-        } catch {
-          setError('Từ chối thất bại');
-          setRejectingId(null);
-        }
-      };
-    // Chuyển mảng [2025,12,13,8,0] thành Date object
-    function formatAppointmentTime(arr) {
-      if (Array.isArray(arr) && arr.length >= 5) {
-        return new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4]);
-      }
-      // Nếu là string ISO thì parse luôn
-      if (typeof arr === 'string') {
-        return new Date(arr);
-      }
-      return null;
-    }
-  const [appointments, setAppointments] = useState([]);
+  const [stats, setStats] = useState({
+    pendingAppointments: 0,
+    confirmedToday: 0,
+    totalThisWeek: 0,
+    completedThisMonth: 0
+  });
+  const [recentAppointments, setRecentAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Cập nhật thời gian mỗi phút
   useEffect(() => {
-    // Gọi API lấy danh sách lịch hẹn trạng thái PENDING cho advisor
-    appointmentService.getPendingAppointments()
-      .then(data => {
-        setAppointments(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Không thể tải dữ liệu');
-        setLoading(false);
-      });
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(timer);
   }, []);
 
-  const handleConfirm = async (id) => {
-    // Xác nhận lịch hẹn
-    try {
-      setLoading(true);
-      await appointmentService.confirmAppointment(id);
-      // Reload lại danh sách lịch chờ xác nhận
-      const data = await appointmentService.getPendingAppointments();
-      setAppointments(data);
-      setLoading(false);
-    } catch {
-      setError('Xác nhận thất bại');
-      setLoading(false);
+  // Fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const appointments = await appointmentService.getPendingAppointments();
+        
+        // Tính toán stats
+        setStats({
+          pendingAppointments: appointments.filter(a => a.status === 'PENDING').length,
+          confirmedToday: appointments.filter(a => a.status === 'CONFIRMED').length,
+          totalThisWeek: appointments.length,
+          completedThisMonth: appointments.filter(a => a.status === 'COMPLETED').length
+        });
+        
+        // Lấy 5 lịch hẹn gần nhất
+        setRecentAppointments(appointments.slice(0, 5));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Format time array to Date
+  const formatAppointmentTime = (arr) => {
+    if (Array.isArray(arr) && arr.length >= 5) {
+      return new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4]);
     }
+    if (typeof arr === 'string') {
+      return new Date(arr);
+    }
+    return null;
   };
 
-  // Xử lý đăng xuất
+  // Lời chào theo thời gian
+  const getGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return 'Chào buổi sáng';
+    if (hour < 18) return 'Chào buổi chiều';
+    return 'Chào buổi tối';
+  };
+
+  // Quick actions
+  const quickActions = [
+    {
+      icon: <FiCalendar />,
+      title: 'Lịch hẹn',
+      description: 'Xem và xử lý lịch hẹn',
+      path: '/advisor/appointments',
+      color: 'blue',
+      badge: stats.pendingAppointments > 0 ? stats.pendingAppointments : null
+    },
+    {
+      icon: <FiPackage />,
+      title: 'Duyệt phụ tùng',
+      description: 'Xử lý yêu cầu phụ tùng',
+      path: '/advisor/parts-approval',
+      color: 'cyan'
+    },
+    {
+      icon: <FiClipboard />,
+      title: 'Đơn hàng',
+      description: 'Quản lý đơn dịch vụ',
+      path: '/advisor/orders',
+      color: 'green'
+    },
+    {
+      icon: <FiMessageSquare />,
+      title: 'Tin nhắn',
+      description: 'Chat với khách hàng',
+      path: '/advisor/chat',
+      color: 'purple'
+    },
+    {
+      icon: <FiUser />,
+      title: 'Hồ sơ',
+      description: 'Thông tin cá nhân',
+      path: '/advisor/profile',
+      color: 'orange'
+    }
+  ];
+
+  // Stats cards
+  const statsCards = [
+    {
+      icon: <FiClock />,
+      value: stats.pendingAppointments,
+      label: 'Chờ xác nhận',
+      color: 'warning',
+      trend: '+2 từ hôm qua'
+    },
+    {
+      icon: <FiCheckCircle />,
+      value: stats.confirmedToday,
+      label: 'Đã xác nhận',
+      color: 'success',
+      trend: 'Hôm nay'
+    },
+    {
+      icon: <FiCalendar />,
+      value: stats.totalThisWeek,
+      label: 'Tuần này',
+      color: 'primary',
+      trend: 'Tổng lịch hẹn'
+    },
+    {
+      icon: <FiActivity />,
+      value: stats.completedThisMonth,
+      label: 'Hoàn thành',
+      color: 'info',
+      trend: 'Tháng này'
+    }
+  ];
+
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     window.location.href = '/login';
@@ -93,140 +164,135 @@ function AdvisorDashboard() {
 
   return (
     <AdvisorLayout onLogout={handleLogout}>
-      <div className="advisor-dashboard-bg" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <div className="glassmorphism" style={{ width: '100%', margin: '24px', padding: '32px 40px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(51, 138, 243, 0.12)', background: 'rgba(255,255,255,0.9)' }}>
-          <h2 className="dashboard-title">Lịch hẹn cần xác nhận</h2>
-          {loading && <div className="dashboard-loading">Đang tải...</div>}
-          {error && <div className="dashboard-error">{error}</div>}
-          {!loading && !error && appointments.length === 0 && (
-            <div className="dashboard-empty">Không có lịch hẹn nào cần xác nhận</div>
-          )}
-          {!loading && !error && appointments.length > 0 && (
-            <div style={{ width: '100%', overflowX: 'auto' }}>
-              <table className="dashboard-table" style={{ width: '100%', minWidth: '1400px', tableLayout: 'fixed' }}>
-                <thead>
-                  <tr>
-                    <th style={{ width: '110px', whiteSpace: 'nowrap', padding: '10px 0' }}><FiCalendar /> Ngày</th>
-                    <th style={{ width: '160px', whiteSpace: 'nowrap', padding: '10px 0' }}><FiUser /> Khách hàng</th>
-                    <th style={{ width: '100px', whiteSpace: 'nowrap', padding: '10px 0' }}><FiClock /> Thời gian</th>
-                    <th style={{ width: '500px', padding: '10px 0' }}>Dịch vụ</th>
-                    <th style={{ width: '140px', whiteSpace: 'nowrap', padding: '10px 0' }}>Tổng giá</th>
-                    <th style={{ width: '120px', whiteSpace: 'nowrap', padding: '10px 0' }}>Trạng thái</th>
-                    <th style={{ width: '180px', whiteSpace: 'nowrap', padding: '10px 0' }}>Xác nhận</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map(app => {
-                    // Xử lý dịch vụ: nếu là mảng thì hiển thị danh sách có số thứ tự
-                    let serviceNames = Array.isArray(app.requestedService) ? app.requestedService : [app.requestedService];
-                    return (
-                      <tr key={app.id} className={app.status === 'CONFIRMED' ? 'row-confirmed' : ''}>
-                        <td style={{ whiteSpace: 'nowrap', padding: '10px 0' }}>{app.appointmentTime ? (formatAppointmentTime(app.appointmentTime)?.toLocaleDateString('vi-VN') || 'Invalid Date') : ''}</td>
-                        <td style={{ whiteSpace: 'nowrap', padding: '10px 0' }}>{app.customerFullName || ''}</td>
-                        <td style={{ whiteSpace: 'nowrap', padding: '10px 0' }}>{app.appointmentTime ? (formatAppointmentTime(app.appointmentTime)?.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) || 'Invalid Date') : ''}</td>
-                        <td style={{ wordBreak: 'break-word', whiteSpace: 'pre-line', padding: '10px 0' }}>
-                          <ol style={{ paddingLeft: 18, margin: 0 }}>
-                            {serviceNames.map((name, idx) => {
-                              // Nếu dịch vụ là chuỗi dài, tách từng dịch vụ theo dấu phẩy
-                              if (typeof name === 'string' && name.includes(',')) {
-                                return name.split(',').map((item, subIdx) => (
-                                  <li key={idx + '-' + subIdx} style={{ marginBottom: 2 }}>{item.trim()}</li>
-                                ));
-                              }
-                              return <li key={idx} style={{ marginBottom: 2 }}>{name}</li>;
-                            })}
-                          </ol>
-                        </td>
-                        <td style={{ fontWeight: 600, color: '#338AF3', whiteSpace: 'nowrap', padding: '10px 0' }}>
-                          {getTotalServicePrice(serviceNames).toLocaleString('vi-VN')} đ
-                        </td>
-                        <td style={{ whiteSpace: 'nowrap', padding: '10px 0' }}>
-                          {app.status === 'CONFIRMED' ? (
-                            <span className="status-confirmed">Đã xác nhận</span>
-                          ) : (
-                            <span className="status-pending">Chờ xác nhận</span>
-                          )}
-                        </td>
-                        <td style={{ whiteSpace: 'nowrap', padding: '10px 0' }}>
-                          {app.status !== 'CONFIRMED' && (
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                              <button
-                                className="btn-confirm"
-                                style={{
-                                  background: 'var(--success-green, #34c759)',
-                                  color: '#fff',
-                                  borderRadius: '12px',
-                                  padding: '8px 16px',
-                                  fontSize: '15px',
-                                  boxShadow: '0 4px 12px rgba(52, 199, 89, 0.18)',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  fontWeight: 600,
-                                  transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                }}
-                                onMouseOver={e => {
-                                  e.currentTarget.style.background = '#28a745';
-                                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                                }}
-                                onMouseOut={e => {
-                                  e.currentTarget.style.background = 'var(--success-green, #34c759)';
-                                  e.currentTarget.style.transform = 'none';
-                                }}
-                                onClick={() => handleConfirm(app.id)}
-                              >
-                                <span style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                  <FiCheckCircle style={{ fontSize: 17, marginRight: 4 }} /> Xác nhận
-                                </span>
-                              </button>
-                              <button
-                                className="btn-reject"
-                                onClick={() => handleReject(app.id)}
-                                disabled={rejectingId === app.id}
-                                style={{
-                                  background: 'var(--danger-red, #EF4444)',
-                                  color: '#fff',
-                                  borderRadius: '12px',
-                                  padding: '8px 16px',
-                                  fontSize: '15px',
-                                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.18)',
-                                  border: 'none',
-                                  cursor: rejectingId === app.id ? 'not-allowed' : 'pointer',
-                                  opacity: rejectingId === app.id ? 0.7 : 1,
-                                  fontWeight: 600,
-                                  transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                }}
-                                onMouseOver={e => {
-                                  e.currentTarget.style.background = '#DC2626';
-                                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                                }}
-                                onMouseOut={e => {
-                                  e.currentTarget.style.background = 'var(--danger-red, #EF4444)';
-                                  e.currentTarget.style.transform = 'none';
-                                }}
-                              >
-                                {rejectingId === app.id ? (
-                                  <span>Đang xử lý...</span>
-                                ) : (
-                                  <span style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                    <span style={{ fontSize: 17, marginRight: 4 }}>✖</span> Từ chối
-                                  </span>
-                                )}
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+      <div className="advisor-dashboard-page">
+        {/* Welcome Section */}
+        <section className="welcome-section">
+          <div className="welcome-content">
+            <div className="welcome-text">
+              <span className="greeting">{getGreeting()} 👋</span>
+              <h1>Chào mừng trở lại!</h1>
+              <p>Đây là tổng quan hoạt động của bạn hôm nay.</p>
             </div>
-          )}
+            <div className="welcome-time">
+              <div className="time-display">
+                {currentTime.toLocaleTimeString('vi-VN', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </div>
+              <div className="date-display">
+                {currentTime.toLocaleDateString('vi-VN', { 
+                  weekday: 'long', 
+                  day: 'numeric', 
+                  month: 'long', 
+                  year: 'numeric' 
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="stats-section">
+          <div className="stats-grid">
+            {statsCards.map((stat, index) => (
+              <div key={index} className={`stat-card ${stat.color}`}>
+                <div className="stat-icon">{stat.icon}</div>
+                <div className="stat-content">
+                  <span className="stat-value">{loading ? '...' : stat.value}</span>
+                  <span className="stat-label">{stat.label}</span>
+                  <span className="stat-trend">{stat.trend}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Main Content */}
+        <div className="dashboard-main">
+          {/* Quick Actions */}
+          <section className="quick-actions-section">
+            <div className="section-header">
+              <h2><FiTrendingUp /> Truy cập nhanh</h2>
+            </div>
+            <div className="actions-grid">
+              {quickActions.map((action, index) => (
+                <Link key={index} to={action.path} className={`action-card ${action.color}`}>
+                  <div className="action-icon">{action.icon}</div>
+                  <div className="action-content">
+                    <h3>{action.title}</h3>
+                    <p>{action.description}</p>
+                  </div>
+                  {action.badge && (
+                    <span className="action-badge">{action.badge}</span>
+                  )}
+                  <FiChevronRight className="action-arrow" />
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* Recent Appointments */}
+          <section className="recent-section">
+            <div className="section-header">
+              <h2><FiCalendar /> Lịch hẹn gần đây</h2>
+              <Link to="/advisor/appointments" className="view-all">
+                Xem tất cả <FiChevronRight />
+              </Link>
+            </div>
+            <div className="recent-list">
+              {loading ? (
+                <div className="loading-placeholder">Đang tải...</div>
+              ) : recentAppointments.length === 0 ? (
+                <div className="empty-placeholder">
+                  <FiCalendar className="empty-icon" />
+                  <p>Chưa có lịch hẹn nào</p>
+                </div>
+              ) : (
+                recentAppointments.map((appointment, index) => (
+                  <div key={index} className="recent-item">
+                    <div className="item-avatar">
+                      {appointment.customerFullName?.charAt(0) || '?'}
+                    </div>
+                    <div className="item-info">
+                      <h4>{appointment.customerFullName || 'Khách hàng'}</h4>
+                      <p>
+                        {appointment.appointmentTime 
+                          ? formatAppointmentTime(appointment.appointmentTime)?.toLocaleString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : 'N/A'}
+                      </p>
+                    </div>
+                    <div className={`item-status ${appointment.status?.toLowerCase()}`}>
+                      {appointment.status === 'PENDING' ? (
+                        <><FiClock /> Chờ</>
+                      ) : appointment.status === 'CONFIRMED' ? (
+                        <><FiCheckCircle /> Xác nhận</>
+                      ) : (
+                        <><FiAlertCircle /> {appointment.status}</>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
         </div>
+
+        {/* Tips Section */}
+        <section className="tips-section">
+          <div className="tip-card">
+            <div className="tip-icon">💡</div>
+            <div className="tip-content">
+              <h4>Mẹo hôm nay</h4>
+              <p>Hãy xác nhận các lịch hẹn đang chờ để khách hàng nhận được thông báo sớm nhất!</p>
+            </div>
+          </div>
+        </section>
       </div>
     </AdvisorLayout>
   );

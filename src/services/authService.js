@@ -46,6 +46,8 @@ class AuthService {
       const data = await response.json();
       console.log('Login response:', { status: response.status, data });
       console.log('📋 Full response data:', JSON.stringify(data, null, 2));
+      console.log('⏩ Checkpoint 1: After logging response data');
+      console.log('🆕 [2024-12-03 14:05] VERSION CHECK - If you see this, browser cache is cleared!');
 
       if (!response.ok) {
         // Handle different error formats
@@ -53,6 +55,15 @@ class AuthService {
         console.error('❌ Login failed with error:', errorMessage);
         throw new Error(errorMessage);
       }
+
+      console.log('⏩ Checkpoint 2: response.ok = true, proceeding...');
+
+      // Clear old tokens first (prevent role mismatch)
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('tokenType');
+      localStorage.removeItem('user');
+      console.log('⏩ Checkpoint 3: LocalStorage cleared');
 
       // Store tokens in localStorage
       if (data.accessToken) {
@@ -73,18 +84,79 @@ class AuthService {
       }
 
       // Return normalized data for consistency
+      const normalizedRole = normalizeRole(data.userRole);
+      console.log('🔍 Role normalization:', { 
+        original: data.userRole, 
+        normalized: normalizedRole 
+      });
+      
       return {
         id: data.userId,
         email: data.email,
         phone: data.phone,
         fullName: data.fullName,
-        role: normalizeRole(data.userRole),
+        role: normalizedRole,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         type: data.type
       };
     } catch (error) {
       console.error('Login error:', error);
+      throw error;
+    }
+  }
+
+  // Register staff (Admin creates staff with specific role)
+  async registerStaff(staffData) {
+    try {
+      console.log('Register staff request:', { ...staffData, password: '***' });
+      const token = this.getAccessToken();
+      if (!token) {
+        throw new Error('Vui lòng đăng nhập để thực hiện chức năng này');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/register-staff`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(staffData),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse response JSON:', jsonError);
+        data = { error: 'Server response error' };
+      }
+      
+      console.log('Register staff response:', { status: response.status, data });
+
+      if (!response.ok) {
+        let errorMessage = 'Đăng ký nhân sự thất bại';
+        
+        if (data.message) {
+          const msg = data.message.toLowerCase();
+          if (msg.includes('email') && msg.includes('already')) {
+            errorMessage = '❌ Email này đã được sử dụng';
+          } else if (msg.includes('phone') && msg.includes('already')) {
+            errorMessage = '❌ Số điện thoại này đã được sử dụng';
+          } else {
+            errorMessage = data.message;
+          }
+        } else if (data.error) {
+          errorMessage = data.error;
+        }
+        
+        console.error('❌ Register staff failed:', errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Register staff error:', error);
       throw error;
     }
   }

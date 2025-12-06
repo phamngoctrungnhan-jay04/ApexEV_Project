@@ -110,8 +110,12 @@ function MaintenanceDetailModal({ open, onClose, order }) {
             </div>
           )}
           <div className="maintenance-info-row">
-            <span className="maintenance-info-label">Kỹ thuật viên/Cố vấn:</span>
-            <span className="maintenance-info-value">{order.serviceAdvisorName || order.technicianName || '--'}</span>
+            <span className="maintenance-info-label">Kỹ thuật viên:</span>
+            <span className="maintenance-info-value">{order.assignedTechnicianName || 'Chưa phân công'}</span>
+          </div>
+          <div className="maintenance-info-row">
+            <span className="maintenance-info-label">Cố vấn dịch vụ:</span>
+            <span className="maintenance-info-value">{order.serviceAdvisorName || '--'}</span>
           </div>
           <div className="maintenance-info-row">
             <span className="maintenance-info-label">Ghi chú:</span>

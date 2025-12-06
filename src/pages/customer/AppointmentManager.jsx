@@ -428,6 +428,18 @@ function AppointmentManager() {
                           </small>
                         </div>
                       )}
+
+                      {/* Nút xem chi tiết order nếu có serviceOrderId */}
+                      {appointment.serviceOrderId && (
+                        <div className="mt-3">
+                          <Link to={ROUTES.CUSTOMER.ORDER_DETAIL.replace(':orderId', appointment.serviceOrderId)}>
+                            <Button variant="primary" size="sm" className="w-100">
+                              <FiCheck className="me-2" />
+                              Xem chi tiết kiểm tra
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </Card.Body>
                 </Card>

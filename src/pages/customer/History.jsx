@@ -7,13 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { getUserHistory, getCompletedHistory, getPendingHistory, getConfirmedHistory } from '../../services/bookingService';
 import vehicleService from '../../services/vehicleService';
-import { Container, Row, Col, Card, Badge, Form, Table, Pagination } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Form, Table } from 'react-bootstrap';
 import MaintenanceDetailModal from '../../components/features/MaintenanceDetailModal';
 import {
   FiClock,
   // ...other icon imports...
   FiTool,
-  FiTruck,
+
   FiUser,
   FiCalendar,
   FiDollarSign,
@@ -25,9 +25,11 @@ import {
   FiCheckCircle,
   FiXCircle,
   FiAlertCircle,
+  FiActivity
 } from 'react-icons/fi';
 
 function History() {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -45,17 +47,28 @@ function History() {
     if (tab === 'completed') fetchFn = getCompletedHistory;
     else if (tab === 'pending') fetchFn = getPendingHistory;
     else if (tab === 'confirmed') fetchFn = getConfirmedHistory;
+    else if (tab === 'in_service') {
+      // Đang bảo dưỡng: bao gồm các trạng thái RECEPTION, INSPECTION, QUOTING, WAITING_FOR_PARTS, IN_PROGRESS, READY_FOR_INVOICE
+      fetchFn = async () => {
+        const all = await getUserHistory();
+        return (all || []).filter(order => 
+          ['RECEPTION', 'INSPECTION', 'QUOTING', 'WAITING_FOR_PARTS', 'IN_PROGRESS', 'READY_FOR_INVOICE', 'IN_SERVICE'].includes(order.serviceOrderStatus || order.status)
+        );
+      };
+    }
     else if (tab === 'cancelled') {
       fetchFn = async () => {
         const all = await getUserHistory();
-        return (all || []).filter(order => order.status === 'CANCELLED');
+        return (all || []).filter(order => order.status === 'CANCELLED' || order.serviceOrderStatus === 'CANCELLED');
       };
     }
     Promise.all([
       fetchFn(),
       vehicleService.getMyVehicles()
     ]).then(([orders, vehiclesData]) => {
-      setCustomerOrders(orders);
+      // Sắp xếp theo thứ tự từ mới nhất đến cũ nhất (theo ID giảm dần)
+      const sortedOrders = (orders || []).sort((a, b) => b.id - a.id);
+      setCustomerOrders(sortedOrders);
       setVehicles(Array.isArray(vehiclesData) ? vehiclesData : []);
       setLoading(false);
     }).catch(() => {
@@ -78,9 +91,9 @@ function History() {
       }
       return true;
     });
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  
+  // Hiển thị tất cả appointments (không phân trang)
+  const currentOrders = filteredOrders;
 
   return (
     <>
@@ -94,12 +107,13 @@ function History() {
             Theo dõi toàn bộ lịch sử bảo dưỡng và dịch vụ của bạn
           </p>
         </div>
-        {/* Tabs cho 3 loại lịch sử */}
-        <div className="mb-3 d-flex gap-2">
+        {/* Tabs cho các loại lịch sử */}
+        <div className="mb-3 d-flex gap-2 flex-wrap">
           <CustomButton variant={tab === 'all' ? 'primary' : 'outline-primary'} size="sm" onClick={() => setTab('all')}>Tất cả</CustomButton>
-          <CustomButton variant={tab === 'completed' ? 'success' : 'outline-success'} size="sm" onClick={() => setTab('completed')}>Đã hoàn thành</CustomButton>
           <CustomButton variant={tab === 'pending' ? 'warning' : 'outline-warning'} size="sm" onClick={() => setTab('pending')}>Chờ xác nhận</CustomButton>
           <CustomButton variant={tab === 'confirmed' ? 'info' : 'outline-info'} size="sm" onClick={() => setTab('confirmed')}>Đã xác nhận</CustomButton>
+          <CustomButton variant={tab === 'in_service' ? 'primary' : 'outline-primary'} size="sm" onClick={() => setTab('in_service')}>Đang bảo dưỡng</CustomButton>
+          <CustomButton variant={tab === 'completed' ? 'success' : 'outline-success'} size="sm" onClick={() => setTab('completed')}>Đã hoàn thành</CustomButton>
           <CustomButton variant={tab === 'cancelled' ? 'danger' : 'outline-danger'} size="sm" onClick={() => setTab('cancelled')}>Đã hủy</CustomButton>
         </div>
         <Card className="orders-card">
@@ -214,42 +228,110 @@ function History() {
                               </td>
                               <td>
                                 <FiUser className="me-1 text-gray-500" />
-                                {order.serviceAdvisorName || 'Chưa phân công'}
+                                {order.assignedTechnicianName || 'Chưa phân công'}
                               </td>
                               <td>
-                                <span className={`status-badge status-${order.status.toLowerCase()}`} style={{
-                                  borderRadius:'8px',
-                                  padding:'4px 16px',
-                                  fontWeight:'bold',
-                                  background: order.status==='CANCELLED' ? 'var(--danger-bg,#FEE2E2)' : order.status==='CONFIRMED' ? 'var(--primary-bg,#E0F2FE)' : order.status==='COMPLETED' ? 'var(--success-bg,#D1FADF)' : '#F3F4F6',
-                                  color: order.status==='CANCELLED' ? '#EF4444' : order.status==='CONFIRMED' ? '#338AF3' : order.status==='COMPLETED' ? '#34c759' : '#6B7280',
-                                  boxShadow: order.status==='CANCELLED' ? '0 2px 8px rgba(239,68,68,0.12)' : order.status==='CONFIRMED' ? '0 2px 8px rgba(51,138,243,0.12)' : order.status==='COMPLETED' ? '0 2px 8px rgba(52,199,89,0.12)' : 'none',
-                                  transition:'all 0.3s cubic-bezier(.4,0,.2,1)'
-                                }}>{order.status}</span>
+                                {(() => {
+                                  // Hiển thị serviceOrderStatus nếu có, nếu không thì hiển thị appointmentStatus
+                                  const displayStatus = order.serviceOrderStatus || order.status;
+                                  const getStatusStyle = (status) => {
+                                    const styles = {
+                                      'PENDING': { bg: '#FEF3C7', color: '#F59E0B', shadow: 'none' },
+                                      'CONFIRMED': { bg: 'var(--primary-bg,#E0F2FE)', color: '#338AF3', shadow: '0 2px 8px rgba(51,138,243,0.12)' },
+                                      'IN_SERVICE': { bg: 'var(--primary-bg,#E0F2FE)', color: '#338AF3', shadow: '0 2px 8px rgba(51,138,243,0.12)' },
+                                      'RECEPTION': { bg: 'var(--info-bg,#E0F2FE)', color: '#0EA5E9', shadow: '0 2px 8px rgba(14,165,233,0.12)' },
+                                      'INSPECTION': { bg: 'var(--primary-bg,#E0F2FE)', color: '#338AF3', shadow: '0 2px 8px rgba(51,138,243,0.12)' },
+                                      'QUOTING': { bg: '#FEF3C7', color: '#F59E0B', shadow: '0 2px 8px rgba(245,158,11,0.12)' },
+                                      'WAITING_FOR_PARTS': { bg: '#FEF3C7', color: '#F59E0B', shadow: '0 2px 8px rgba(245,158,11,0.12)' },
+                                      'IN_PROGRESS': { bg: 'var(--primary-bg,#E0F2FE)', color: '#338AF3', shadow: '0 2px 8px rgba(51,138,243,0.12)' },
+                                      'READY_FOR_INVOICE': { bg: 'var(--success-bg,#D1FADF)', color: '#34c759', shadow: '0 2px 8px rgba(52,199,89,0.12)' },
+                                      'COMPLETED': { bg: 'var(--success-bg,#D1FADF)', color: '#34c759', shadow: '0 2px 8px rgba(52,199,89,0.12)' },
+                                      'CANCELLED': { bg: 'var(--danger-bg,#FEE2E2)', color: '#EF4444', shadow: '0 2px 8px rgba(239,68,68,0.12)' }
+                                    };
+                                    return styles[status] || { bg: '#F3F4F6', color: '#6B7280', shadow: 'none' };
+                                  };
+                                  const getStatusLabel = (status) => {
+                                    const labels = {
+                                      'PENDING': 'Chờ xác nhận',
+                                      'CONFIRMED': 'Đã xác nhận',
+                                      'IN_SERVICE': 'Đang bảo dưỡng',
+                                      'RECEPTION': 'Đã tiếp nhận',
+                                      'INSPECTION': 'Đang kiểm tra',
+                                      'QUOTING': 'Đang báo giá',
+                                      'WAITING_FOR_PARTS': 'Chờ phụ tùng',
+                                      'IN_PROGRESS': 'Đang thực hiện',
+                                      'READY_FOR_INVOICE': 'Sẵn sàng thanh toán',
+                                      'COMPLETED': 'Hoàn thành',
+                                      'CANCELLED': 'Đã hủy'
+                                    };
+                                    return labels[status] || status;
+                                  };
+                                  const style = getStatusStyle(displayStatus);
+                                  return (
+                                    <span className={`status-badge status-${displayStatus.toLowerCase()}`} style={{
+                                      borderRadius:'8px',
+                                      padding:'4px 16px',
+                                      fontWeight:'bold',
+                                      background: style.bg,
+                                      color: style.color,
+                                      boxShadow: style.shadow,
+                                      transition:'all 0.3s cubic-bezier(.4,0,.2,1)'
+                                    }}>
+                                      {getStatusLabel(displayStatus)}
+                                    </span>
+                                  );
+                                })()}
                               </td>
                               <td>
-                                <CustomButton
-                                  className="action-btn"
-                                  icon={<FiEye />}
-                                  size="sm"
-                                  variant="primary"
-                                  style={{
-                                    minWidth:36,
-                                    borderRadius:'12px',
-                                    background:'linear-gradient(90deg,#338AF3 0%,#6B47DC 100%)',
-                                    color:'#fff',
-                                    boxShadow:'0 2px 8px rgba(51,138,243,0.18)',
-                                    transition:'all 0.3s cubic-bezier(.4,0,.2,1)',
-                                    fontWeight:'bold',
-                                    padding:'10px 24px',
-                                    transform:'scale(1)',
-                                  }}
-                                  onMouseEnter={e=>e.currentTarget.style.transform='scale(1.04)'}
-                                  onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
-                                  onClick={() => setSelectedOrder(order) || setShowDetailModal(true)}
-                                >
-                                  Xem chi tiết
-                                </CustomButton>
+                                <div className="d-flex gap-2">
+                                  {/* Hiển thị nút "Theo dõi" khi appointment đã có ServiceOrder */}
+                                  {order.serviceOrderId && (
+                                    <CustomButton
+                                      className="action-btn"
+                                      icon={<FiActivity />}
+                                      size="sm"
+                                      variant="success"
+                                      style={{
+                                        minWidth:36,
+                                        borderRadius:'12px',
+                                        background:'linear-gradient(90deg,#34c759 0%,#28a745 100%)',
+                                        color:'#fff',
+                                        boxShadow:'0 2px 8px rgba(52,199,89,0.18)',
+                                        transition:'all 0.3s cubic-bezier(.4,0,.2,1)',
+                                        fontWeight:'bold',
+                                        padding:'10px 20px',
+                                        transform:'scale(1)',
+                                      }}
+                                      onMouseEnter={e=>e.currentTarget.style.transform='scale(1.04)'}
+                                      onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+                                      onClick={() => navigate(`/customer/order-tracking/${order.serviceOrderId}`)}
+                                    >
+                                      Theo dõi
+                                    </CustomButton>
+                                  )}
+                                  <CustomButton
+                                    className="action-btn"
+                                    icon={<FiEye />}
+                                    size="sm"
+                                    variant="primary"
+                                    style={{
+                                      minWidth:36,
+                                      borderRadius:'12px',
+                                      background:'linear-gradient(90deg,#338AF3 0%,#6B47DC 100%)',
+                                      color:'#fff',
+                                      boxShadow:'0 2px 8px rgba(51,138,243,0.18)',
+                                      transition:'all 0.3s cubic-bezier(.4,0,.2,1)',
+                                      fontWeight:'bold',
+                                      padding:'10px 20px',
+                                      transform:'scale(1)',
+                                    }}
+                                    onMouseEnter={e=>e.currentTarget.style.transform='scale(1.04)'}
+                                    onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+                                    onClick={() => setSelectedOrder(order) || setShowDetailModal(true)}
+                                  >
+                                    Chi tiết
+                                  </CustomButton>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -258,9 +340,6 @@ function History() {
                     </tbody>
                   </Table>
                 </div>
-                <Pagination className="justify-content-center mt-3">
-                  {/* ...pagination logic... */}
-                </Pagination>
               </div>
             ) : (
               <div className="text-center text-muted py-5">

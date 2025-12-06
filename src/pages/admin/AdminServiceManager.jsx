@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
 import CustomAlert from '../../components/common/CustomAlert';
 import CustomModal from '../../components/common/CustomModal';
+import ServiceChecklistModal from '../../components/features/ServiceChecklistModal';
 import {
   FiPlus,
   FiEdit2,
@@ -19,7 +20,8 @@ import {
   FiClock,
   FiInfo,
   FiAlertTriangle,
-  FiActivity
+  FiActivity,
+  FiClipboard
 } from 'react-icons/fi';
 import SearchBar from '../../components/common/SearchBar';
 import serviceService from '../../services/serviceService';
@@ -36,6 +38,7 @@ const AdminServiceManager = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showChecklistModal, setShowChecklistModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
   // Form state
@@ -342,6 +345,11 @@ const AdminServiceManager = () => {
     setShowDeleteModal(true);
   };
 
+  const openChecklistModal = (service) => {
+    setSelectedService(service);
+    setShowChecklistModal(true);
+  };
+
   // Category summary - đếm số dịch vụ theo danh mục
   const categorySummary = categories.map(cat => ({
     ...cat,
@@ -490,6 +498,9 @@ const AdminServiceManager = () => {
                         >
                           {service.isActive !== false ? <FiToggleRight /> : <FiToggleLeft />}
                         </button>
+                        <button className="btn-checklist" onClick={() => openChecklistModal(service)} title="Xem Checklist">
+                          <FiClipboard />
+                        </button>
                         <button className="btn-edit" onClick={() => openEditModal(service)} title="Chỉnh sửa">
                           <FiEdit2 />
                         </button>
@@ -545,6 +556,14 @@ const AdminServiceManager = () => {
           <p>Bạn có chắc chắn muốn xóa dịch vụ <strong>{selectedService?.name}</strong>?</p>
           <p className="warning-text">Hành động này không thể hoàn tác!</p>
         </CustomModal>
+
+        {/* Service Checklist Modal */}
+        <ServiceChecklistModal
+          show={showChecklistModal}
+          onHide={() => { setShowChecklistModal(false); setSelectedService(null); }}
+          service={selectedService}
+          isAdminMode={true}
+        />
         </div>
       </section>
     </AdminLayout>

@@ -296,6 +296,66 @@ class AppointmentService {
       throw error;
     }
   }
+
+  // Lấy danh sách technicians với số công việc đang làm
+  async getTechniciansWithWorkload() {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/technician/available`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.getAuthToken()}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Không thể lấy danh sách kỹ thuật viên.');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Get technicians with workload error:', error);
+      throw error;
+    }
+  }
+
+  // Assign technician cho appointment (kèm ghi chú của cố vấn)
+  async assignTechnician(appointmentId, technicianId, advisorNotes = '') {
+    try {
+      console.log(`Assigning technician ${technicianId} to appointment ${appointmentId}`);
+      
+      const response = await fetch(`${API_BASE_URL}/${appointmentId}/assign-technician`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.getAuthToken()}`,
+        },
+        body: JSON.stringify({ technicianId, advisorNotes }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Assign technician failed:', errorData);
+        
+        if (response.status === 401) {
+          throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
+
+        if (response.status === 403) {
+          throw new Error('Bạn không có quyền phân công kỹ thuật viên.');
+        }
+        
+        throw new Error(errorData.message || 'Không thể phân công kỹ thuật viên. Vui lòng thử lại.');
+      }
+
+      const data = await response.json();
+      console.log('✅ Technician assigned:', data);
+      return data;
+    } catch (error) {
+      console.error('Assign technician error:', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

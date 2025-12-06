@@ -163,8 +163,9 @@ const AdminUserRegister = () => {
 
     setLoading(true);
     try {
-      await authService.register(form);
-      showAlert('success', 'Thêm nhân sự thành công!');
+      // Use registerStaff instead of register to preserve role
+      await authService.registerStaff(form);
+      showAlert('success', '✅ Thêm nhân sự thành công!');
       setShowAddModal(false);
       resetForm();
       fetchAllUsers();
@@ -452,7 +453,7 @@ const AdminUserRegister = () => {
           )}
         </div>
 
-        {/* Add Modal */}
+        {/* Add Modal - Wider size */}
         <CustomModal
           show={showAddModal}
           onHide={() => { setShowAddModal(false); resetForm(); }}
@@ -460,8 +461,9 @@ const AdminUserRegister = () => {
           onConfirm={handleAddUser}
           confirmText="Thêm nhân sự"
           loading={loading}
-          size="lg"
-          dialogClassName="apex-modal"
+          size="xl"
+          dialogClassName="apex-modal apex-modal-wide"
+          centered
         >
           <div className="user-form modern">
             <div className="form-section">

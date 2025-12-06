@@ -1,0 +1,1509 @@
+/* ========================================
+   APEX EV - Parts Approval Premium Design
+   ======================================== */
+
+/* Toast Notification */
+.parts-approval-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  color: white;
+  font-weight: 600;
+  z-index: 9999;
+  animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(12px);
+  max-width: 400px;
+}
+
+.parts-approval-toast.success {
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+}
+
+.parts-approval-toast.error {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Page Container */
+.parts-approval-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 32px;
+}
+
+/* Header Section */
+.parts-approval-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.parts-approval-title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.parts-approval-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(51, 138, 243, 0.35);
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.parts-approval-icon-wrapper svg {
+  font-size: 28px;
+  color: white;
+}
+
+.parts-approval-title {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1F2937 0%, #338AF3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.parts-approval-subtitle {
+  color: #6B7280;
+  font-size: 15px;
+  margin: 4px 0 0 0;
+}
+
+.parts-approval-refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  color: #1F2937;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.parts-approval-refresh-btn:hover {
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(51, 138, 243, 0.3);
+}
+
+.parts-approval-refresh-btn svg {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.parts-approval-refresh-btn:hover svg {
+  transform: rotate(180deg);
+}
+
+/* Stats Grid */
+.parts-approval-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.parts-approval-stat-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.parts-approval-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+.parts-approval-stat-card.pending {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+  border: 1px solid #FED7AA;
+}
+
+.parts-approval-stat-card.urgent {
+  background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+  border: 1px solid #FECACA;
+}
+
+.parts-approval-stat-card.orders {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1px solid #BFDBFE;
+}
+
+.parts-approval-stat-card.total {
+  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+  border: 1px solid #BBF7D0;
+}
+
+.parts-approval-stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.parts-approval-stat-card.pending .parts-approval-stat-icon {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.35);
+}
+
+.parts-approval-stat-card.urgent .parts-approval-stat-icon {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+.parts-approval-stat-card.orders .parts-approval-stat-icon {
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(51, 138, 243, 0.35);
+}
+
+.parts-approval-stat-card.total .parts-approval-stat-icon {
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
+}
+
+.parts-approval-stat-info h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1F2937;
+  margin: 0 0 4px 0;
+}
+
+.parts-approval-stat-info p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Filters Section */
+.parts-approval-filters {
+  background: white;
+  padding: 20px 24px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.parts-approval-search {
+  flex: 1;
+  min-width: 280px;
+  position: relative;
+}
+
+.parts-approval-search svg {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9CA3AF;
+  font-size: 18px;
+}
+
+.parts-approval-search input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background: #F9FAFB;
+}
+
+.parts-approval-search input:focus {
+  outline: none;
+  border-color: #338AF3;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(51, 138, 243, 0.1);
+}
+
+.parts-approval-filter-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.parts-approval-filter-group label {
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+.parts-approval-filter-group select {
+  padding: 12px 40px 12px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  background: #F9FAFB url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 16px center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  min-width: 150px;
+}
+
+.parts-approval-filter-group select:focus {
+  outline: none;
+  border-color: #338AF3;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(51, 138, 243, 0.1);
+}
+
+/* Orders Grid */
+.parts-approval-orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+}
+
+/* Order Card */
+.parts-approval-order-card {
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.parts-approval-order-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #338AF3 0%, #005CF0 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.parts-approval-order-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(51, 138, 243, 0.15);
+  border-color: #338AF3;
+}
+
+.parts-approval-order-card:hover::before {
+  opacity: 1;
+}
+
+.parts-approval-order-card.has-urgent {
+  border-color: #FED7AA;
+}
+
+.parts-approval-order-card.has-urgent::before {
+  background: linear-gradient(90deg, #F97316 0%, #EF4444 100%);
+  opacity: 1;
+}
+
+.parts-approval-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.parts-approval-order-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.parts-approval-order-avatar {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+.parts-approval-order-details h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 4px 0;
+}
+
+.parts-approval-order-details p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.parts-approval-request-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-radius: 10px;
+  font-weight: 700;
+  color: #338AF3;
+  font-size: 14px;
+}
+
+.parts-approval-order-customer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.parts-approval-customer-avatar {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+.parts-approval-customer-info h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0 0 2px 0;
+}
+
+.parts-approval-customer-info p {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.parts-approval-order-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.parts-approval-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #F9FAFB;
+  border-radius: 12px;
+}
+
+.parts-approval-meta-item svg {
+  color: #6B7280;
+  font-size: 16px;
+}
+
+.parts-approval-meta-item span {
+  font-size: 13px;
+  color: #4B5563;
+  font-weight: 500;
+}
+
+.parts-approval-order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 2px dashed #E5E7EB;
+}
+
+.parts-approval-order-urgency {
+  display: flex;
+  gap: 8px;
+}
+
+.parts-approval-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+.parts-approval-view-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(51, 138, 243, 0.4);
+}
+
+/* Urgency Badge */
+.parts-approval-urgency-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.parts-approval-urgency-badge.urgent {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #DC2626;
+}
+
+.parts-approval-urgency-badge.high {
+  background: linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%);
+  color: #EA580C;
+}
+
+.parts-approval-urgency-badge.normal {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+  color: #2563EB;
+}
+
+.parts-approval-urgency-badge.low {
+  background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+  color: #4B5563;
+}
+
+/* Status Badge */
+.parts-approval-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.parts-approval-status-badge.pending {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  color: #B45309;
+}
+
+.parts-approval-status-badge.approved {
+  background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+  color: #15803D;
+}
+
+.parts-approval-status-badge.rejected {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #DC2626;
+}
+
+/* Empty State */
+.parts-approval-empty {
+  text-align: center;
+  padding: 80px 40px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.parts-approval-empty-icon {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 28px;
+  font-size: 48px;
+  color: #22C55E;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+}
+
+.parts-approval-empty h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 12px 0;
+}
+
+.parts-approval-empty p {
+  font-size: 16px;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Loading State */
+.parts-approval-loading {
+  text-align: center;
+  padding: 80px 40px;
+}
+
+.parts-approval-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid #E5E7EB;
+  border-top-color: #338AF3;
+  border-radius: 50%;
+  animation: spinnerRotate 1s linear infinite;
+  margin: 0 auto 24px;
+}
+
+@keyframes spinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
+.parts-approval-loading p {
+  font-size: 16px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* Error State */
+.parts-approval-error {
+  text-align: center;
+  padding: 80px 40px;
+  background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+  border-radius: 24px;
+  border: 2px solid #FECACA;
+}
+
+.parts-approval-error-icon {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 36px;
+  color: #EF4444;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+}
+
+.parts-approval-error h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #DC2626;
+  margin: 0 0 12px 0;
+}
+
+.parts-approval-error p {
+  font-size: 15px;
+  color: #7F1D1D;
+  margin: 0 0 24px 0;
+}
+
+.parts-approval-error button {
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.parts-approval-error button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+}
+
+/* ========================================
+   MODAL STYLES - PREMIUM WIDE DESIGN
+   ======================================== */
+
+/* Modal Overlay */
+.parts-approval-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  animation: overlayFadeIn 0.3s ease;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Order Detail Modal - Extra Wide */
+.parts-approval-modal {
+  background: white;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 950px;
+  max-height: 92vh;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+  animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(40px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Modal Header */
+.parts-approval-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 36px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.parts-approval-modal-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.parts-approval-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.parts-approval-modal-title-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  backdrop-filter: blur(8px);
+}
+
+.parts-approval-modal-title h2 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.parts-approval-modal-title p {
+  font-size: 15px;
+  margin: 4px 0 0 0;
+  opacity: 0.9;
+}
+
+.parts-approval-modal-close {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 1;
+}
+
+.parts-approval-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Modal Body */
+.parts-approval-modal-body {
+  padding: 36px;
+  overflow-y: auto;
+  max-height: calc(92vh - 140px);
+}
+
+/* Custom Scrollbar */
+.parts-approval-modal-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.parts-approval-modal-body::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 10px;
+}
+
+.parts-approval-modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #338AF3 0%, #005CF0 100%);
+  border-radius: 10px;
+}
+
+/* Order Info Section in Modal */
+.parts-approval-order-info-section {
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.parts-approval-order-info-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.parts-approval-order-info-item .info-icon {
+  width: 52px;
+  height: 52px;
+  background: white;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #338AF3;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.15);
+}
+
+.parts-approval-order-info-item .info-content h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.parts-approval-order-info-item .info-content p {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0;
+}
+
+/* Requests List Section */
+.parts-approval-requests-section {
+  margin-top: 8px;
+}
+
+.parts-approval-requests-section h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.parts-approval-requests-section h3 svg {
+  color: #338AF3;
+}
+
+/* Request Item Card */
+.parts-approval-request-item {
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.parts-approval-request-item:hover {
+  border-color: #338AF3;
+  box-shadow: 0 8px 24px rgba(51, 138, 243, 0.12);
+}
+
+.parts-approval-request-item.urgent {
+  border-color: #FECACA;
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+}
+
+.parts-approval-request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.parts-approval-request-part {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.parts-approval-part-icon {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #338AF3;
+}
+
+.parts-approval-part-details h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 6px 0;
+}
+
+.parts-approval-part-details p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.parts-approval-request-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Request Details Grid */
+.parts-approval-request-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.parts-approval-detail-item {
+  background: #F9FAFB;
+  padding: 16px 20px;
+  border-radius: 14px;
+}
+
+.parts-approval-detail-item label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.parts-approval-detail-item span {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.parts-approval-detail-item span.price {
+  color: #338AF3;
+}
+
+.parts-approval-detail-item span.in-stock {
+  color: #22C55E;
+}
+
+.parts-approval-detail-item span.out-stock {
+  color: #EF4444;
+}
+
+/* Technician Notes */
+.parts-approval-notes {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 1px solid #FDE68A;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.parts-approval-notes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #B45309;
+  margin-bottom: 10px;
+}
+
+.parts-approval-notes p {
+  font-size: 16px;
+  color: #92400E;
+  margin: 0;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Request Actions */
+.parts-approval-request-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 2px dashed #E5E7EB;
+}
+
+.parts-approval-approve-btn,
+.parts-approval-reject-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.parts-approval-approve-btn {
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+}
+
+.parts-approval-approve-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.45);
+}
+
+.parts-approval-reject-btn {
+  background: white;
+  color: #EF4444;
+  border: 2px solid #FECACA;
+}
+
+.parts-approval-reject-btn:hover {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+}
+
+/* ========================================
+   CONFIRM MODAL - SMALLER SIZE
+   ======================================== */
+
+.parts-approval-confirm-modal {
+  background: white;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+  animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.parts-approval-confirm-modal .parts-approval-modal-header.approve {
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+}
+
+.parts-approval-confirm-modal .parts-approval-modal-header.reject {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.parts-approval-confirm-content {
+  padding: 36px;
+  text-align: center;
+}
+
+.parts-approval-confirm-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 28px;
+  font-size: 40px;
+}
+
+.parts-approval-confirm-icon.approve {
+  background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+  color: #22C55E;
+}
+
+.parts-approval-confirm-icon.reject {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #EF4444;
+}
+
+.parts-approval-confirm-content h3 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1F2937;
+  margin: 0 0 12px 0;
+}
+
+.parts-approval-confirm-content p {
+  font-size: 16px;
+  color: #6B7280;
+  margin: 0 0 8px 0;
+  line-height: 1.6;
+}
+
+.parts-approval-confirm-part {
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  padding: 20px 24px;
+  border-radius: 16px;
+  margin: 24px 0;
+  border: 1px solid #E5E7EB;
+}
+
+.parts-approval-confirm-part h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.parts-approval-confirm-part p {
+  font-size: 15px;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Confirm Part Details Grid */
+.confirm-part-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirm-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 10px;
+}
+
+.confirm-detail-row .label {
+  font-size: 14px;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirm-detail-row .label svg {
+  color: #9CA3AF;
+}
+
+.confirm-detail-row .value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.confirm-detail-row .value.quantity {
+  font-size: 18px;
+  font-weight: 700;
+  color: #338AF3;
+  background: rgba(51, 138, 243, 0.1);
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.confirm-detail-row .value.stock {
+  color: #10B981;
+}
+
+.confirm-detail-row .value.price {
+  color: #DC2626;
+}
+
+.confirm-detail-row.total {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border: 1px solid #F59E0B;
+  margin-top: 8px;
+}
+
+.confirm-detail-row.total .label {
+  font-weight: 600;
+  color: #92400E;
+}
+
+.confirm-detail-row.total .value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #B45309;
+}
+
+/* KTV Notes in Confirm Modal */
+.parts-approval-ktv-notes {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+  border: 1px solid #93C5FD;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+
+.parts-approval-ktv-notes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E40AF;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.parts-approval-ktv-notes p {
+  font-size: 15px;
+  color: #1E3A8A;
+  margin: 0;
+  line-height: 1.6;
+  font-style: italic;
+  background: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+/* Technician Notes in Request Item */
+.parts-approval-notes.technician-notes {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+  border-color: #93C5FD;
+}
+
+.parts-approval-notes.technician-notes label {
+  color: #1E40AF;
+}
+
+.parts-approval-notes.technician-notes p {
+  color: #1E3A8A;
+}
+
+/* Quantity value highlight */
+.quantity-value {
+  font-weight: 700;
+  color: #338AF3;
+  font-size: 16px;
+  background: rgba(51, 138, 243, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* Total price highlight */
+.price.total {
+  font-weight: 700;
+  color: #DC2626;
+  font-size: 16px;
+}
+
+/* Confirm Notes Input */
+.parts-approval-notes-input {
+  width: 100%;
+  margin: 24px 0;
+}
+
+.parts-approval-notes-input label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #4B5563;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.parts-approval-notes-input textarea {
+  width: 100%;
+  padding: 18px;
+  border: 2px solid #E5E7EB;
+  border-radius: 14px;
+  font-size: 15px;
+  resize: none;
+  transition: all 0.3s ease;
+  min-height: 110px;
+  font-family: inherit;
+}
+
+.parts-approval-notes-input textarea:focus {
+  outline: none;
+  border-color: #338AF3;
+  box-shadow: 0 0 0 4px rgba(51, 138, 243, 0.1);
+}
+
+/* Confirm Actions */
+.parts-approval-confirm-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.parts-approval-confirm-cancel,
+.parts-approval-confirm-submit {
+  flex: 1;
+  padding: 18px 28px;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.parts-approval-confirm-cancel {
+  background: #F3F4F6;
+  color: #4B5563;
+}
+
+.parts-approval-confirm-cancel:hover {
+  background: #E5E7EB;
+}
+
+.parts-approval-confirm-submit.approve {
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+}
+
+.parts-approval-confirm-submit.reject {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+}
+
+.parts-approval-confirm-submit:hover {
+  transform: translateY(-2px);
+}
+
+.parts-approval-confirm-submit.approve:hover {
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.45);
+}
+
+.parts-approval-confirm-submit.reject:hover {
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+}
+
+.parts-approval-confirm-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .parts-approval-page {
+    padding: 20px;
+  }
+
+  .parts-approval-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .parts-approval-title {
+    font-size: 26px;
+  }
+
+  .parts-approval-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .parts-approval-orders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .parts-approval-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 20px 20px 0 0;
+    margin-top: auto;
+  }
+
+  .parts-approval-modal-header {
+    padding: 24px;
+  }
+
+  .parts-approval-modal-body {
+    padding: 24px;
+  }
+
+  .parts-approval-order-info-section {
+    grid-template-columns: 1fr;
+  }
+
+  .parts-approval-request-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .parts-approval-request-actions {
+    flex-direction: column;
+  }
+
+  .parts-approval-approve-btn,
+  .parts-approval-reject-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .parts-approval-confirm-modal {
+    max-width: 100%;
+    margin: 16px;
+  }
+
+  .parts-approval-confirm-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .parts-approval-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .parts-approval-filters {
+    flex-direction: column;
+  }
+
+  .parts-approval-search {
+    min-width: 100%;
+  }
+
+  .parts-approval-filter-group {
+    width: 100%;
+  }
+
+  .parts-approval-filter-group select {
+    flex: 1;
+  }
+
+  .parts-approval-request-details {
+    grid-template-columns: 1fr;
+  }
+
+  .parts-approval-order-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Spin Animation */
+.spin {
+  animation: spinAnimation 1s linear infinite;
+}
+
+@keyframes spinAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

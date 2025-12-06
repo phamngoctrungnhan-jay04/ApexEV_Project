@@ -1,0 +1,170 @@
+/* File: src/components/layout/ManagerSidebar.css */
+/* Sidebar cho Manager - APEX Modern UI */
+
+.manager-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1a1f36 0%, #252d4a 100%);
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+}
+
+.manager-sidebar.glassmorphism {
+  backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(26, 31, 54, 0.95) 0%, rgba(37, 45, 74, 0.95) 100%);
+}
+
+/* Brand */
+.manager-sidebar .sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+}
+
+.manager-sidebar .brand-text {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.manager-sidebar .brand-badge {
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Menu */
+.manager-sidebar .sidebar-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+  overflow-y: auto;
+}
+
+.manager-sidebar .sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+.manager-sidebar .sidebar-link:hover {
+  background: rgba(52, 199, 89, 0.15);
+  color: #fff;
+}
+
+.manager-sidebar .sidebar-link.active {
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+.manager-sidebar .sidebar-link svg {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Logout Button */
+.manager-sidebar .sidebar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 16px;
+  padding: 14px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.manager-sidebar .sidebar-logout:hover {
+  background: #EF4444;
+  color: #fff;
+}
+
+.manager-sidebar .sidebar-logout svg {
+  font-size: 18px;
+}
+
+/* Scrollbar */
+.manager-sidebar .sidebar-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.manager-sidebar .sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.manager-sidebar .sidebar-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .manager-sidebar {
+    width: 70px;
+    padding: 16px 0;
+  }
+
+  .manager-sidebar .sidebar-brand {
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 8px 16px;
+  }
+
+  .manager-sidebar .brand-text {
+    font-size: 16px;
+  }
+
+  .manager-sidebar .brand-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .manager-sidebar .sidebar-link {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .manager-sidebar .sidebar-link span {
+    display: none;
+  }
+
+  .manager-sidebar .sidebar-link svg {
+    font-size: 20px;
+  }
+
+  .manager-sidebar .sidebar-logout span {
+    display: none;
+  }
+}

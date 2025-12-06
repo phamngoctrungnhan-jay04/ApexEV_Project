@@ -4,7 +4,13 @@ import { ROUTES } from './constants/routes';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUserRegister from './pages/admin/AdminUserRegister';
 import AdminServiceManager from './pages/admin/AdminServiceManager';
+import AdminPartsManager from './pages/admin/AdminPartsManager';
 import AdminProfile from './pages/admin/AdminProfile';
+// Manager imports
+import FinanceDashboard from './pages/manager/FinanceDashboard';
+import FinanceInvoices from './pages/manager/FinanceInvoices';
+import ManagerProfile from './pages/manager/ManagerProfile';
+import ManagerLayout from './components/layout/ManagerLayout';
 import './i18n';
 import './styles/Alert.css';
 
@@ -14,22 +20,27 @@ import LoginPage from './pages/auth/LoginPageModern';
 import RegisterPage from './pages/auth/RegisterPageModern';
 import Booking from './pages/customer/Booking';
 import History from './pages/customer/History';
+import OrderTracking from './pages/customer/OrderTracking';
 import Invoices from './pages/customer/Invoices';
 import CustomerProfile from './pages/customer/CustomerProfile';
 import Settings from './pages/customer/Settings';
 import Chat from './pages/customer/Chat';
 import Ratings from './pages/customer/Ratings';
+import OrderDetail from './pages/customer/OrderDetail';
 import TechnicianDashboard from './pages/technician/TechnicianDashboard';
 import JobList from './pages/technician/JobList';
 import MaintenanceChecklist from './pages/technician/MaintenanceChecklist';
 import UploadEvidence from './pages/technician/UploadEvidence';
 import PartsRequest from './pages/technician/PartsRequest';
+import TechnicianProfile from './pages/technician/TechnicianProfile';
 import ComponentDemo from './pages/ComponentDemo';
 import AdvisorDashboard from './pages/advisor/AdvisorDashboard';
 import AdvisorProfile from './pages/advisor/AdvisorProfile';
+import AdvisorAppointments from './pages/advisor/AdvisorAppointments';
+import PartsApproval from './pages/advisor/PartsApproval';
 
 // Layout
-import { CustomerLayout } from './components/layout';
+import { CustomerLayout, TechnicianLayout } from './components/layout';
 import AdminLayout from './components/layout/AdminLayout';
 
 // Protected Route Component
@@ -68,7 +79,16 @@ function AppRoutes() {
       {/* Admin - Đăng ký tài khoản nhân sự */}
       <Route path="/admin/register-user" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminUserRegister /></AdminLayout></ProtectedRoute>} />
       {/* Admin - Quản lý dịch vụ */}
-      <Route path="/admin/services" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminServiceManager /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/services" element={<ProtectedRoute requiredRole="ADMIN"><AdminServiceManager /></ProtectedRoute>} />
+      {/* Admin - Quản lý phụ tùng */}
+      <Route path="/admin/parts" element={<ProtectedRoute requiredRole="ADMIN"><AdminPartsManager /></ProtectedRoute>} />
+      
+      {/* Manager (BUSINESS_MANAGER) - Quản lý Tài chính */}
+      <Route path="/manager/dashboard" element={<ProtectedRoute requiredRole="BUSINESS_MANAGER"><FinanceDashboard /></ProtectedRoute>} />
+      <Route path="/manager/finance" element={<ProtectedRoute requiredRole="BUSINESS_MANAGER"><FinanceDashboard /></ProtectedRoute>} />
+      <Route path="/manager/invoices" element={<ProtectedRoute requiredRole="BUSINESS_MANAGER"><FinanceInvoices /></ProtectedRoute>} />
+      <Route path="/manager/profile" element={<ProtectedRoute requiredRole="BUSINESS_MANAGER"><ManagerProfile /></ProtectedRoute>} />
+      
       <Route path="/demo" element={<ComponentDemo />} />
       
       {/* Homepage route - outside CustomerLayout (after login) */}
@@ -92,6 +112,8 @@ function AppRoutes() {
       >
         <Route path="booking" element={<Booking />} />
         <Route path="history" element={<History />} />
+        <Route path="order-tracking/:orderId" element={<OrderTracking />} />
+        <Route path="order/:orderId" element={<OrderDetail />} />
         <Route path="invoices" element={<Invoices />} />
         <Route path="profile" element={<CustomerProfile />} />
         <Route path="settings" element={<Settings />} />
@@ -104,7 +126,7 @@ function AppRoutes() {
         path="/technician/*" 
         element={
           <ProtectedRoute>
-            <CustomerLayout />
+            <TechnicianLayout />
           </ProtectedRoute>
         }
       >
@@ -113,7 +135,7 @@ function AppRoutes() {
         <Route path="checklist" element={<MaintenanceChecklist />} />
         <Route path="upload-evidence" element={<UploadEvidence />} />
         <Route path="parts-request" element={<PartsRequest />} />
-        {/* TODO: Add more technician routes here */}
+        <Route path="profile" element={<TechnicianProfile />} />
       </Route>
 
       {/* Advisor routes */}
@@ -130,6 +152,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AdvisorProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route 
+        path="/advisor/appointments" 
+        element={
+          <ProtectedRoute>
+            <AdvisorAppointments />
+          </ProtectedRoute>
+        }
+      />
+      <Route 
+        path="/advisor/parts-approval" 
+        element={
+          <ProtectedRoute>
+            <PartsApproval />
           </ProtectedRoute>
         }
       />

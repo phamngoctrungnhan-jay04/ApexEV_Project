@@ -13,15 +13,23 @@ export const ROUTES = {
     BOOKING: '/customer/booking',
     PROFILE: '/customer/profile',
     HISTORY: '/customer/history',
+    ORDER_TRACKING: '/customer/order-tracking/:orderId',
+    ORDER_DETAIL: '/customer/order/:orderId',
     INVOICES: '/customer/invoices',
     CHAT: '/customer/chat',
     RATINGS: '/customer/ratings',
-    SETTINGS: '/customer/settings'
+    SETTINGS: '/customer/settings',
+    VEHICLES: '/customer/vehicles'
   },
   
   // Technician routes
   TECHNICIAN: {
     DASHBOARD: '/technician/dashboard',
+    JOBS: '/technician/jobs',
+    CHECKLIST: '/technician/checklist',
+    PARTS_REQUEST: '/technician/parts-request',
+    UPLOAD_EVIDENCE: '/technician/upload-evidence',
+    PROFILE: '/technician/profile',
     WORK_LIST: '/technician/work-list',
     WORK_DETAIL: '/technician/work-detail/:id',
     DOCUMENTS: '/technician/documents'
@@ -32,18 +40,20 @@ export const ROUTES = {
     DASHBOARD: '/advisor/dashboard',
     PROFILE: '/advisor/profile',
     APPOINTMENTS: '/advisor/appointments',
+    PARTS_APPROVAL: '/advisor/parts-approval',
     ORDERS: '/advisor/orders',
     ORDER_DETAIL: '/advisor/orders/:id',
     CHAT: '/advisor/chat'
   },
   
-  // Manager routes
+  // Manager routes (BUSINESS_MANAGER - Quản lý Tài chính)
   MANAGER: {
     DASHBOARD: '/manager/dashboard',
-    EMPLOYEES: '/manager/employees',
-    SHIFTS: '/manager/shifts',
     FINANCE: '/manager/finance',
-    PARTS: '/manager/parts'
+    INVOICES: '/manager/invoices',
+    OVERDUE: '/manager/overdue',
+    REPORTS: '/manager/reports',
+    PROFILE: '/manager/profile'
   },
   
   // Admin routes
@@ -54,6 +64,7 @@ export const ROUTES = {
     PROFILE: '/admin/profile',
     ROLES: '/admin/roles',
     SERVICES: '/admin/services',
+    PARTS: '/admin/parts',
     CHECKLISTS: '/admin/checklists',
     TEMPLATES: '/admin/templates',
     SETTINGS: '/admin/settings',

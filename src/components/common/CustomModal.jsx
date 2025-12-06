@@ -13,8 +13,12 @@ function CustomModal({
   confirmVariant = 'primary',
   loading = false,
   dialogClassName = '',
+  isDanger = false,
   ...props 
 }) {
+  // Nếu isDanger = true, tự động đổi confirmVariant thành 'danger'
+  const finalConfirmVariant = isDanger ? 'danger' : confirmVariant;
+
   return (
     <Modal show={show} onHide={onHide} size={size} centered dialogClassName={dialogClassName} {...props}>
       {title && (
@@ -32,7 +36,7 @@ function CustomModal({
           </Button>
           {onConfirm && (
             <Button 
-              variant={confirmVariant} 
+              variant={finalConfirmVariant} 
               onClick={onConfirm}
               disabled={loading}
             >

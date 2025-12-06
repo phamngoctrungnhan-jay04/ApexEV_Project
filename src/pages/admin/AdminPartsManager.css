@@ -1,0 +1,822 @@
+/* File: src/pages/admin/AdminPartsManager.css */
+/* Quản lý phụ tùng - APEX Modern UI */
+
+:root {
+  --primary-color: #338AF3;
+  --primary-hover: #005CF0;
+  --success-color: #34c759;
+  --danger-color: #EF4444;
+  --warning-color: #FFA726;
+  --background: #F8FAFC;
+  --text-main: #1F2937;
+  --text-sub: #6B7280;
+  --border-color: #E5E7EB;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(51, 138, 243, 0.15);
+  --shadow-lg: 0 8px 24px rgba(51, 138, 243, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.admin-parts-manager-page {
+  width: 100%;
+  padding: 24px 0;
+}
+
+.admin-parts-manager-page .parts-manager-container {
+  padding: 0;
+  width: 100%;
+}
+
+/* ==================== HEADER ==================== */
+.parts-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0 12px 0;
+  margin: 0;
+}
+
+.parts-manager-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.parts-manager-header .header-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.parts-manager-header .header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(51, 138, 243, 0.1);
+  border-radius: 14px;
+  color: var(--primary-color);
+  font-size: 24px;
+}
+
+.btn-add-part {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+.btn-add-part:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(51, 138, 243, 0.4);
+}
+
+/* ==================== STATS GRID ==================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card .stat-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 22px;
+}
+
+.stat-card.total .stat-icon {
+  background: rgba(51, 138, 243, 0.1);
+  color: var(--primary-color);
+}
+
+.stat-card.danger .stat-icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+.stat-card.warning .stat-icon {
+  background: rgba(255, 167, 38, 0.1);
+  color: var(--warning-color);
+}
+
+.stat-card.success .stat-icon {
+  background: rgba(52, 199, 89, 0.1);
+  color: var(--success-color);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+/* ==================== CATEGORY FILTER ==================== */
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 16px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background: #F3F4F6;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(51, 138, 243, 0.1);
+  color: var(--primary-color);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ==================== TABLE ==================== */
+.parts-table-container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-sub);
+  font-size: 15px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px;
+  color: var(--text-sub);
+}
+
+.empty-state .empty-icon {
+  font-size: 48px;
+  color: #D1D5DB;
+  margin-bottom: 12px;
+}
+
+.parts-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.parts-table thead {
+  background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+}
+
+.parts-table th {
+  padding: 16px 12px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.parts-table tbody tr {
+  transition: background 0.2s;
+}
+
+.parts-table tbody tr:hover {
+  background: rgba(51, 138, 243, 0.04);
+}
+
+.parts-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+/* Part Name Cell */
+.part-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.part-name-cell .name-text {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.part-name-cell .description-hint {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+/* SKU */
+.part-sku code {
+  padding: 4px 8px;
+  background: #F3F4F6;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  color: #6366F1;
+}
+
+/* Category Badge */
+.category-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.category-badge.battery {
+  background: rgba(255, 167, 38, 0.15);
+  color: #C77800;
+}
+
+.category-badge.cooling {
+  background: rgba(41, 182, 246, 0.15);
+  color: #0277BD;
+}
+
+.category-badge.brake {
+  background: rgba(239, 83, 80, 0.15);
+  color: #C62828;
+}
+
+.category-badge.tire {
+  background: rgba(102, 187, 106, 0.15);
+  color: #2E7D32;
+}
+
+.category-badge.motor {
+  background: rgba(171, 71, 188, 0.15);
+  color: #7B1FA2;
+}
+
+.category-badge.inverter {
+  background: rgba(255, 87, 34, 0.15);
+  color: #D84315;
+}
+
+.category-badge.suspension {
+  background: rgba(141, 110, 99, 0.15);
+  color: #5D4037;
+}
+
+.category-badge.hvac {
+  background: rgba(66, 165, 245, 0.15);
+  color: #1565C0;
+}
+
+.category-badge.electrical {
+  background: rgba(255, 235, 59, 0.2);
+  color: #F9A825;
+}
+
+.category-badge.care {
+  background: rgba(38, 198, 218, 0.15);
+  color: #00838F;
+}
+
+.category-badge.emergency {
+  background: rgba(255, 87, 34, 0.15);
+  color: #BF360C;
+}
+
+.category-badge.unknown,
+.category-badge.other {
+  background: #F3F4F6;
+  color: var(--text-sub);
+}
+
+/* Price */
+.part-price {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Stock Value */
+.stock-value {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.stock-value.in-stock {
+  background: rgba(52, 199, 89, 0.1);
+  color: var(--success-color);
+}
+
+.stock-value.medium-stock {
+  background: rgba(255, 167, 38, 0.1);
+  color: var(--warning-color);
+}
+
+.stock-value.low-stock {
+  background: rgba(255, 152, 0, 0.15);
+  color: #E65100;
+}
+
+.stock-value.out-of-stock {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.in-stock {
+  background: rgba(52, 199, 89, 0.1);
+  color: var(--success-color);
+}
+
+.status-badge.medium-stock {
+  background: rgba(255, 167, 38, 0.1);
+  color: var(--warning-color);
+}
+
+.status-badge.low-stock {
+  background: rgba(255, 152, 0, 0.15);
+  color: #E65100;
+}
+
+.status-badge.out-of-stock {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+/* Actions */
+.part-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.part-actions button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.btn-stock {
+  background: rgba(102, 187, 106, 0.1);
+  color: #2E7D32;
+}
+
+.btn-stock:hover {
+  background: rgba(102, 187, 106, 0.2);
+  transform: scale(1.05);
+}
+
+.btn-edit {
+  background: rgba(51, 138, 243, 0.1);
+  color: var(--primary-color);
+}
+
+.btn-edit:hover {
+  background: rgba(51, 138, 243, 0.2);
+  transform: scale(1.05);
+}
+
+.btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.05);
+}
+
+/* ==================== FORM STYLES ==================== */
+.part-form {
+  padding: 8px 0;
+}
+
+.form-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.form-info-card svg {
+  color: var(--primary-color);
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-content .info-title {
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 4px 0;
+}
+
+.info-content .info-text {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin: 0;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.form-group label .required {
+  color: var(--danger-color);
+}
+
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input-wrapper svg {
+  position: absolute;
+  left: 14px;
+  color: var(--text-sub);
+  font-size: 16px;
+  z-index: 1;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--text-main);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(51, 138, 243, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.textarea-wrapper {
+  align-items: flex-start;
+}
+
+.textarea-wrapper svg {
+  top: 14px;
+}
+
+.warning-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--warning-color);
+}
+
+.warning-text.subtle {
+  color: var(--text-sub);
+}
+
+/* ==================== DELETE CONFIRM ==================== */
+.delete-confirm-content {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.delete-confirm-content .warning-icon {
+  font-size: 48px;
+  color: var(--danger-color);
+  margin-bottom: 16px;
+}
+
+.delete-confirm-content .part-name-highlight {
+  font-size: 18px;
+  color: var(--text-main);
+  margin: 12px 0;
+}
+
+.delete-confirm-content .part-sku-info {
+  font-size: 14px;
+  color: var(--text-sub);
+  margin: 8px 0;
+}
+
+.delete-confirm-content .part-sku-info code {
+  padding: 2px 8px;
+  background: #F3F4F6;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.delete-confirm-content .warning-text {
+  justify-content: center;
+  color: var(--danger-color);
+  font-weight: 500;
+}
+
+/* ==================== STOCK MODAL ==================== */
+.stock-form {
+  padding: 8px 0;
+}
+
+.stock-part-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.stock-part-info .part-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(51, 138, 243, 0.1);
+  border-radius: 12px;
+  color: var(--primary-color);
+  font-size: 22px;
+}
+
+.stock-part-info .part-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stock-part-info .part-name {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 16px;
+}
+
+.stock-part-info .current-stock {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.stock-part-info .current-stock strong {
+  color: var(--primary-color);
+  font-size: 15px;
+}
+
+.stock-action-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.action-btn.add.active {
+  background: rgba(52, 199, 89, 0.1);
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.action-btn.subtract.active {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.stock-form .form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.stock-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-main);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stock-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(51, 138, 243, 0.1);
+}
+
+.stock-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 10px;
+  margin-top: 12px;
+  color: var(--danger-color);
+  font-size: 13px;
+}
+
+.stock-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #F8FAFC;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.preview-label {
+  font-size: 14px;
+  color: var(--text-sub);
+}
+
+.preview-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.preview-value.increase {
+  color: var(--success-color);
+}
+
+.preview-value.decrease {
+  color: var(--danger-color);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .parts-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .category-filter {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    flex-shrink: 0;
+  }
+
+  .parts-table-container {
+    overflow-x: auto;
+  }
+
+  .parts-table {
+    min-width: 900px;
+  }
+
+  .stock-action-toggle {
+    flex-direction: column;
+  }
+}

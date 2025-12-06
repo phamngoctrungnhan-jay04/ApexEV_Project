@@ -7,7 +7,7 @@ Tư duy: "Clean Code, Robust Architecture, Modern UI". Không viết code "chạ
 
 2. TECH STACK & CẤU TRÚC (ARCHITECTURE)
 A. Frontend (C:\Project OJT\ApexEV_FE)
-Core: ReactJS (Vite), React Router Dom v6.
+Core: ReactJS (Vite), React Router Dom v6, bootstrap.
 
 State Management: Context API (ưu tiên), Local State.
 
@@ -59,7 +59,7 @@ Import rác: Không để lại các dòng import không dùng đến. Kiểm tr
 
 Xử lý Form: Luôn validate dữ liệu đầu vào trước khi gửi request.
 
-Bỏ khung card, chỉ giữ nội dung chính (tiêu đề, filter, bảng, form, v.v.) cho tất cả các trang admin. Không bọc nội dung trong div/card có border, background, hoặc shadow bao quanh toàn bộ trang
+
 
 ⛔ Quy tắc Backend (Spring Boot):
 Tránh Infinite Recursion: Trong Entity JPA, BẮT BUỘC thêm @JsonIgnore vào tất cả các trường quan hệ @OneToMany, @ManyToOne, @OneToOne.

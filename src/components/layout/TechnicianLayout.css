@@ -1,0 +1,40 @@
+/* File: src/components/layout/TechnicianLayout.css */
+/* Layout cho Kỹ thuật viên - APEX Modern UI */
+
+.technician-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #F8FAFC;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.technician-main-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 32px 40px;
+  min-height: 100vh;
+  width: calc(100% - 280px);
+  transition: all 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .technician-main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding: 24px 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .technician-layout {
+    flex-direction: column;
+  }
+
+  .technician-main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px 16px;
+  }
+}

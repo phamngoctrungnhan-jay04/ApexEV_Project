@@ -7,7 +7,8 @@
 
 .admin-main-content {
   flex: 1;
-  margin-left: 100px;
-  padding: 32px;
+  margin-left: var(--sidebar-width); /* Đẩy nội dung sang phải, không bị che */
+  padding: 0;
   background: #F8FAFC;
+  min-width: 0; /* Prevent overflow */
 }

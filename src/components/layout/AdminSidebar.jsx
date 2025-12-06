@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiHome, FiUserPlus, FiUsers, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiUserPlus, FiUsers, FiUser, FiSettings, FiLogOut, FiPackage } from 'react-icons/fi';
 import './AdminSidebar.css';
 
 const adminLinks = [
@@ -11,6 +11,7 @@ const adminLinks = [
   { to: '/admin/profile', label: 'Hồ sơ cá nhân', icon: <FiUser /> },
   { to: '/admin/register-user', label: 'Quản lý tài khoản', icon: <FiUsers /> },
   { to: '/admin/services', label: 'Quản lý dịch vụ', icon: <FiSettings /> },
+  { to: '/admin/parts', label: 'Quản lý phụ tùng', icon: <FiPackage /> },
 ];
 
 const AdminSidebar = () => {

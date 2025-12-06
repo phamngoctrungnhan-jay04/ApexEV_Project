@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Container, Row, Col, Card, Button, Modal, Form, Alert, Badge, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Modal, Form, Alert, Badge, ProgressBar, Toast, ToastContainer } from 'react-bootstrap';
 import { FiUpload, FiTrash2, FiEye, FiImage, FiVideo, FiCheckCircle, FiAlertCircle, FiX } from 'react-icons/fi';
+import { uploadTechnicianFile, deleteFile, validateFile } from '../../services/uploadService';
 import './UploadEvidence.css';
 
 const UploadEvidence = () => {
@@ -18,6 +19,10 @@ const UploadEvidence = () => {
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
   const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/mov', 'video/avi', 'video/quicktime'];
   const ALL_ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
+
+  const showToast = (message, variant = 'success') => {
+    setToast({ show: true, message, variant });
+  };
 
   // Handle drag events
   const handleDrag = (e) => {
@@ -83,44 +88,66 @@ const UploadEvidence = () => {
 
     // Show errors if any
     if (errors.length > 0) {
-      alert(errors.join('\n'));
+      showToast(errors.join('\n'), 'danger');
     }
 
     // Upload valid files
     if (validFiles.length > 0) {
       setFiles(prev => [...prev, ...validFiles]);
       validFiles.forEach(fileObj => {
-        simulateUpload(fileObj.id);
+        uploadToS3(fileObj);
       });
     }
   };
 
-  // Simulate file upload (AWS S3 placeholder)
-  const simulateUpload = (fileId) => {
-    const file = files.find(f => f.id === fileId) || files[files.length - 1];
-    
+  // Upload file to AWS S3
+  const uploadToS3 = async (fileObj) => {
+    // Update status to uploading
     setFiles(prev => prev.map(f => 
-      f.id === fileId ? { ...f, status: 'uploading' } : f
+      f.id === fileObj.id ? { ...f, status: 'uploading' } : f
     ));
+    setUploadProgress(prev => ({ ...prev, [fileObj.id]: 10 }));
 
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 30;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        setFiles(prev => prev.map(f => 
-          f.id === fileId ? { ...f, status: 'uploaded' } : f
-        ));
+    try {
+      // Simulate progress updates
+      setUploadProgress(prev => ({ ...prev, [fileObj.id]: 30 }));
+      
+      // Upload to S3
+      const response = await uploadTechnicianFile(fileObj.file, 'evidence');
+      
+      setUploadProgress(prev => ({ ...prev, [fileObj.id]: 80 }));
+      
+      // Update file with S3 key
+      setFiles(prev => prev.map(f => 
+        f.id === fileObj.id 
+          ? { ...f, status: 'uploaded', s3Key: response.s3Key, mediaType: response.mediaType } 
+          : f
+      ));
+      
+      setUploadProgress(prev => ({ ...prev, [fileObj.id]: 100 }));
+      
+      // Remove progress after a short delay
+      setTimeout(() => {
         setUploadProgress(prev => {
           const newProgress = { ...prev };
-          delete newProgress[fileId];
+          delete newProgress[fileObj.id];
           return newProgress;
         });
-      } else {
-        setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
-      }
-    }, 500);
+      }, 500);
+      
+      showToast(`✅ Upload thành công: ${fileObj.name}`, 'success');
+    } catch (error) {
+      console.error('Upload error:', error);
+      setFiles(prev => prev.map(f => 
+        f.id === fileObj.id ? { ...f, status: 'error' } : f
+      ));
+      setUploadProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[fileObj.id];
+        return newProgress;
+      });
+      showToast(`❌ Upload thất bại: ${fileObj.name}`, 'danger');
+    }
   };
 
   // Delete file
@@ -129,8 +156,22 @@ const UploadEvidence = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (fileToDelete) {
+      const fileToRemove = files.find(f => f.id === fileToDelete);
+      
+      try {
+        // Nếu file đã upload lên S3, xóa trên S3
+        if (fileToRemove?.s3Key) {
+          await deleteS3File(fileToRemove.s3Key);
+          showToast('✅ Đã xóa file thành công', 'success');
+        }
+      } catch (error) {
+        console.error('Error deleting from S3:', error);
+        showToast('⚠️ Không thể xóa file trên S3', 'warning');
+      }
+
+      // Xóa khỏi state local
       setFiles(prev => {
         const file = prev.find(f => f.id === fileToDelete);
         if (file && file.preview) {
@@ -234,10 +275,10 @@ const UploadEvidence = () => {
               </Alert>
 
               {/* AWS S3 Info */}
-              <Alert variant="secondary" className="mt-2">
+              <Alert variant="success" className="mt-2">
                 <small>
-                  <strong>📦 Storage:</strong> AWS S3 (Placeholder)<br />
-                  <em>Tệp sẽ được lưu trữ an toàn trên Amazon S3</em>
+                  <strong>📦 Storage:</strong> AWS S3<br />
+                  <em>Tệp được lưu trữ an toàn trên Amazon S3</em>
                 </small>
               </Alert>
             </Card.Body>
@@ -431,6 +472,24 @@ const UploadEvidence = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Toast Notification */}
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+        <Toast 
+          show={toast.show} 
+          onClose={() => setToast({ ...toast, show: false })}
+          delay={3000}
+          autohide
+          bg={toast.variant}
+        >
+          <Toast.Header>
+            <strong className="me-auto">Thông báo</strong>
+          </Toast.Header>
+          <Toast.Body className={toast.variant === 'success' || toast.variant === 'danger' ? 'text-white' : ''}>
+            {toast.message}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   );
 };

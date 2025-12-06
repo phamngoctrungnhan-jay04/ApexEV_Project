@@ -1,0 +1,213 @@
+/* File: src/components/layout/TechnicianSidebar.css */
+/* Sidebar cho Kỹ thuật viên - APEX Modern UI */
+
+.technician-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 280px;
+  background: linear-gradient(180deg, #ffffff 0%, #F8FAFC 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(229, 231, 235, 0.5);
+  box-shadow: 0 8px 32px rgba(51, 138, 243, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+/* Brand */
+.technician-sidebar .sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px 28px 24px;
+  border-bottom: 2px solid #E5E7EB;
+  margin-bottom: 24px;
+}
+
+.technician-sidebar .brand-text {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.technician-sidebar .brand-badge {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+/* Menu */
+.technician-sidebar .sidebar-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+  overflow-y: auto;
+}
+
+.technician-sidebar .sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  color: #6B7280;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.technician-sidebar .sidebar-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #338AF3 0%, #005CF0 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 0 4px 4px 0;
+}
+
+.technician-sidebar .sidebar-link:hover {
+  background: rgba(51, 138, 243, 0.08);
+  color: #338AF3;
+  transform: translateX(4px);
+}
+
+.technician-sidebar .sidebar-link.active {
+  background: linear-gradient(135deg, rgba(51, 138, 243, 0.12) 0%, rgba(51, 138, 243, 0.08) 100%);
+  color: #338AF3;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.15);
+}
+
+.technician-sidebar .sidebar-link.active::before {
+  opacity: 1;
+}
+
+.technician-sidebar .sidebar-link svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* Logout Button */
+.technician-sidebar .sidebar-logout {
+  margin: 24px 16px 0;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.technician-sidebar .sidebar-logout:hover {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+  transform: translateY(-2px);
+}
+
+.technician-sidebar .sidebar-logout:active {
+  transform: translateY(0);
+}
+
+.technician-sidebar .sidebar-logout svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Scrollbar */
+.technician-sidebar .sidebar-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.technician-sidebar .sidebar-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.technician-sidebar .sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(51, 138, 243, 0.2);
+  border-radius: 10px;
+}
+
+.technician-sidebar .sidebar-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(51, 138, 243, 0.35);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .technician-sidebar {
+    width: 240px;
+  }
+
+  .technician-sidebar .sidebar-brand {
+    padding: 0 20px 24px 20px;
+  }
+
+  .technician-sidebar .sidebar-menu {
+    padding: 0 12px;
+  }
+
+  .technician-sidebar .sidebar-link {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .technician-sidebar .brand-text {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .technician-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  }
+
+  .technician-sidebar .sidebar-menu {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 16px 16px;
+  }
+
+  .technician-sidebar .sidebar-link {
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+
+  .technician-sidebar .sidebar-logout {
+    margin: 16px 16px 0;
+  }
+}

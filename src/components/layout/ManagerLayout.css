@@ -1,0 +1,33 @@
+/* File: src/components/layout/ManagerLayout.css */
+/* Layout cho Manager - APEX Modern UI */
+
+.manager-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #F8FAFC;
+}
+
+.manager-main-content {
+  flex: 1;
+  margin-left: 220px;
+  padding: 24px 32px;
+  min-height: 100vh;
+  background: #F8FAFC;
+  overflow-x: hidden;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .manager-main-content {
+    margin-left: 70px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .manager-main-content {
+    margin-left: 0;
+    padding: 12px;
+    padding-bottom: 80px;
+  }
+}

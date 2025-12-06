@@ -1,12 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FiCalendar, FiClipboard, FiUser, FiLogOut, FiHome } from 'react-icons/fi';
+import { FiCalendar, FiClipboard, FiUser, FiLogOut, FiHome, FiPackage } from 'react-icons/fi';
 import './AdvisorSidebar.css';
 
 const advisorMenu = [
   { label: 'Dashboard', icon: <FiHome />, path: '/advisor/dashboard' },
-  { label: 'Lịch hẹn', icon: <FiCalendar />, path: '/advisor/appointments' },
-  { label: 'Đơn hàng', icon: <FiClipboard />, path: '/advisor/orders' },
   { label: 'Hồ sơ', icon: <FiUser />, path: '/advisor/profile' },
+  { label: 'Lịch hẹn', icon: <FiCalendar />, path: '/advisor/appointments' },
+  { label: 'Duyệt phụ tùng', icon: <FiPackage />, path: '/advisor/parts-approval' },
+  { label: 'Đơn hàng', icon: <FiClipboard />, path: '/advisor/orders' },
+
 ];
 
 function AdvisorSidebar({ onLogout }) {

@@ -32,6 +32,7 @@ const LoginPageModern = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    console.log('🔵 [LoginPageModern] handleSubmit called - START');
     
     if (!email || !password) {
       setError(t('common.pleaseEnterAllFields') || 'Vui lòng nhập đầy đủ thông tin');
@@ -42,7 +43,10 @@ const LoginPageModern = () => {
     
     try {
       // Call real API
+      console.log('🔵 [LoginPageModern] Calling authService.login...');
       const response = await authService.login(email, password);
+      console.log('🔵 [LoginPageModern] authService.login returned:', response);
+      console.log('🔵 [LoginPageModern] response.role =', response.role);
       
       // Login successful - authService already saved tokens to localStorage
       const user = {
@@ -56,13 +60,22 @@ const LoginPageModern = () => {
       login(user);
       
       // Navigate based on role
+      console.log('🚀 Navigating user with role:', response.role);
+      
       if (response.role === 'CUSTOMER') {
+        console.log('🔵 [LoginPageModern] → Navigating to /Homepage (CUSTOMER)');
         navigate('/Homepage');
       } else if (response.role === 'ADMIN') {
+        console.log('🔵 [LoginPageModern] → Navigating to /admin/dashboard (ADMIN)');
         navigate('/admin/dashboard');
       } else if (response.role === 'SERVICE_ADVISOR') {
+        console.log('🔵 [LoginPageModern] → Navigating to /advisor/dashboard (SERVICE_ADVISOR)');
         navigate('/advisor/dashboard');
+      } else if (response.role === 'TECHNICIAN') {
+        console.log('🔵 [LoginPageModern] → Navigating to /technician/dashboard (TECHNICIAN)');
+        navigate('/technician/dashboard');
       } else {
+        console.warn('⚠️ Unknown role, defaulting to Homepage:', response.role);
         navigate('/Homepage');
       }
     } catch (err) {

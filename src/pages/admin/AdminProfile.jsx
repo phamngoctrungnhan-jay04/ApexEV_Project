@@ -515,6 +515,7 @@ const AdminProfile = () => {
   return (
     <AdminLayout>
       <section className="admin-profile-page">
+        <div className="profile-page-container">
         <div className="profile-hero">
           <div className="hero-gradient"></div>
           <div className="hero-pattern layer-one"></div>
@@ -839,6 +840,7 @@ const AdminProfile = () => {
               </article>
             </main>
           </div>
+        </div>
         </div>
       </section>
     </AdminLayout>

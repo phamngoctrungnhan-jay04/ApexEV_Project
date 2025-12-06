@@ -1,32 +1,113 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Form, InputGroup, Table, Modal, Badge, Alert } from 'react-bootstrap';
-import { FiSearch, FiPlus, FiTrash2, FiSend, FiPackage, FiAlertCircle, FiCheck } from 'react-icons/fi';
-import { parts } from '../../mockData';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Button, Form, InputGroup, Table, Modal, Badge, Toast, ToastContainer, Spinner, Alert } from 'react-bootstrap';
+import { FiSearch, FiPlus, FiTrash2, FiSend, FiPackage, FiAlertCircle, FiCheck, FiInfo, FiClock, FiX, FiList, FiRepeat, FiTool, FiImage } from 'react-icons/fi';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { getAllParts, searchParts, createPartRequest, getMyPartRequests, cancelPartRequest } from '../../services/partService';
 import './PartsRequest.css';
 
 const PartsRequest = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const orderId = searchParams.get('orderId');
+
+  // State
+  const [parts, setParts] = useState([]);
+  const [myRequests, setMyRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedParts, setSelectedParts] = useState([]);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [requestNote, setRequestNote] = useState('');
-  const [urgencyLevel, setUrgencyLevel] = useState('normal');
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [urgencyLevel, setUrgencyLevel] = useState('NORMAL');
+  const [replacementItems, setReplacementItems] = useState([]); // Items được đánh dấu thay thế từ checklist
+  
+  // Loading states
+  const [loadingParts, setLoadingParts] = useState(true);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Toast state
+  const [toast, setToast] = useState({ show: false, message: '', variant: 'success' });
 
-  // Get unique categories from parts
-  const categories = ['all', ...new Set(parts.map(part => part.category))];
+  // Load parts and replacement items on mount
+  useEffect(() => {
+    loadParts();
+    loadMyRequests();
+    loadReplacementItems();
+  }, []);
 
-  // Filter parts based on search and category
-  const filteredParts = parts.filter(part => {
-    const matchSearch = searchTerm === '' || 
-      part.nameVi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      part.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      part.partNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchCategory = selectedCategory === 'all' || part.category === selectedCategory;
-    
-    return matchSearch && matchCategory;
-  });
+  // Load replacement items từ localStorage
+  const loadReplacementItems = () => {
+    try {
+      const saved = localStorage.getItem('replacementItems');
+      if (saved) {
+        const items = JSON.parse(saved);
+        setReplacementItems(items);
+        // Không xóa localStorage ngay để user có thể quay lại trang
+      }
+    } catch (error) {
+      console.error('Load replacement items error:', error);
+    }
+  };
+
+  // Xóa một replacement item
+  const handleRemoveReplacementItem = (itemId) => {
+    const updated = replacementItems.filter(item => item.itemId !== itemId);
+    setReplacementItems(updated);
+    localStorage.setItem('replacementItems', JSON.stringify(updated));
+  };
+
+  // Xóa tất cả replacement items
+  const handleClearReplacementItems = () => {
+    setReplacementItems([]);
+    localStorage.removeItem('replacementItems');
+  };
+
+  const loadParts = async () => {
+    try {
+      setLoadingParts(true);
+      const data = await getAllParts();
+      setParts(data);
+    } catch (error) {
+      console.error('Load parts error:', error);
+      showToast('Không thể tải danh sách phụ tùng', 'danger');
+    } finally {
+      setLoadingParts(false);
+    }
+  };
+
+  const loadMyRequests = async () => {
+    try {
+      setLoadingRequests(true);
+      const data = await getMyPartRequests();
+      setMyRequests(data);
+    } catch (error) {
+      console.error('Load requests error:', error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      loadParts();
+      return;
+    }
+    try {
+      setLoadingParts(true);
+      const data = await searchParts(searchTerm);
+      setParts(data);
+    } catch (error) {
+      console.error('Search error:', error);
+      showToast('Lỗi tìm kiếm', 'danger');
+    } finally {
+      setLoadingParts(false);
+    }
+  };
+
+  const showToast = (message, variant = 'success') => {
+    setToast({ show: true, message, variant });
+  };
 
   // Check if part is already added
   const isPartAdded = (partId) => {
@@ -69,89 +150,162 @@ const PartsRequest = () => {
   // Calculate total cost
   const calculateTotalCost = () => {
     return selectedParts.reduce((total, part) => 
-      total + (part.price * part.requestedQuantity), 0
+      total + (parseFloat(part.price) * part.requestedQuantity), 0
     );
   };
 
   // Handle send request
-  const handleSendRequest = () => {
+  const handleSendRequest = async () => {
     // Validate
     if (selectedParts.length === 0) {
-      alert('Vui lòng chọn ít nhất một phụ tùng');
+      showToast('Vui lòng chọn ít nhất một phụ tùng', 'warning');
+      return;
+    }
+
+    if (!orderId) {
+      showToast('Vui lòng chọn đơn hàng trước khi yêu cầu phụ tùng', 'warning');
       return;
     }
 
     const hasInvalidQuantity = selectedParts.some(p => p.requestedQuantity <= 0);
     if (hasInvalidQuantity) {
-      alert('Vui lòng nhập số lượng hợp lệ cho tất cả phụ tùng');
+      showToast('Vui lòng nhập số lượng hợp lệ cho tất cả phụ tùng', 'warning');
       return;
     }
 
-    // Show success
-    console.log('Parts Request:', {
-      parts: selectedParts,
-      note: requestNote,
-      urgency: urgencyLevel,
-      totalCost: calculateTotalCost(),
-      requestDate: new Date().toISOString()
-    });
+    setSubmitting(true);
+    try {
+      // Gửi từng request
+      for (const part of selectedParts) {
+        const combinedNotes = part.note 
+          ? `${requestNote ? requestNote + ' | ' : ''}${part.note}` 
+          : requestNote;
+        
+        await createPartRequest(
+          parseInt(orderId),
+          part.id,
+          part.requestedQuantity,
+          urgencyLevel,
+          combinedNotes || null
+        );
+      }
 
-    setShowSendModal(false);
-    setShowSuccessAlert(true);
-    
-    // Reset form
-    setTimeout(() => {
+      showToast(`Đã gửi ${selectedParts.length} yêu cầu phụ tùng thành công!`, 'success');
+      setShowSendModal(false);
+      
+      // Reset form
       setSelectedParts([]);
       setRequestNote('');
-      setUrgencyLevel('normal');
-      setShowSuccessAlert(false);
-    }, 3000);
+      setUrgencyLevel('NORMAL');
+      
+      // Reload requests
+      loadMyRequests();
+    } catch (error) {
+      console.error('Send request error:', error);
+      showToast(error.response?.data?.message || 'Không thể gửi yêu cầu', 'danger');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Get category display name
-  const getCategoryName = (category) => {
-    const categoryNames = {
-      'all': 'Tất cả',
-      'battery': 'Pin',
-      'motor': 'Động cơ',
-      'brake': 'Phanh',
-      'suspension': 'Giảm xóc',
-      'electrical': 'Điện',
-      'tire': 'Lốp',
-      'filter': 'Lọc',
-      'fluid': 'Dầu',
-      'interior': 'Nội thất',
-      'exterior': 'Ngoại thất',
-      'hvac': 'Điều hòa',
-      'lighting': 'Đèn'
-    };
-    return categoryNames[category] || category;
+  // Handle cancel request
+  const handleCancelRequest = async (requestId) => {
+    if (!window.confirm('Bạn có chắc muốn hủy yêu cầu này?')) return;
+
+    try {
+      await cancelPartRequest(requestId);
+      showToast('Đã hủy yêu cầu', 'success');
+      loadMyRequests();
+    } catch (error) {
+      console.error('Cancel request error:', error);
+      showToast(error.response?.data?.message || 'Không thể hủy yêu cầu', 'danger');
+    }
   };
 
   // Get urgency badge
   const getUrgencyBadge = (urgency) => {
     const badges = {
-      'urgent': { bg: 'danger', text: 'Khẩn cấp' },
-      'high': { bg: 'warning', text: 'Cao' },
-      'normal': { bg: 'info', text: 'Bình thường' },
-      'low': { bg: 'secondary', text: 'Thấp' }
+      'URGENT': { bg: 'danger', text: 'Khẩn cấp' },
+      'HIGH': { bg: 'warning', text: 'Cao' },
+      'NORMAL': { bg: 'info', text: 'Bình thường' },
+      'LOW': { bg: 'secondary', text: 'Thấp' }
     };
-    return badges[urgency] || badges.normal;
+    return badges[urgency] || badges.NORMAL;
+  };
+
+  // Get status badge
+  const getStatusBadge = (status) => {
+    const badges = {
+      'PENDING': { bg: 'warning', text: 'Chờ duyệt', icon: <FiClock className="me-1" /> },
+      'APPROVED': { bg: 'success', text: 'Đã duyệt', icon: <FiCheck className="me-1" /> },
+      'REJECTED': { bg: 'danger', text: 'Từ chối', icon: <FiX className="me-1" /> },
+      'FULFILLED': { bg: 'primary', text: 'Đã cấp', icon: <FiPackage className="me-1" /> },
+      'CANCELLED': { bg: 'secondary', text: 'Đã hủy', icon: <FiX className="me-1" /> }
+    };
+    return badges[status] || badges.PENDING;
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
     <Container fluid className="parts-request-page">
+      {/* Toast Notifications */}
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+        <Toast 
+          show={toast.show} 
+          onClose={() => setToast({ ...toast, show: false })} 
+          delay={3000} 
+          autohide
+          bg={toast.variant}
+        >
+          <Toast.Header closeButton>
+            <strong className="me-auto">
+              {toast.variant === 'success' ? <FiCheck className="me-2" /> : <FiAlertCircle className="me-2" />}
+              Thông báo
+            </strong>
+          </Toast.Header>
+          <Toast.Body className={toast.variant === 'danger' || toast.variant === 'success' ? 'text-white' : ''}>
+            {toast.message}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       {/* Header */}
       <div className="page-header">
         <div>
-          <h2>Tạo Yêu Cầu Phụ Tùng</h2>
-          <p className="text-muted">Tìm kiếm và yêu cầu phụ tùng cần thiết cho quá trình bảo dưỡng</p>
+          <h2>Yêu Cầu Phụ Tùng</h2>
+          <p className="text-muted">
+            {orderId ? `Đơn hàng #${orderId} - ` : ''}
+            Tìm kiếm và yêu cầu phụ tùng cần thiết
+          </p>
         </div>
         <div className="header-actions">
           <Button 
+            variant="outline-primary" 
+            className="me-2"
+            onClick={() => setShowHistoryModal(true)}
+          >
+            <FiList className="me-2" />
+            Lịch sử ({myRequests.length})
+          </Button>
+          <Button 
             variant="primary" 
             size="lg"
-            disabled={selectedParts.length === 0}
+            disabled={selectedParts.length === 0 || !orderId}
             onClick={() => setShowSendModal(true)}
           >
             <FiSend className="me-2" />
@@ -160,12 +314,94 @@ const PartsRequest = () => {
         </div>
       </div>
 
-      {/* Success Alert */}
-      {showSuccessAlert && (
-        <Alert variant="success" className="success-alert" dismissible onClose={() => setShowSuccessAlert(false)}>
-          <FiCheck className="me-2" />
-          <strong>Thành công!</strong> Yêu cầu phụ tùng đã được gửi đến cố vấn dịch vụ.
-        </Alert>
+      {/* Warning if no orderId */}
+      {!orderId && (
+        <div className="alert alert-warning mb-4">
+          <FiAlertCircle className="me-2" />
+          <strong>Lưu ý:</strong> Vui lòng chọn đơn hàng từ danh sách công việc trước khi yêu cầu phụ tùng.
+          <Button 
+            variant="link" 
+            className="p-0 ms-2"
+            onClick={() => navigate('/technician/jobs')}
+          >
+            Quay lại danh sách công việc
+          </Button>
+        </div>
+      )}
+
+      {/* Replacement Items Section - Các mục cần thay thế từ checklist */}
+      {replacementItems.length > 0 && (
+        <Card className="replacement-items-card mb-4">
+          <Card.Header className="d-flex justify-content-between align-items-center">
+            <div className="d-flex align-items-center">
+              <FiRepeat className="me-2 text-primary" />
+              <strong>Các hạng mục cần thay thế ({replacementItems.length})</strong>
+            </div>
+            <Button 
+              variant="outline-danger" 
+              size="sm"
+              onClick={handleClearReplacementItems}
+            >
+              <FiTrash2 className="me-1" />
+              Xóa tất cả
+            </Button>
+          </Card.Header>
+          <Card.Body>
+            <Alert variant="info" className="mb-3">
+              <FiInfo className="me-2" />
+              Đây là các hạng mục được đánh dấu <strong>"Thay thế"</strong> trong checklist. 
+              Hãy tìm kiếm phụ tùng phù hợp để thêm vào yêu cầu.
+            </Alert>
+            <div className="replacement-items-list">
+              {replacementItems.map((item, index) => (
+                <div key={item.itemId || index} className="replacement-item">
+                  <div className="replacement-item-icon">
+                    <FiTool />
+                  </div>
+                  <div className="replacement-item-info">
+                    <div className="replacement-item-name">{item.itemName}</div>
+                    <div className="replacement-item-service">
+                      <Badge bg="secondary">{item.serviceName}</Badge>
+                    </div>
+                    {item.notes && (
+                      <div className="replacement-item-notes">
+                        <FiInfo className="me-1" />
+                        <span className="notes-label">Ghi chú KTV:</span> {item.notes}
+                      </div>
+                    )}
+                    {/* Hiển thị hình ảnh của KTV */}
+                    {item.images && item.images.length > 0 && (
+                      <div className="replacement-item-images">
+                        <div className="images-header">
+                          <FiImage className="me-1" />
+                          <span className="images-label">Hình ảnh KTV ({item.images.length}):</span>
+                        </div>
+                        <div className="images-gallery">
+                          {item.images.map((img, imgIndex) => (
+                            <div key={imgIndex} className="image-thumb">
+                              <img 
+                                src={img.url} 
+                                alt={img.name || `Ảnh ${imgIndex + 1}`}
+                                onClick={() => window.open(img.url, '_blank')}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Button 
+                    variant="outline-danger" 
+                    size="sm"
+                    onClick={() => handleRemoveReplacementItem(item.itemId)}
+                  >
+                    <FiX />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </Card.Body>
+        </Card>
       )}
 
       <Row>
@@ -182,44 +418,37 @@ const PartsRequest = () => {
                 </InputGroup.Text>
                 <Form.Control
                   type="text"
-                  placeholder="Tìm theo tên phụ tùng, mã phụ tùng..."
+                  placeholder="Tìm theo tên phụ tùng, mã SKU..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
+                <Button variant="primary" onClick={handleSearch}>
+                  Tìm kiếm
+                </Button>
               </InputGroup>
-
-              {/* Category Filter */}
-              <div className="category-filters mb-3">
-                {categories.map(cat => (
-                  <Badge
-                    key={cat}
-                    bg={selectedCategory === cat ? 'primary' : 'light'}
-                    text={selectedCategory === cat ? 'white' : 'dark'}
-                    className="category-badge"
-                    onClick={() => setSelectedCategory(cat)}
-                  >
-                    {getCategoryName(cat)}
-                  </Badge>
-                ))}
-              </div>
 
               {/* Parts List */}
               <div className="parts-list">
-                {filteredParts.length === 0 ? (
+                {loadingParts ? (
+                  <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                    <p className="text-muted mt-2">Đang tải danh sách phụ tùng...</p>
+                  </div>
+                ) : parts.length === 0 ? (
                   <div className="empty-state">
                     <FiPackage size={48} className="text-muted mb-3" />
                     <p className="text-muted">Không tìm thấy phụ tùng</p>
                   </div>
                 ) : (
                   <div className="parts-grid">
-                    {filteredParts.map(part => (
+                    {parts.map(part => (
                       <Card key={part.id} className="part-card">
                         <Card.Body>
                           <div className="d-flex justify-content-between align-items-start mb-2">
                             <div className="flex-grow-1">
-                              <h6 className="mb-1">{part.nameVi}</h6>
-                              <p className="text-muted small mb-1">{part.nameEn}</p>
-                              <Badge bg="secondary" className="mb-2">{part.partNumber}</Badge>
+                              <h6 className="mb-1">{part.partName}</h6>
+                              <Badge bg="secondary" className="mb-2">{part.sku || 'N/A'}</Badge>
                             </div>
                             <Button
                               variant={isPartAdded(part.id) ? 'success' : 'outline-primary'}
@@ -234,22 +463,22 @@ const PartsRequest = () => {
                           <div className="part-info">
                             <div className="info-item">
                               <small className="text-muted">Giá:</small>
-                              <strong className="ms-2">{part.price.toLocaleString('vi-VN')}đ</strong>
+                              <strong className="ms-2">{formatCurrency(part.price)}</strong>
                             </div>
                             <div className="info-item">
                               <small className="text-muted">Tồn kho:</small>
                               <Badge 
-                                bg={part.stock > 10 ? 'success' : part.stock > 0 ? 'warning' : 'danger'}
+                                bg={part.quantityInStock > 10 ? 'success' : part.quantityInStock > 0 ? 'warning' : 'danger'}
                                 className="ms-2"
                               >
-                                {part.stock}
+                                {part.quantityInStock}
                               </Badge>
                             </div>
                           </div>
 
-                          {part.supplier && (
+                          {part.description && (
                             <small className="text-muted d-block mt-2">
-                              Nhà cung cấp: {part.supplier}
+                              {part.description}
                             </small>
                           )}
                         </Card.Body>
@@ -280,13 +509,13 @@ const PartsRequest = () => {
               ) : (
                 <>
                   <div className="selected-parts-list">
-                    {selectedParts.map((part, index) => (
+                    {selectedParts.map((part) => (
                       <Card key={part.id} className="selected-part-item mb-3">
                         <Card.Body className="p-3">
                           <div className="d-flex justify-content-between align-items-start mb-2">
                             <div className="flex-grow-1">
-                              <h6 className="mb-1">{part.nameVi}</h6>
-                              <Badge bg="secondary" className="mb-2">{part.partNumber}</Badge>
+                              <h6 className="mb-1">{part.partName}</h6>
+                              <Badge bg="secondary" className="mb-2">{part.sku || 'N/A'}</Badge>
                             </div>
                             <Button
                               variant="outline-danger"
@@ -303,10 +532,16 @@ const PartsRequest = () => {
                             <Form.Control
                               type="number"
                               min="1"
+                              max={part.quantityInStock}
                               value={part.requestedQuantity}
                               onChange={(e) => handleQuantityChange(part.id, e.target.value)}
                               size="sm"
                             />
+                            {part.requestedQuantity > part.quantityInStock && (
+                              <Form.Text className="text-danger">
+                                Vượt quá tồn kho ({part.quantityInStock})
+                              </Form.Text>
+                            )}
                           </Form.Group>
 
                           {/* Note Input */}
@@ -326,7 +561,7 @@ const PartsRequest = () => {
                           <div className="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                             <small className="text-muted">Tạm tính:</small>
                             <strong className="text-primary">
-                              {(part.price * part.requestedQuantity).toLocaleString('vi-VN')}đ
+                              {formatCurrency(parseFloat(part.price) * part.requestedQuantity)}
                             </strong>
                           </div>
                         </Card.Body>
@@ -350,7 +585,7 @@ const PartsRequest = () => {
                       <div className="d-flex justify-content-between align-items-center pt-2 border-top">
                         <strong>Tổng chi phí:</strong>
                         <strong className="text-primary fs-5">
-                          {calculateTotalCost().toLocaleString('vi-VN')}đ
+                          {formatCurrency(calculateTotalCost())}
                         </strong>
                       </div>
                     </Card.Body>
@@ -382,8 +617,8 @@ const PartsRequest = () => {
             <Card.Body>
               <Row>
                 <Col md={4}>
-                  <small className="text-muted d-block">Tổng phụ tùng</small>
-                  <h4 className="mb-0">{selectedParts.length}</h4>
+                  <small className="text-muted d-block">Đơn hàng</small>
+                  <h4 className="mb-0">#{orderId}</h4>
                 </Col>
                 <Col md={4}>
                   <small className="text-muted d-block">Tổng số lượng</small>
@@ -394,7 +629,7 @@ const PartsRequest = () => {
                 <Col md={4}>
                   <small className="text-muted d-block">Tổng chi phí</small>
                   <h4 className="mb-0 text-primary">
-                    {calculateTotalCost().toLocaleString('vi-VN')}đ
+                    {formatCurrency(calculateTotalCost())}
                   </h4>
                 </Col>
               </Row>
@@ -417,13 +652,13 @@ const PartsRequest = () => {
                 {selectedParts.map(part => (
                   <tr key={part.id}>
                     <td>
-                      <div>{part.nameVi}</div>
-                      <small className="text-muted">{part.partNumber}</small>
+                      <div>{part.partName}</div>
+                      <small className="text-muted">{part.sku || 'N/A'}</small>
                     </td>
                     <td>{part.requestedQuantity}</td>
-                    <td>{part.price.toLocaleString('vi-VN')}đ</td>
+                    <td>{formatCurrency(part.price)}</td>
                     <td className="fw-bold">
-                      {(part.price * part.requestedQuantity).toLocaleString('vi-VN')}đ
+                      {formatCurrency(parseFloat(part.price) * part.requestedQuantity)}
                     </td>
                   </tr>
                 ))}
@@ -435,7 +670,7 @@ const PartsRequest = () => {
           <Form.Group className="mb-3">
             <Form.Label>Mức độ khẩn cấp</Form.Label>
             <div className="d-flex gap-2">
-              {['urgent', 'high', 'normal', 'low'].map(level => {
+              {['URGENT', 'HIGH', 'NORMAL', 'LOW'].map(level => {
                 const badge = getUrgencyBadge(level);
                 return (
                   <Button
@@ -464,18 +699,112 @@ const PartsRequest = () => {
             />
           </Form.Group>
 
-          <Alert variant="info" className="mb-0">
+          <div className="alert alert-info mb-0">
             <FiAlertCircle className="me-2" />
             Yêu cầu sẽ được gửi đến cố vấn dịch vụ và quản lý để xem xét phê duyệt.
-          </Alert>
+          </div>
         </Modal.Body>
         <Modal.Footer className="border-0">
           <Button variant="outline-secondary" onClick={() => setShowSendModal(false)}>
             Hủy
           </Button>
-          <Button variant="primary" onClick={handleSendRequest}>
-            <FiSend className="me-2" />
-            Gửi yêu cầu
+          <Button variant="primary" onClick={handleSendRequest} disabled={submitting}>
+            {submitting ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Đang gửi...
+              </>
+            ) : (
+              <>
+                <FiSend className="me-2" />
+                Gửi yêu cầu
+              </>
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* History Modal */}
+      <Modal 
+        show={showHistoryModal} 
+        onHide={() => setShowHistoryModal(false)} 
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <FiList className="me-2" />
+            Lịch sử yêu cầu phụ tùng
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+          {loadingRequests ? (
+            <div className="text-center py-4">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : myRequests.length === 0 ? (
+            <div className="text-center py-4">
+              <FiPackage size={48} className="text-muted mb-3" />
+              <p className="text-muted">Chưa có yêu cầu nào</p>
+            </div>
+          ) : (
+            <Table hover responsive>
+              <thead>
+                <tr>
+                  <th>Phụ tùng</th>
+                  <th>SL</th>
+                  <th>Đơn hàng</th>
+                  <th>Trạng thái</th>
+                  <th>Ngày tạo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {myRequests.map(req => {
+                  const statusBadge = getStatusBadge(req.status);
+                  return (
+                    <tr key={req.id}>
+                      <td>
+                        <div>{req.partName}</div>
+                        <small className="text-muted">{req.partSku || 'N/A'}</small>
+                      </td>
+                      <td>{req.quantityRequested}</td>
+                      <td>
+                        <small>#{req.serviceOrderId}</small>
+                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                          {req.vehicleLicensePlate}
+                        </div>
+                      </td>
+                      <td>
+                        <Badge bg={statusBadge.bg}>
+                          {statusBadge.icon}
+                          {statusBadge.text}
+                        </Badge>
+                      </td>
+                      <td>
+                        <small>{formatDate(req.createdAt)}</small>
+                      </td>
+                      <td>
+                        {req.status === 'PENDING' && (
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleCancelRequest(req.id)}
+                          >
+                            <FiX size={14} />
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowHistoryModal(false)}>
+            Đóng
           </Button>
         </Modal.Footer>
       </Modal>

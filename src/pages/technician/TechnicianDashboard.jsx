@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Badge, Table, ProgressBar } from 'react-bootstrap';
-import { FiCheckCircle, FiClock, FiAlertCircle, FiTool, FiTrendingUp, FiAward, FiCalendar, FiUser } from 'react-icons/fi';
-import { getOrdersByTechnician } from '../../mockData';
+import { Container, Row, Col, Card, Badge, Table, ProgressBar, Spinner, Alert } from 'react-bootstrap';
+import { FiCheckCircle, FiClock, FiAlertCircle, FiTool, FiTrendingUp, FiAward, FiCalendar, FiUser, FiRefreshCw } from 'react-icons/fi';
+import { getDashboardStats } from '../../services/technicianService';
 import './TechnicianDashboard.css';
 
 const TechnicianDashboard = () => {
-  const currentTechnicianId = 1; // Mock current logged-in technician
   const [allOrders, setAllOrders] = useState([]);
   const [todayTasks, setTodayTasks] = useState([]);
   const [stats, setStats] = useState({
@@ -14,38 +13,50 @@ const TechnicianDashboard = () => {
     inProgress: 0,
     pending: 0
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getDashboardStats();
+      
+      setStats(data.stats);
+      setTodayTasks(data.todayWorks);
+      setAllOrders(data.allWorks);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
+      // Set empty data khi lỗi
+      setStats({
+        totalCompleted: 0,
+        todayTasks: 0,
+        inProgress: 0,
+        pending: 0
+      });
+      setTodayTasks([]);
+      setAllOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Load all orders for this technician
-    const orders = getOrdersByTechnician(currentTechnicianId);
-    setAllOrders(orders);
-
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Filter today's tasks
-    const todaysOrders = orders.filter(order => order.scheduledDate === today);
-    setTodayTasks(todaysOrders);
-
-    // Calculate stats
-    const completed = orders.filter(o => o.status === 'completed').length;
-    const inProgress = orders.filter(o => o.status === 'in-progress').length;
-    const pending = orders.filter(o => o.status === 'pending' || o.status === 'scheduled').length;
-
-    setStats({
-      totalCompleted: completed,
-      todayTasks: todaysOrders.length,
-      inProgress: inProgress,
-      pending: pending
-    });
+    fetchDashboardData();
   }, []);
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      'COMPLETED': { variant: 'success', text: 'Hoàn thành', icon: <FiCheckCircle /> },
       'completed': { variant: 'success', text: 'Hoàn thành', icon: <FiCheckCircle /> },
+      'IN_PROGRESS': { variant: 'primary', text: 'Đang thực hiện', icon: <FiTool /> },
       'in-progress': { variant: 'primary', text: 'Đang thực hiện', icon: <FiTool /> },
+      'ASSIGNED': { variant: 'info', text: 'Đã phân công', icon: <FiCalendar /> },
       'scheduled': { variant: 'info', text: 'Đã lên lịch', icon: <FiCalendar /> },
+      'PENDING': { variant: 'warning', text: 'Chờ xử lý', icon: <FiClock /> },
       'pending': { variant: 'warning', text: 'Chờ xử lý', icon: <FiClock /> },
+      'CANCELLED': { variant: 'danger', text: 'Đã hủy', icon: <FiAlertCircle /> },
       'cancelled': { variant: 'danger', text: 'Đã hủy', icon: <FiAlertCircle /> }
     };
 
@@ -79,37 +90,62 @@ const TechnicianDashboard = () => {
     : 0;
 
   // Calculate on-time completion rate
-  const onTimeOrders = allOrders.filter(o => 
-    o.status === 'completed' && 
-    o.actualDuration <= o.estimatedDuration
+  const completedOrders = allOrders.filter(o => o.status === 'COMPLETED' || o.status === 'completed');
+  const onTimeOrders = completedOrders.filter(o => 
+    o.actualDuration && o.estimatedDuration && o.actualDuration <= o.estimatedDuration
   ).length;
-  const onTimeRate = stats.totalCompleted > 0 
-    ? ((onTimeOrders / stats.totalCompleted) * 100).toFixed(1) 
+  const onTimeRate = completedOrders.length > 0 
+    ? ((onTimeOrders / completedOrders.length) * 100).toFixed(1) 
     : 0;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="technician-dashboard">
+        <Container fluid className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+          <div className="text-center">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-3 text-muted">Đang tải dữ liệu...</p>
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="technician-dashboard">
       <Container fluid>
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="warning" className="mb-4" dismissible onClose={() => setError(null)}>
+            <Alert.Heading>Lưu ý</Alert.Heading>
+            <p>{error}</p>
+            <button className="btn btn-outline-warning btn-sm" onClick={fetchDashboardData}>
+              <FiRefreshCw className="me-2" /> Thử lại
+            </button>
+          </Alert>
+        )}
+
         {/* Header */}
         <div className="dashboard-header">
-          <div>
-            <h2>Dashboard Nhân viên</h2>
-            <p className="text-muted">Chào buổi sáng! Bắt đầu ngày làm việc của bạn.</p>
+            <div>
+              <h2>Dashboard Kỹ thuật viên</h2>
+              <p className="text-muted">Chào buổi sáng! Bắt đầu ngày làm việc của bạn.</p>
+            </div>
+            <div className="header-date">
+              <FiCalendar size={20} />
+              <span>{new Date().toLocaleDateString('vi-VN', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}</span>
+            </div>
           </div>
-          <div className="header-date">
-            <FiCalendar size={20} />
-            <span>{new Date().toLocaleDateString('vi-VN', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</span>
-          </div>
-        </div>
 
-        {/* Stats Cards */}
-        <Row className="mb-4">
-          <Col md={3} sm={6} className="mb-3">
+          {/* Stats Cards */}
+          <Row className="mb-4">
+            <Col md={3} sm={6} className="mb-3">
             <Card className="stats-card stats-completed">
               <Card.Body>
                 <div className="stats-icon">
@@ -164,10 +200,10 @@ const TechnicianDashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-        </Row>
+          </Row>
 
-        {/* Performance Metrics */}
-        <Row className="mb-4">
+          {/* Performance Metrics */}
+          <Row className="mb-4">
           <Col md={12}>
             <Card className="performance-card">
               <Card.Body>
@@ -229,10 +265,10 @@ const TechnicianDashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-        </Row>
+          </Row>
 
-        {/* Today's Tasks */}
-        <Row>
+          {/* Today's Tasks */}
+          <Row>
           <Col md={12}>
             <Card className="tasks-card">
               <Card.Body>
@@ -261,32 +297,32 @@ const TechnicianDashboard = () => {
                       </thead>
                       <tbody>
                         {todayTasks.map(task => (
-                          <tr key={task.id}>
+                          <tr key={task.id || task.appointmentId}>
                             <td>
-                              <strong>{task.orderNumber}</strong>
+                              <strong>{task.orderNumber || `APT-${task.appointmentId || task.id}`}</strong>
                             </td>
                             <td>
                               <div className="customer-info">
                                 <FiUser className="me-1" />
-                                Khách hàng #{task.customerId}
+                                {task.customerName || `Khách hàng #${task.customerId || 'N/A'}`}
                               </div>
                             </td>
                             <td>
                               <span className="service-count">
-                                {task.serviceIds.length} dịch vụ
+                                {task.services?.length || task.serviceIds?.length || 1} dịch vụ
                               </span>
                             </td>
                             <td>
                               <div className="time-info">
                                 <FiClock className="me-1" />
-                                {task.scheduledTime}
+                                {task.scheduledTime || task.appointmentTime || 'N/A'}
                                 <small className="d-block text-muted">
-                                  ~{task.estimatedDuration} phút
+                                  ~{task.estimatedDuration || 60} phút
                                 </small>
                               </div>
                             </td>
                             <td>
-                              {getPriorityBadge(task.priority)}
+                              {getPriorityBadge(task.priority || 'normal')}
                             </td>
                             <td>
                               {getStatusBadge(task.status)}
@@ -305,10 +341,10 @@ const TechnicianDashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-        </Row>
+          </Row>
 
-        {/* Recent Completed Jobs (Last 5) */}
-        <Row className="mt-4">
+          {/* Recent Completed Jobs (Last 5) */}
+          <Row className="mt-4">
           <Col md={12}>
             <Card className="recent-jobs-card">
               <Card.Body>
@@ -316,6 +352,12 @@ const TechnicianDashboard = () => {
                   <h5><FiCheckCircle /> Công việc hoàn thành gần đây</h5>
                 </div>
 
+                {completedOrders.length === 0 ? (
+                  <div className="empty-state">
+                    <FiCheckCircle size={48} />
+                    <p>Chưa có công việc hoàn thành</p>
+                  </div>
+                ) : (
                 <div className="table-responsive">
                   <Table hover className="recent-jobs-table">
                     <thead>
@@ -328,22 +370,21 @@ const TechnicianDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {allOrders
-                        .filter(o => o.status === 'completed')
+                      {completedOrders
                         .slice(0, 5)
                         .map(job => (
-                          <tr key={job.id}>
-                            <td><strong>{job.orderNumber}</strong></td>
+                          <tr key={job.id || job.appointmentId}>
+                            <td><strong>{job.orderNumber || `APT-${job.appointmentId || job.id}`}</strong></td>
                             <td>
-                              {new Date(job.completedDate).toLocaleDateString('vi-VN')}
-                              <small className="d-block text-muted">{job.completedTime}</small>
+                              {job.completedDate ? new Date(job.completedDate).toLocaleDateString('vi-VN') : 'N/A'}
+                              {job.completedTime && <small className="d-block text-muted">{job.completedTime}</small>}
                             </td>
-                            <td>{job.serviceIds.length} dịch vụ</td>
+                            <td>{job.services?.length || job.serviceIds?.length || 1} dịch vụ</td>
                             <td>
-                              <span className={job.actualDuration <= job.estimatedDuration ? 'text-success' : 'text-warning'}>
-                                {job.actualDuration} phút
+                              <span className={(job.actualDuration && job.estimatedDuration && job.actualDuration <= job.estimatedDuration) ? 'text-success' : 'text-warning'}>
+                                {job.actualDuration || 'N/A'} phút
                               </span>
-                              {job.actualDuration <= job.estimatedDuration && (
+                              {job.actualDuration && job.estimatedDuration && job.actualDuration <= job.estimatedDuration && (
                                 <small className="d-block text-success">✓ Đúng giờ</small>
                               )}
                             </td>
@@ -362,12 +403,13 @@ const TechnicianDashboard = () => {
                     </tbody>
                   </Table>
                 </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
-        </Row>
-      </Container>
-    </div>
+          </Row>
+        </Container>
+      </div>
   );
 };
 
