@@ -3,6 +3,7 @@ package com.apexev.entity;
 
 import com.apexev.enums.OrderStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -65,6 +66,7 @@ public class ServiceOrder {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "technician_id") // KTV được chỉ định (có thể null)
+    @NotEmpty(message = "Vui lòng chọn kỹ thuật viên!")
     private User technician; // Liên kết về User
 
     @OneToMany(mappedBy = "serviceOrder", cascade = CascadeType.ALL, orphanRemoval = true)

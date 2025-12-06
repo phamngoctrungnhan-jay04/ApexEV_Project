@@ -1,3 +1,4 @@
+
 package com.apexev.dto.request.coreBussinessRequest;
 
 import jakarta.validation.constraints.Future;
@@ -6,6 +7,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class AppointmentRequest {
     @NotNull(message = "Bạn phải chọn một chiếc xe")
@@ -17,4 +21,8 @@ public class AppointmentRequest {
 
     private String requestedService;
     private String notes; // "Tôi sẽ đến sau 9h" kiểu kiểu vậy
+
+    // Thêm trường nhận danh sách dịch vụ từ FE
+    @com.fasterxml.jackson.annotation.JsonProperty("serviceIds")
+    private java.util.List<Integer> serviceIds;
 }

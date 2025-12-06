@@ -17,4 +17,9 @@ public class UserResponse {
     private String phone;
     private String Role;
     private Boolean isActive;
+
+    // Thông tin bổ sung
+    private String dateOfBirth;
+    private String gender;
+    private String address;
 }

@@ -1,17 +1,15 @@
 package com.apexev.controller.userAndVehicleController;
 
-
-import com.apexev.dto.request.userAndVehicleRequest.RegisterStaffRequest;
-import com.apexev.dto.request.userAndVehicleRequest.ChangePasswordRequest;
-
 import com.apexev.dto.request.userAndVehicleRequest.LoginRequest;
 import com.apexev.dto.request.userAndVehicleRequest.RefreshRequest;
 import com.apexev.dto.request.userAndVehicleRequest.RegisterRequest;
+import com.apexev.dto.request.RegisterStaffRequest;
 import com.apexev.dto.response.userAndVehicleResponse.LoginSuccessResponse;
 import com.apexev.enums.UserRole;
 import com.apexev.security.jwt.JwtUtils;
 import com.apexev.security.services.UserDetailsImpl;
 import com.apexev.security.services.UserDetailsServiceImpl;
+import com.apexev.service.service_Interface.UserService;
 
 import com.apexev.service.service_Interface.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +27,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -52,27 +49,15 @@ public class AuthController {
     @PostMapping("/register-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registerStaff(@RequestBody @Valid RegisterStaffRequest request) {
-        int number = request.getNumbers();
-        while(number>0){
-            UserRole role = UserRole.valueOf(request.getRole());
-            userService.registerUser(
-                    request.getFullName(),
-                    String.valueOf(number)+ request.getEmail(),
-                    request.getPhone(),
-                    request.getPassword(),
-                    role
-            );
-        }
-
+        UserRole role = UserRole.valueOf(request.getRole());
+        userService.registerUser(
+                request.getFullName(),
+                request.getEmail(),
+                request.getPhone(),
+                request.getPassword(),
+                role);
         return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
     }
-    @GetMapping("/check-auth")
-    public String checkAuth() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("Quyền thực tế: " + authentication.getAuthorities());
-        return "Quyền thực tế: " + authentication.getAuthorities();
-    }
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         UserRole role = UserRole.valueOf("CUSTOMER");
@@ -92,9 +77,7 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmailOrPhone(),
-                            loginRequest.getPassword()
-                    )
-            );
+                            loginRequest.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             String accessToken = jwtUtils.generateJwtToken(authentication);
@@ -108,8 +91,7 @@ public class AuthController {
                     userDetails.getEmail(),
                     userDetails.getPhone(),
                     userDetails.getFullName(),
-                    userDetails.getAuthorities().iterator().next().getAuthority()
-            ));
+                    userDetails.getAuthorities().iterator().next().getAuthority()));
         } catch (BadCredentialsException ex) {
             // Trả về JSON lỗi
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -134,4 +116,5 @@ public class AuthController {
                     .body(Map.of("error", "Invalid refresh token"));
         }
     }
+
 }

@@ -3,6 +3,7 @@ package com.apexev.controller.userAndVehicleController;
 import com.apexev.dto.request.userAndVehicleRequest.VehicleRequest;
 import com.apexev.dto.response.userAndVehicleResponse.VehicleResponse;
 import com.apexev.entity.User;
+import com.apexev.service.service_Interface.VehicleService;
 
 import com.apexev.service.serviceImpl.VehicleServiceImpl;
 import jakarta.validation.Valid;
