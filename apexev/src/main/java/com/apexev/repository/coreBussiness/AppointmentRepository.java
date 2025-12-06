@@ -24,6 +24,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByAppointmentTimeBetween(LocalDateTime start, LocalDateTime end);
 
+    // Tìm lịch hẹn theo trạng thái và khoảng thời gian (dùng cho scheduler gửi nhắc nhở)
+    List<Appointment> findByStatusAndAppointmentTimeBetween(AppointmentStatus status, LocalDateTime start, LocalDateTime end);
+
     // ktra xe đó đã có cuộc hẹn nào chưa -> đang pending hoặc đang confirm
     boolean existsByVehicleIdAndStatusIn(Long vehicleId, List<AppointmentStatus> statuses);
 

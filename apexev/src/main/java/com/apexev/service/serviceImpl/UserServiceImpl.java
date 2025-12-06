@@ -25,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher publisher; // Đã thêm từ file dưới để bắn event
+    private final SNSEmailService snsEmailService; // Inject SNSEmailService
 
     @Override
     public User registerUser(String fullName, String email, String phone, String plainPassword, UserRole role) {
@@ -63,6 +65,17 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             log.error("Error publishing UserRegisterEvent for user: {}", savedUser.getEmail(), e);
             // Không throw exception ở đây để tránh rollback transaction nếu chỉ lỗi gửi mail/event
+        }
+
+        // Gửi email xác nhận đăng ký
+        try {
+            String confirmationToken = UUID.randomUUID().toString();
+            String confirmationLink = "https://regenzet.io.vn/verify?token=" + confirmationToken;
+            snsEmailService.sendRegistrationConfirmationEmail(email, fullName, confirmationLink);
+            log.info("Registration confirmation email sent to: {}", email);
+        } catch (Exception e) {
+            log.error("Error sending registration confirmation email to: {}", email, e);
+            // Không throw exception để không ảnh hưởng đến quá trình đăng ký
         }
 
         return savedUser;
