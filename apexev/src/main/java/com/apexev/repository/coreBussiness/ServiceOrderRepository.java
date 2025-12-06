@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long> {
@@ -22,13 +21,4 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     // Dùng cho Quản lý
     List<ServiceOrder> findByStatus(OrderStatus status);
-
-    // Tìm lịch sử của tôi
-    List<ServiceOrder> findByCustomerUserIdAndStatusOrderByCompletedAtDesc(Integer customerId, OrderStatus status);
-
-    // Xem chi tiết đơn hàng
-    Optional<ServiceOrder> findByIdAndCustomerUserId(Long orderId, Integer customerId);
-
-    // Xóa tất cả đơn hàng của 1 khách hàng
-    void deleteByCustomerUserId(Integer customerId);
 }

@@ -1,6 +1,5 @@
 package com.apexev.service.service_Interface;
 
-import com.apexev.dto.request.userAndVehicleRequest.UpdateProfileRequest;
 import com.apexev.dto.request.userAndVehicleRequest.UserUpdateRequest;
 import com.apexev.dto.response.userAndVehicleResponse.UserResponse;
 import com.apexev.entity.User;
@@ -20,10 +19,4 @@ public interface UserService {
     void updateUserId(Integer id, UserUpdateRequest userUpdateRequest);
     void updateUserStatus(Integer id, boolean isActive);
     void changePassword(Integer id, String oldPassword, String newPassword);
-
-    // lấy thông tin người dùng đang đăng nhập
-    UserResponse getMyProfile(User loggedInUser);
-
-    // Cập nhật thông tin hồ sơ của người dùng đang đăng nhập.
-    UserResponse updateMyProfile(User loggedInUser, UpdateProfileRequest request);
 }
