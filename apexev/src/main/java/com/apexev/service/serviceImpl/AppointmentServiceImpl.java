@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -32,7 +33,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final com.apexev.repository.coreBussiness.ServiceRepository serviceRepository; // Inject ServiceRepository
     // setup tự động chuyển Entity -> DTO
     private final ModelMapper modelMapper;
-    private final MailService mailService; // Inject MailService
+    private final SNSEmailService snsEmailService; // Inject SNSEmailService
 
     @Override
     public AppointmentResponse createAppointment(AppointmentRequest request, User loggedInUser) {
@@ -89,6 +90,23 @@ public class AppointmentServiceImpl implements AppointmentService {
                 "Lịch hẹn của bạn đã được tạo thành công vào lúc %s. Vui lòng chờ cố vấn xác nhận.",
                 savedAppointment.getAppointmentTime().toString());
         notificationService.sendNotification(customer, message, null);
+
+        // 9. Gửi email xác nhận đặt lịch hẹn
+        try {
+            String appointmentDate = savedAppointment.getAppointmentTime()
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            String vehicleInfo = vehicle.getYearManufactured() + " " + vehicle.getBrand() + " " + vehicle.getModel();
+            snsEmailService.sendAppointmentConfirmationEmail(
+                    customer.getEmail(),
+                    customer.getFullName(),
+                    appointmentDate,
+                    vehicleInfo,
+                    savedAppointment.getRequestedService() != null ? savedAppointment.getRequestedService() : "Chưa xác định"
+            );
+            System.out.println("[DEBUG] Appointment confirmation email sent to: " + customer.getEmail());
+        } catch (Exception e) {
+            System.out.println("[ERROR] Error sending appointment confirmation email: " + e.getMessage());
+        }
 
         return modelMapper.map(savedAppointment, AppointmentResponse.class);
         // giải thích
@@ -157,24 +175,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             System.out.println("[ERROR] Lỗi gửi notification: " + e.getMessage());
         }
 
-        // 7. Gửi email cho customer khi lịch hẹn bị từ chối/hủy
-        String emailSubject = "[ApexEV] Lịch hẹn bị từ chối/hủy";
-        String emailBody = String.format(
-                "<p>Xin chào %s,</p>"
-                        + "<p>Rất tiếc, lịch hẹn của bạn vào lúc <b>%s</b> đã bị từ chối/hủy bởi cố vấn <b>%s</b>.</p>"
-                        + "<p>Nếu cần hỗ trợ hoặc đặt lại lịch, vui lòng liên hệ lại với chúng tôi.</p>"
-                        + "<br><p>Trân trọng,<br>ApexEV Team</p>",
-                appointment.getCustomer().getFullName(),
-                savedAppointment.getAppointmentTime().toString(),
-                loggedInUser.getFullName());
-        try {
-            mailService.sendEmail(appointment.getCustomer().getEmail(), emailSubject, emailBody, null); // Không đính
-                                                                                                        // kèm file
-            System.out.println("[DEBUG] Đã gửi email từ chối/hủy cho: " + appointment.getCustomer().getEmail());
-        } catch (Exception e) {
-            System.out.println("[ERROR] Lỗi gửi email: " + e.getMessage());
-        }
-
         return modelMapper.map(savedAppointment, AppointmentResponse.class);
     }
 
@@ -202,18 +202,22 @@ public class AppointmentServiceImpl implements AppointmentService {
                 loggedInUser.getFullName());
         notificationService.sendNotification(appointment.getCustomer(), message, null);
 
-        // 7. Gửi email cho customer khi advisor xác nhận lịch hẹn
-        String emailSubject = "[ApexEV] Lịch hẹn đã được xác nhận";
-        String emailBody = String.format(
-                "<p>Xin chào %s,</p>"
-                        + "<p>Lịch hẹn của bạn vào lúc <b>%s</b> đã được xác nhận bởi cố vấn <b>%s</b>.</p>"
-                        + "<p>Vui lòng đến đúng giờ để được phục vụ tốt nhất.</p>"
-                        + "<br><p>Trân trọng,<br>ApexEV Team</p>",
-                appointment.getCustomer().getFullName(),
-                savedAppointment.getAppointmentTime().toString(),
-                loggedInUser.getFullName());
-        mailService.sendEmail(appointment.getCustomer().getEmail(), emailSubject, emailBody, null); // Không đính kèm
-                                                                                                    // file
+        // 7. Gửi email xác nhận lịch hẹn đã được advisor xác nhận
+        try {
+            String appointmentDate = savedAppointment.getAppointmentTime()
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            String vehicleInfo = appointment.getVehicle().getYearManufactured() + " " + appointment.getVehicle().getBrand() + " " + appointment.getVehicle().getModel();
+            snsEmailService.sendAppointmentConfirmationEmail(
+                    appointment.getCustomer().getEmail(),
+                    appointment.getCustomer().getFullName(),
+                    appointmentDate,
+                    vehicleInfo,
+                    savedAppointment.getRequestedService() != null ? savedAppointment.getRequestedService() : "Chưa xác định"
+            );
+            System.out.println("[DEBUG] Appointment confirmation email sent to: " + appointment.getCustomer().getEmail());
+        } catch (Exception e) {
+            System.out.println("[ERROR] Error sending appointment confirmation email: " + e.getMessage());
+        }
 
         return modelMapper.map(savedAppointment, AppointmentResponse.class);
     }

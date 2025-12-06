@@ -69,5 +69,4 @@ public class MailService {
     // Phương thức này có thể được sử dụng để gửi thông báo, thông tin hoặc tài liệu
     // đến người dùng hoặc nhân viên trong trường học.
     // Nó hỗ trợ gửi email đến nhiều người nhận và có thể đính kèm tệp nếu cần.
-
 }

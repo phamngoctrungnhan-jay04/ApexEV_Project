@@ -144,6 +144,13 @@
             <artifactId>s3</artifactId>
         </dependency>
 
+        <!-- AWS SDK v1 for SNS -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sns</artifactId>
+            <version>1.12.529</version>
+        </dependency>
+
     </dependencies>
 
     <build>

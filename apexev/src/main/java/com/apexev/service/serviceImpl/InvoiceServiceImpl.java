@@ -14,6 +14,7 @@ import com.apexev.service.service_Interface.InvoiceService;
 import com.apexev.service.service_Interface.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -21,14 +22,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final ServiceOrderRepository serviceOrderRepository;
     private final NotificationService notificationService;
     private final ModelMapper modelMapper;
+    private final SNSEmailService snsEmailService; // Inject SNSEmailService
 
     @Override
     @Transactional
@@ -80,6 +84,21 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.getDueDate().toLocalDate().toString());
         notificationService.sendNotification(order.getCustomer(), message, order);
 
+        // 9. Gửi email xác nhận hóa đơn
+        try {
+            String paymentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            snsEmailService.sendPaymentConfirmationEmail(
+                    order.getCustomer().getEmail(),
+                    order.getCustomer().getFullName(),
+                    "INV-" + savedInvoice.getId(),
+                    totalAmount.doubleValue(),
+                    paymentDate
+            );
+            log.info("Payment confirmation email sent to: {}", order.getCustomer().getEmail());
+        } catch (Exception e) {
+            log.error("Error sending payment confirmation email to: {}", order.getCustomer().getEmail(), e);
+        }
+
         return modelMapper.map(savedInvoice, InvoiceResponse.class);
     }
 
@@ -128,6 +147,21 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.getServiceOrder().getId());
         notificationService.sendNotification(invoice.getServiceOrder().getCustomer(), message,
                 invoice.getServiceOrder());
+
+        // 6. Gửi email xác nhận thanh toán
+        try {
+            String paymentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            snsEmailService.sendPaymentConfirmationEmail(
+                    invoice.getServiceOrder().getCustomer().getEmail(),
+                    invoice.getServiceOrder().getCustomer().getFullName(),
+                    "INV-" + invoice.getId(),
+                    invoice.getTotalAmount().doubleValue(),
+                    paymentDate
+            );
+            log.info("Payment confirmation email sent to: {}", invoice.getServiceOrder().getCustomer().getEmail());
+        } catch (Exception e) {
+            log.error("Error sending payment confirmation email to: {}", invoice.getServiceOrder().getCustomer().getEmail(), e);
+        }
 
         return modelMapper.map(savedInvoice, InvoiceResponse.class);
     }

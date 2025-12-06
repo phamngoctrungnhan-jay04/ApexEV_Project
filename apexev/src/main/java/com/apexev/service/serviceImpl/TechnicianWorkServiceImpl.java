@@ -18,6 +18,8 @@ import com.apexev.repository.coreBussiness.ServiceOrderRepository;
 import com.apexev.service.service_Interface.TechnicianWorkService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,10 +30,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TechnicianWorkServiceImpl implements TechnicianWorkService {
     private final ServiceOrderRepository serviceOrderRepository;
     private final PartRepository partRepository;
     private final MaintenanceServiceRepository maintenanceServiceRepository;
+    private final SNSEmailService snsEmailService;
+
+    @Value("${app.appointment-schedule-link:https://apexev.com/appointments/schedule}")
+    private String appointmentScheduleLink;
 
     @Override
     public List<TechnicianWorkResponse> getMyAssignedWorks(User technician) {
@@ -78,6 +85,26 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
         }
 
         ServiceOrder savedWork = serviceOrderRepository.save(work);
+
+        // Gửi email nhắc nhở đặt lịch lấy xe khi bảo dưỡng hoàn thành
+        if (newStatus == OrderStatus.READY_FOR_INVOICE) {
+            try {
+                String vehicleInfo = work.getVehicle().getYearManufactured() + " " +
+                        work.getVehicle().getBrand() + " " +
+                        work.getVehicle().getModel();
+                
+                snsEmailService.sendPickupScheduleReminderEmail(
+                        work.getCustomer().getEmail(),
+                        work.getCustomer().getFullName(),
+                        vehicleInfo,
+                        appointmentScheduleLink
+                );
+                log.info("Pickup schedule reminder email sent to: {}", work.getCustomer().getEmail());
+            } catch (Exception e) {
+                log.error("Error sending pickup schedule reminder email to: {}", work.getCustomer().getEmail(), e);
+            }
+        }
+
         return convertToDetailDto(savedWork);
     }
 
