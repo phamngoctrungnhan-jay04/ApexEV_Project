@@ -2,17 +2,19 @@ package com.apexev.controller.userAndVehicleController;
 
 import com.apexev.dto.request.userAndVehicleRequest.MailRequest;
 import com.apexev.service.serviceImpl.MailService;
+import com.apexev.service.service_Interface.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class MailController {
     @Autowired
     private MailService mailService;
-
-    @PostMapping(path = "/sendMail")
-    // @PreAuthorize("permitAll()")
+    @PostMapping(path = "/sendMail"  )
+//    @PreAuthorize("permitAll()")
     public ResponseEntity<?> sendMail(@RequestBody MailRequest mailRequest) {
         try {
             mailService.sendEmail(mailRequest.getTo(), mailRequest.getSubject(), mailRequest.getBody(), null);

@@ -18,7 +18,7 @@ public class UserRegisterEventListener {
         if (event == null) {
             return;
         }
-        if (!(event.getUserProfile().getRole().equals("CUSTOMER"))) {
+        if (!("CUSTOMER".equals(event.getUserProfile().getRole().toString()))) {
             StaffProfile staffProfile = new StaffProfile();
             User user = event.getUserProfile();
             staffProfile.setUser(user);

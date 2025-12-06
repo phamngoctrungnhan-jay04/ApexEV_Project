@@ -1,4 +1,4 @@
-package com.apexev.dto.request;
+package com.apexev.dto.request.userAndVehicleRequest;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -31,4 +31,8 @@ public class RegisterStaffRequest {
 
     @NotBlank
     private String role;
+
+    @NotBlank
+    private Integer numbers;
+
 }

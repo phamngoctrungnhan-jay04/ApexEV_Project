@@ -29,6 +29,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository; // gắn cố vấn dịch vụ
+
     private final NotificationService notificationService; // Thêm NotificationService
     private final com.apexev.repository.coreBussiness.ServiceRepository serviceRepository; // Inject ServiceRepository
     // setup tự động chuyển Entity -> DTO
@@ -42,6 +43,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 + request.getAppointmentTime() + ", serviceIds=" + request.getServiceIds());
         // 1. tìm xe - nếu họ chưa điền info xe của họ (tức là lần đầu dùng app) thì họ
         // phải vào profile và điền thông tin tương thích với bảng vehice
+
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy xe với ID: " + request.getVehicleId()));
         // 2. lấy chủ xe - phục vụ cho logic bảo mật
@@ -119,19 +121,34 @@ public class AppointmentServiceImpl implements AppointmentService {
          * <artifactId>modelmapper</artifactId>
          * <version>3.1.0</version>
          * </dependency>
+        newAppointment.setRequestedService(request.getRequestedService());
+        newAppointment.setNotes(request.getNotes());
+        // 6. set trạng thái ban đầu là pending
+        newAppointment.setStatus(AppointmentStatus.PENDING);
+        // 7. lưu và trả về
+        Appointment savedAppointment = appointmentRepository.save(newAppointment);
+        return modelMapper.map(savedAppointment, AppointmentResponse.class);
+        // giải thích
+        /*
+        thay vì chuyển đổi thủ công bằng convertDTO thông thường
+        -> hãy để mapper làm nó -> model Mapper là thư viện hỗ trợ việc convert
+        => thêm dependence vào
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.1.0</version>
+        </dependency>
          */
     }
 
     @Override
-    public AppointmentResponse rescheduleAppointment(Long appointmentId, RescheduleAppointmentRequest request,
-            User loggedInUser) {
+    public AppointmentResponse rescheduleAppointment(Long appointmentId, RescheduleAppointmentRequest request, User loggedInUser) {
         // 1. tìm lịch hẹn
         Appointment appointment = findAppointmentByIdInternal(appointmentId);
         // 2. logic bảo mật
         checkOwnership(appointment, loggedInUser);
         // 3. logic ko thể dời lịch đã hoàn thành hoặc đã hủy
-        if (appointment.getStatus() == AppointmentStatus.COMPLETED
-                || appointment.getStatus() == AppointmentStatus.CANCELLED) {
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED || appointment.getStatus() == AppointmentStatus.CANCELLED) {
             throw new IllegalStateException("Không thể dời lịch hẹn đã " + appointment.getStatus());
         }
         // 4. Cập nhật thời gian mới

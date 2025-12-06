@@ -1,4 +1,4 @@
-package com.apexev.dto.request;
+package com.apexev.dto.request.coreBussinessRequest;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;

@@ -10,6 +10,9 @@ import com.apexev.security.jwt.JwtUtils;
 import com.apexev.security.services.UserDetailsImpl;
 import com.apexev.security.services.UserDetailsServiceImpl;
 import com.apexev.service.service_Interface.UserService;
+
+import com.apexev.service.service_Interface.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @Validated
+@Tag(name = "AuthController", description = "Quản lí tài khoản")
 public class AuthController {
 
     @Autowired
@@ -103,8 +107,7 @@ public class AuthController {
             // Lấy UserDetails từ username
             UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsServiceImpl.loadUserById(userId);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
-                    userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             String newAccessToken = jwtUtils.generateJwtToken(authentication);
 
             return ResponseEntity.ok(Map.of("accessToken", newAccessToken, "type", "Bearer"));

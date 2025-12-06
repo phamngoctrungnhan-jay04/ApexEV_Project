@@ -30,23 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-    @Autowired
-    private UserRepository userRepository;
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String[] permitAllPaths = {
-                "/api/auth/**",
-                "/api/admin/vaccination-campaigns",
-                "/swagger-ui/**", // Swagger UI
-                "/v3/api-docs/**", // Swagger JSON
-                "/error"
-        };
-        AntPathMatcher pathMatcher = new AntPathMatcher();
-        String path = request.getRequestURI();
-        return Arrays.stream(permitAllPaths)
-                .anyMatch(p -> pathMatcher.match(p, path));
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

@@ -21,5 +21,13 @@ public interface VehicleService {
 
     //xóa một chiếc xe khỏi gara - chỉ chủ xe mới xóa được
     //sẽ ko xóa được nếu xe đang có lịch hẹn - pending hoặc confirm
+    List<VehicleResponse> getMyVehicles(User loggedInUser);
+
+    VehicleResponse getVehicleById(Long vehicleId, User loggedInUser);
+
+    VehicleResponse addVehicle(VehicleRequest request, User loggedInUser);
+
+    VehicleResponse updateVehicle(Long vehicleId, VehicleRequest request, User loggedInUser);
+
     void deleteVehicle(Long vehicleId, User loggedInUser);
 }
