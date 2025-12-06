@@ -1,6 +1,7 @@
 package com.apexev.controller.coreBussinessController;
 
 import com.apexev.dto.request.coreBussinessRequest.AppointmentRequest;
+import com.apexev.dto.request.coreBussinessRequest.AssignTechnicianRequest;
 import com.apexev.dto.request.coreBussinessRequest.RescheduleAppointmentRequest;
 import com.apexev.dto.response.coreBussinessResponse.AppointmentResponse;
 import com.apexev.entity.User;
@@ -115,6 +116,17 @@ public class AppointmentController {
         List<AppointmentResponse> pendingAppointments = appointmentService
                 .getPendingAppointmentsForAdvisor(advisor.getUserId());
         return ResponseEntity.ok(pendingAppointments);
+    }
+
+    // Phân công kỹ thuật viên cho lịch hẹn
+    @PostMapping("/{id}/assign-technician")
+    @PreAuthorize("hasRole('SERVICE_ADVISOR')")
+    public ResponseEntity<AppointmentResponse> assignTechnician(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignTechnicianRequest request,
+            @AuthenticationPrincipal User advisor) {
+        AppointmentResponse response = appointmentService.assignTechnician(id, request, advisor);
+        return ResponseEntity.ok(response);
     }
 
 }

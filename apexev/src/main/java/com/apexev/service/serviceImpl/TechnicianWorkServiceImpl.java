@@ -2,6 +2,7 @@ package com.apexev.service.serviceImpl;
 
 import com.apexev.dto.request.technicianRequest.AddTechnicianNotesRequest;
 import com.apexev.dto.request.technicianRequest.UpdateWorkStatusRequest;
+import com.apexev.dto.response.technicianResponse.TechnicianAvailabilityResponse;
 import com.apexev.dto.response.technicianResponse.TechnicianWorkDetailResponse;
 import com.apexev.dto.response.technicianResponse.TechnicianWorkResponse;
 import com.apexev.dto.response.technicianResponse.WorkOrderItemResponse;
@@ -15,6 +16,7 @@ import com.apexev.enums.UserRole;
 import com.apexev.repository.coreBussiness.MaintenanceServiceRepository;
 import com.apexev.repository.coreBussiness.PartRepository;
 import com.apexev.repository.coreBussiness.ServiceOrderRepository;
+import com.apexev.repository.userAndVehicle.UserRepository;
 import com.apexev.service.service_Interface.TechnicianWorkService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
     private final ServiceOrderRepository serviceOrderRepository;
     private final PartRepository partRepository;
     private final MaintenanceServiceRepository maintenanceServiceRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<TechnicianWorkResponse> getMyAssignedWorks(User technician) {
@@ -42,7 +45,7 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
 
         // Lấy danh sách công việc (loại trừ COMPLETED và CANCELLED)
         List<ServiceOrder> works = serviceOrderRepository
-                .findByTechnicianUserIdAndStatusNot(technician.getUserId().longValue(), OrderStatus.COMPLETED);
+                .findByTechnicianUserIdAndStatusNot(technician.getUserId(), OrderStatus.COMPLETED);
 
         // Lọc thêm để loại bỏ CANCELLED
         return works.stream()
@@ -119,13 +122,22 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
         boolean isValidTransition = false;
 
         switch (currentStatus) {
+            case CONFIRMED:
+                // Từ CONFIRMED chỉ có thể chuyển sang RECEPTION (kỹ thuật viên tiếp nhận xe)
+                isValidTransition = (newStatus == OrderStatus.RECEPTION);
+                break;
+            case RECEPTION:
+                // Từ RECEPTION có thể chuyển sang INSPECTION (bắt đầu kiểm tra xe)
+                isValidTransition = (newStatus == OrderStatus.INSPECTION);
+                break;
             case INSPECTION:
                 // Từ INSPECTION có thể chuyển sang QUOTING hoặc IN_PROGRESS
                 isValidTransition = (newStatus == OrderStatus.QUOTING || newStatus == OrderStatus.IN_PROGRESS);
                 break;
             case QUOTING:
-                // Từ QUOTING chỉ có thể chuyển sang IN_PROGRESS (sau khi customer approve)
-                isValidTransition = (newStatus == OrderStatus.IN_PROGRESS);
+                // Từ QUOTING có thể chuyển sang IN_PROGRESS hoặc WAITING_FOR_PARTS
+                isValidTransition = (newStatus == OrderStatus.IN_PROGRESS
+                        || newStatus == OrderStatus.WAITING_FOR_PARTS);
                 break;
             case WAITING_FOR_PARTS:
                 // Từ WAITING_FOR_PARTS chuyển sang IN_PROGRESS
@@ -151,6 +163,11 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
         dto.setId(work.getId());
         dto.setStatus(work.getStatus());
         dto.setCreatedAt(work.getCreatedAt());
+
+        // Lấy appointmentTime từ appointment nếu có
+        if (work.getAppointment() != null) {
+            dto.setAppointmentTime(work.getAppointment().getAppointmentTime());
+        }
 
         // Thông tin xe
         dto.setVehicleLicensePlate(work.getVehicle().getLicensePlate());
@@ -202,17 +219,27 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
                     itemDto.setUnitPrice(item.getUnitPrice());
                     itemDto.setStatus(item.getStatus());
 
-                    // Lấy tên item
+                    // Lấy tên item và ID theo loại
                     if (item.getItemType() == OrderItemType.SERVICE) {
-                        itemDto.setItemName(
-                                maintenanceServiceRepository.findById(item.getItemRefId())
-                                        .map(MaintenanceService::getName)
-                                        .orElse("Dịch vụ không xác định"));
+                        maintenanceServiceRepository.findById(item.getItemRefId())
+                                .ifPresent(service -> {
+                                    itemDto.setServiceId(service.getId());
+                                    itemDto.setServiceName(service.getName());
+                                    itemDto.setItemName(service.getName()); // backward compatible
+                                });
+                        if (itemDto.getServiceName() == null) {
+                            itemDto.setItemName("Dịch vụ không xác định");
+                        }
                     } else if (item.getItemType() == OrderItemType.PART) {
-                        itemDto.setItemName(
-                                partRepository.findById(item.getItemRefId())
-                                        .map(Part::getPartName)
-                                        .orElse("Phụ tùng không xác định"));
+                        partRepository.findById(item.getItemRefId())
+                                .ifPresent(part -> {
+                                    itemDto.setPartId(part.getId());
+                                    itemDto.setPartName(part.getPartName());
+                                    itemDto.setItemName(part.getPartName()); // backward compatible
+                                });
+                        if (itemDto.getPartName() == null) {
+                            itemDto.setItemName("Phụ tùng không xác định");
+                        }
                     }
 
                     return itemDto;
@@ -222,5 +249,61 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
         dto.setOrderItems(itemDtos);
 
         return dto;
+    }
+
+    @Override
+    public List<TechnicianAvailabilityResponse> getAvailableTechnicians() {
+        try {
+            System.out.println("[DEBUG] getAvailableTechnicians() - Bắt đầu tìm technicians...");
+
+            // Lấy tất cả technicians
+            List<User> allUsers = userRepository.findAll();
+            System.out.println("[DEBUG] Tổng số users trong DB: " + allUsers.size());
+
+            List<User> technicians = allUsers.stream()
+                    .filter(user -> {
+                        boolean isTech = user.getRole() == UserRole.TECHNICIAN;
+                        boolean isActive = user.isActive();
+                        System.out.println("[DEBUG] User " + user.getUserId() + " - " + user.getFullName()
+                                + " - Role: " + user.getRole() + " - Active: " + isActive);
+                        return isTech && isActive;
+                    })
+                    .collect(Collectors.toList());
+
+            System.out.println("[DEBUG] Số technicians tìm được: " + technicians.size());
+
+            // Đếm số công việc đang làm của mỗi technician
+            return technicians.stream()
+                    .map(tech -> {
+                        long activeWorkCount = 0;
+                        try {
+                            List<ServiceOrder> orders = serviceOrderRepository
+                                    .findByTechnicianUserIdAndStatusNot(tech.getUserId(), OrderStatus.COMPLETED);
+                            activeWorkCount = orders.stream()
+                                    .filter(order -> order.getStatus() != OrderStatus.CANCELLED)
+                                    .count();
+                            System.out.println("[DEBUG] Tech " + tech.getFullName() + " có " + activeWorkCount
+                                    + " công việc đang làm");
+                        } catch (Exception e) {
+                            System.err.println("[ERROR] Lỗi khi đếm công việc cho tech " + tech.getUserId() + ": "
+                                    + e.getMessage());
+                        }
+
+                        return TechnicianAvailabilityResponse.builder()
+                                .userId(tech.getUserId())
+                                .fullName(tech.getFullName())
+                                .email(tech.getEmail())
+                                .phone(tech.getPhone())
+                                .avatarUrl(tech.getAvatarUrl())
+                                .activeWorkCount(activeWorkCount)
+                                .isAvailable(activeWorkCount < 3)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("[ERROR] getAvailableTechnicians() - Lỗi: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

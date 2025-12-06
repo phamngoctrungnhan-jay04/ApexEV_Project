@@ -54,7 +54,7 @@ public class MaintenanceService {
     // 8. Trạng thái hoạt động
     @Column(name = "is_active")
     private Boolean isActive = true;
-    
+
     // 9. Các bước kiểm tra (checklist items) của dịch vụ này
     @JsonIgnore
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)

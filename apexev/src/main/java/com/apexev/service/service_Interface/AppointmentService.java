@@ -1,6 +1,7 @@
 package com.apexev.service.service_Interface;
 
 import com.apexev.dto.request.coreBussinessRequest.AppointmentRequest;
+import com.apexev.dto.request.coreBussinessRequest.AssignTechnicianRequest;
 import com.apexev.dto.request.coreBussinessRequest.RescheduleAppointmentRequest;
 import com.apexev.dto.response.coreBussinessResponse.AppointmentResponse;
 import com.apexev.entity.User;
@@ -28,4 +29,7 @@ public interface AppointmentService {
 
     // Lấy danh sách lịch hẹn trạng thái PENDING cho advisor xác nhận
     List<AppointmentResponse> getPendingAppointmentsForAdvisor(Integer advisorId);
+
+    // Phân công technician cho appointment (sẽ tạo ServiceOrder)
+    AppointmentResponse assignTechnician(Long appointmentId, AssignTechnicianRequest request, User loggedInAdvisor);
 }

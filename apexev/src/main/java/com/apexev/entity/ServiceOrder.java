@@ -3,7 +3,6 @@ package com.apexev.entity;
 
 import com.apexev.enums.OrderStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +25,7 @@ public class ServiceOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
-    private OrderStatus status = OrderStatus.RECEPTION;
+    private OrderStatus status = OrderStatus.CONFIRMED;
 
     @Nationalized
     @Column(name = "customer_description", columnDefinition = "TEXT")
@@ -34,7 +33,8 @@ public class ServiceOrder {
 
     @Nationalized
     @Column(name = "advisor_notes", columnDefinition = "TEXT")
-    private String advisorNotes; //note của cố vấn về yêu cầu của khách hàng (nếu có), kiểu như rửa xe trước khi giao hoặc something
+    private String advisorNotes; // note của cố vấn về yêu cầu của khách hàng (nếu có), kiểu như rửa xe trước khi
+                                 // giao hoặc something
     @Nationalized
     @Column(name = "technician_notes", columnDefinition = "TEXT")
     private String technicianNotes;
@@ -65,8 +65,7 @@ public class ServiceOrder {
     private User serviceAdvisor; // Liên kết về User
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "technician_id") // KTV được chỉ định (có thể null)
-    @NotEmpty(message = "Vui lòng chọn kỹ thuật viên!")
+    @JoinColumn(name = "technician_id", nullable = false) // KTV được chỉ định khi assign
     private User technician; // Liên kết về User
 
     @OneToMany(mappedBy = "serviceOrder", cascade = CascadeType.ALL, orphanRemoval = true)

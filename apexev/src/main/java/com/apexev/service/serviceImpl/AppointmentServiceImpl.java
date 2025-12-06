@@ -1,14 +1,18 @@
 package com.apexev.service.serviceImpl;
 
 import com.apexev.dto.request.coreBussinessRequest.AppointmentRequest;
+import com.apexev.dto.request.coreBussinessRequest.AssignTechnicianRequest;
 import com.apexev.dto.request.coreBussinessRequest.RescheduleAppointmentRequest;
 import com.apexev.dto.response.coreBussinessResponse.AppointmentResponse;
 import com.apexev.entity.Appointment;
+import com.apexev.entity.ServiceOrder;
 import com.apexev.entity.User;
 import com.apexev.entity.Vehicle;
 import com.apexev.enums.AppointmentStatus;
+import com.apexev.enums.OrderStatus;
 import com.apexev.enums.UserRole;
 import com.apexev.repository.coreBussiness.AppointmentRepository;
+import com.apexev.repository.coreBussiness.ServiceOrderRepository;
 import com.apexev.repository.userAndVehicle.UserRepository;
 import com.apexev.repository.userAndVehicle.VehicleRepository;
 import com.apexev.service.service_Interface.AppointmentService;
@@ -18,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +36,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository; // gắn cố vấn dịch vụ
     private final NotificationService notificationService; // Thêm NotificationService
     private final com.apexev.repository.coreBussiness.ServiceRepository serviceRepository; // Inject ServiceRepository
+    private final ServiceOrderRepository serviceOrderRepository; // Inject để tạo ServiceOrder
     // setup tự động chuyển Entity -> DTO
     private final ModelMapper modelMapper;
     private final MailService mailService; // Inject MailService
@@ -60,17 +67,22 @@ public class AppointmentServiceImpl implements AppointmentService {
         newAppointment.setAppointmentTime(request.getAppointmentTime());
         // Map requestedService từ serviceIds nếu có
         String requestedServiceStr = null;
+        String serviceIdsStr = null;
         if (request.getServiceIds() != null && !request.getServiceIds().isEmpty()) {
             java.util.List<String> serviceNames = new java.util.ArrayList<>();
+            java.util.List<String> serviceIdList = new java.util.ArrayList<>();
             for (Integer sidInt : request.getServiceIds()) {
                 Long sid = sidInt.longValue();
+                serviceIdList.add(sid.toString());
                 var serviceOpt = serviceRepository.findById(sid);
                 serviceOpt.ifPresent(s -> serviceNames.add(s.getName()));
             }
             requestedServiceStr = String.join(", ", serviceNames);
+            serviceIdsStr = String.join(",", serviceIdList);
         }
         newAppointment.setRequestedService(requestedServiceStr != null ? requestedServiceStr
                 : (request.getRequestedService() != null ? request.getRequestedService().trim() : null));
+        newAppointment.setServiceIds(serviceIdsStr); // Lưu danh sách serviceIds
         newAppointment.setNotes(request.getNotes() != null ? request.getNotes().trim() : null);
         // 6. set trạng thái ban đầu là pending
         newAppointment.setStatus(AppointmentStatus.PENDING);
@@ -236,11 +248,28 @@ public class AppointmentServiceImpl implements AppointmentService {
         // 2. lấy ds và sắp xếp lịch gần nhất lên đầu
         List<Appointment> appointments = appointmentRepository
                 .findByCustomerUserIdOrderByAppointmentTimeDesc(customerId);
-        // 3. Dùng Stream để map cả danh sách sang List<AppointmentResponse>
-        return appointments.stream() // stream kiểu như dây chuyền để đóng gói hàng loạt các appointment bên dưới
-                                     // thành 1 list
-                .map(appointment -> modelMapper.map(appointment, AppointmentResponse.class))
-                .collect(Collectors.toList()); // đóng gói các appointment lại thành 1 list
+        // 3. Map sang DTO với đầy đủ thông tin technician từ ServiceOrder
+        return appointments.stream()
+                .map(appointment -> {
+                    AppointmentResponse dto = modelMapper.map(appointment, AppointmentResponse.class);
+                    // Thêm phone của customer
+                    if (appointment.getCustomer() != null) {
+                        dto.setCustomerPhone(appointment.getCustomer().getPhone());
+                    }
+                    // Kiểm tra xem appointment này đã có ServiceOrder chưa -> lấy technician từ đó
+                    ServiceOrder existingOrder = serviceOrderRepository.findByAppointmentId(appointment.getId())
+                            .orElse(null);
+                    if (existingOrder != null) {
+                        dto.setServiceOrderId(existingOrder.getId()); // Set serviceOrderId
+                        dto.setServiceOrderStatus(existingOrder.getStatus().name()); // Set serviceOrderStatus
+                        if (existingOrder.getTechnician() != null) {
+                            dto.setAssignedTechnicianId(existingOrder.getTechnician().getUserId().longValue());
+                            dto.setAssignedTechnicianName(existingOrder.getTechnician().getFullName());
+                        }
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -254,9 +283,27 @@ public class AppointmentServiceImpl implements AppointmentService {
         // 2. lấy ds và sắp xếp lịch gần nhất lên đầu
         List<Appointment> appointments = appointmentRepository
                 .findByServiceAdvisorUserIdOrderByAppointmentTimeAsc(advisorId);
-        // 3. Map cả danh sách sang List<AppointmentResponse>
+        // 3. Map cả danh sách sang List<AppointmentResponse> với đầy đủ thông tin
         return appointments.stream()
-                .map(appointment -> modelMapper.map(appointment, AppointmentResponse.class))
+                .map(appointment -> {
+                    AppointmentResponse dto = modelMapper.map(appointment, AppointmentResponse.class);
+                    // Thêm phone của customer
+                    if (appointment.getCustomer() != null) {
+                        dto.setCustomerPhone(appointment.getCustomer().getPhone());
+                    }
+                    // Kiểm tra xem appointment này đã có ServiceOrder chưa -> lấy technician từ đó
+                    ServiceOrder existingOrder = serviceOrderRepository.findByAppointmentId(appointment.getId())
+                            .orElse(null);
+                    if (existingOrder != null) {
+                        dto.setServiceOrderId(existingOrder.getId()); // Set serviceOrderId
+                        dto.setServiceOrderStatus(existingOrder.getStatus().name()); // Set serviceOrderStatus
+                        if (existingOrder.getTechnician() != null) {
+                            dto.setAssignedTechnicianId(existingOrder.getTechnician().getUserId().longValue());
+                            dto.setAssignedTechnicianName(existingOrder.getTechnician().getFullName());
+                        }
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -281,7 +328,25 @@ public class AppointmentServiceImpl implements AppointmentService {
                     + (a.getServiceAdvisor() != null ? a.getServiceAdvisor().getUserId() : "null"));
         }
         List<AppointmentResponse> responseList = appointments.stream()
-                .map(appointment -> modelMapper.map(appointment, AppointmentResponse.class))
+                .map(appointment -> {
+                    AppointmentResponse dto = modelMapper.map(appointment, AppointmentResponse.class);
+                    // Thêm phone của customer
+                    if (appointment.getCustomer() != null) {
+                        dto.setCustomerPhone(appointment.getCustomer().getPhone());
+                    }
+                    // Kiểm tra xem appointment này đã có ServiceOrder chưa -> lấy technician từ đó
+                    ServiceOrder existingOrder = serviceOrderRepository.findByAppointmentId(appointment.getId())
+                            .orElse(null);
+                    if (existingOrder != null) {
+                        dto.setServiceOrderId(existingOrder.getId()); // Set serviceOrderId
+                        dto.setServiceOrderStatus(existingOrder.getStatus().name()); // Set serviceOrderStatus
+                        if (existingOrder.getTechnician() != null) {
+                            dto.setAssignedTechnicianId(existingOrder.getTechnician().getUserId().longValue());
+                            dto.setAssignedTechnicianName(existingOrder.getTechnician().getFullName());
+                        }
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
         // Log dữ liệu DTO trả về cho FE
         for (AppointmentResponse r : responseList) {
@@ -291,9 +356,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         return responseList;
     }
 
-    // hàm tìm kiếm
+    // hàm tìm kiếm - dùng JOIN FETCH để load customer và vehicle
     private Appointment findAppointmentByIdInternal(Long appointmentId) {
-        return appointmentRepository.findById(appointmentId)
+        return appointmentRepository.findByIdWithCustomerAndVehicle(appointmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy lịch hẹn với ID: " + appointmentId));
     }
 
@@ -306,5 +371,145 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
         // nghĩa là nếu là ADMIN/MANAGER/SERVICE_ADVISOR thì có toàn quyền -> chỉ quy
         // định cho CUSTOMER
+    }
+
+    @Override
+    @Transactional
+    public AppointmentResponse assignTechnician(Long appointmentId, AssignTechnicianRequest request,
+            User loggedInAdvisor) {
+        // 1. Kiểm tra quyền - chỉ Service Advisor mới được phân công
+        if (loggedInAdvisor.getRole() != UserRole.SERVICE_ADVISOR) {
+            throw new AccessDeniedException("Chỉ Cố vấn dịch vụ mới có quyền phân công kỹ thuật viên.");
+        }
+
+        // 2. Tìm appointment
+        Appointment appointment = findAppointmentByIdInternal(appointmentId);
+
+        // DEBUG: Log customer và vehicle
+        System.out.println("[ASSIGN-DEBUG] Appointment ID: " + appointment.getId());
+        System.out.println("[ASSIGN-DEBUG] Customer: " + appointment.getCustomer());
+        System.out.println("[ASSIGN-DEBUG] Vehicle: " + appointment.getVehicle());
+
+        // Đảm bảo customer và vehicle được load (tránh LazyInitializationException)
+        User customer = appointment.getCustomer();
+        Vehicle vehicle = appointment.getVehicle();
+
+        if (customer == null) {
+            throw new IllegalStateException("Lịch hẹn không có thông tin khách hàng.");
+        }
+        if (vehicle == null) {
+            throw new IllegalStateException("Lịch hẹn không có thông tin xe.");
+        }
+
+        System.out.println("[ASSIGN-DEBUG] Customer ID: " + customer.getUserId() + ", Name: " + customer.getFullName());
+        System.out.println("[ASSIGN-DEBUG] Vehicle ID: " + vehicle.getId());
+
+        // 3. Kiểm tra trạng thái - chỉ phân công khi PENDING
+        if (appointment.getStatus() != AppointmentStatus.PENDING) {
+            throw new IllegalStateException("Chỉ có thể phân công kỹ thuật viên cho lịch hẹn đang chờ xác nhận.");
+        }
+
+        // 4. Tìm technician
+        User technician = userRepository.findById(request.getTechnicianId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy kỹ thuật viên với ID: " + request.getTechnicianId()));
+
+        // 5. Kiểm tra role của technician
+        if (technician.getRole() != UserRole.TECHNICIAN) {
+            throw new IllegalArgumentException("User được chọn không phải là Kỹ thuật viên.");
+        }
+
+        // 6. Cập nhật Appointment
+        appointment.setServiceAdvisor(loggedInAdvisor);
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        // 7. Tạo ServiceOrder để Technician có công việc để làm
+        ServiceOrder serviceOrder = new ServiceOrder();
+        serviceOrder.setAppointment(savedAppointment);
+        serviceOrder.setCustomer(customer); // Dùng biến đã load
+        serviceOrder.setVehicle(vehicle); // Dùng biến đã load
+        serviceOrder.setServiceAdvisor(loggedInAdvisor);
+        serviceOrder.setTechnician(technician);
+        serviceOrder.setStatus(OrderStatus.CONFIRMED); // Trạng thái ban đầu: Đã xác nhận, chờ kỹ thuật viên tiếp nhận
+        serviceOrder.setCustomerDescription(appointment.getRequestedService()); // Lấy mô tả từ appointment
+
+        // Gộp notes từ appointment với advisorNotes từ request (nếu có)
+        String combinedNotes = "";
+        if (appointment.getNotes() != null && !appointment.getNotes().trim().isEmpty()) {
+            combinedNotes = "Ghi chú khách hàng: " + appointment.getNotes().trim();
+        }
+        if (request.getAdvisorNotes() != null && !request.getAdvisorNotes().trim().isEmpty()) {
+            if (!combinedNotes.isEmpty()) {
+                combinedNotes += "\n";
+            }
+            combinedNotes += "Ghi chú cố vấn: " + request.getAdvisorNotes().trim();
+        }
+        serviceOrder.setAdvisorNotes(combinedNotes.isEmpty() ? null : combinedNotes);
+
+        // 7.1. Tạo ServiceOrderItem từ serviceIds của appointment
+        java.util.Set<com.apexev.entity.ServiceOrderItem> orderItems = new java.util.HashSet<>();
+        if (appointment.getServiceIds() != null && !appointment.getServiceIds().trim().isEmpty()) {
+            String[] ids = appointment.getServiceIds().split(",");
+            for (String idStr : ids) {
+                try {
+                    Long serviceId = Long.parseLong(idStr.trim());
+                    var serviceOpt = serviceRepository.findById(serviceId);
+                    if (serviceOpt.isPresent()) {
+                        var service = serviceOpt.get();
+                        com.apexev.entity.ServiceOrderItem item = new com.apexev.entity.ServiceOrderItem();
+                        item.setItemType(com.apexev.enums.OrderItemType.SERVICE);
+                        item.setItemRefId(serviceId);
+                        item.setQuantity(1);
+                        item.setUnitPrice(
+                                service.getUnitPrice() != null ? service.getUnitPrice() : java.math.BigDecimal.ZERO);
+                        item.setStatus(com.apexev.enums.OrderItemStatus.APPROVED); // Đã được khách duyệt khi đặt lịch
+                        item.setServiceOrder(serviceOrder);
+                        orderItems.add(item);
+                        System.out.println("[ASSIGN] Thêm service item: " + service.getName() + ", ID=" + serviceId);
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("[ASSIGN] Lỗi parse serviceId: " + idStr);
+                }
+            }
+        }
+        serviceOrder.setOrderItems(orderItems);
+
+        ServiceOrder savedServiceOrder = serviceOrderRepository.save(serviceOrder);
+
+        // 8. Gửi notification cho Technician
+        String technicianMessage = String.format(
+                "Bạn được phân công công việc mới cho xe %s - %s. Khách hàng: %s",
+                appointment.getVehicle().getBrand(),
+                appointment.getVehicle().getModel(),
+                appointment.getCustomer().getFullName());
+        try {
+            notificationService.sendNotification(technician, technicianMessage, null);
+            System.out.println("[ASSIGN] Đã gửi notification cho technician: " + technician.getUserId());
+        } catch (Exception e) {
+            System.out.println("[ERROR] Lỗi gửi notification cho technician: " + e.getMessage());
+        }
+
+        // 9. Gửi notification cho Customer
+        String customerMessage = String.format(
+                "Lịch hẹn của bạn đã được xác nhận. Kỹ thuật viên %s sẽ phụ trách xe của bạn.",
+                technician.getFullName());
+        try {
+            notificationService.sendNotification(appointment.getCustomer(), customerMessage, null);
+            System.out.println("[ASSIGN] Đã gửi notification cho customer: " + appointment.getCustomer().getUserId());
+        } catch (Exception e) {
+            System.out.println("[ERROR] Lỗi gửi notification cho customer: " + e.getMessage());
+        }
+
+        // 10. Log
+        System.out.println("[ASSIGN] ServiceOrder #" + savedServiceOrder.getId() + " created for Technician "
+                + technician.getFullName());
+
+        // 11. Map response với đầy đủ thông tin technician đã assign
+        AppointmentResponse response = modelMapper.map(savedAppointment, AppointmentResponse.class);
+        response.setAssignedTechnicianId(technician.getUserId().longValue());
+        response.setAssignedTechnicianName(technician.getFullName());
+
+        return response;
     }
 }

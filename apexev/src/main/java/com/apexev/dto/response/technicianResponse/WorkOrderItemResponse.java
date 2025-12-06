@@ -12,7 +12,11 @@ import java.math.BigDecimal;
 public class WorkOrderItemResponse {
     private Long id;
     private OrderItemType itemType; // SERVICE hoặc PART
-    private String itemName; // Tên dịch vụ hoặc phụ tùng
+    private Long serviceId; // ID của dịch vụ (nếu itemType là SERVICE)
+    private String serviceName; // Tên dịch vụ
+    private Long partId; // ID của phụ tùng (nếu itemType là PART)
+    private String partName; // Tên phụ tùng
+    private String itemName; // Tên chung (backward compatible)
     private int quantity;
     private BigDecimal unitPrice;
     private OrderItemStatus status; // REQUESTED, APPROVED, REJECTED

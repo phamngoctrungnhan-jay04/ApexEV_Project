@@ -2,6 +2,8 @@ package com.apexev.controller;
 
 import com.apexev.dto.request.SubmitChecklistItemRequest;
 import com.apexev.dto.response.ChecklistItemResponse;
+import com.apexev.dto.response.ChecklistTemplateResponse;
+import com.apexev.dto.response.ServiceChecklistResponse;
 import com.apexev.entity.User;
 import com.apexev.service.serviceImpl.ChecklistService;
 import jakarta.validation.Valid;
@@ -23,10 +25,80 @@ public class ChecklistController {
     private final ChecklistService checklistService;
 
     /**
+     * Lấy danh sách templates có sẵn
+     * Endpoint: GET /api/checklist/templates
+     */
+    @GetMapping("/templates")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'ADMIN')")
+    public ResponseEntity<List<ChecklistTemplateResponse>> getTemplates() {
+        log.info("Get all checklist templates");
+        List<ChecklistTemplateResponse> templates = checklistService.getAllTemplates();
+        return ResponseEntity.ok(templates);
+    }
+
+    /**
+     * Lấy chi tiết một template
+     * Endpoint: GET /api/checklist/templates/{templateId}
+     */
+    @GetMapping("/templates/{templateId}")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'ADMIN')")
+    public ResponseEntity<ChecklistTemplateResponse> getTemplateById(@PathVariable Long templateId) {
+        log.info("Get template by id: {}", templateId);
+        ChecklistTemplateResponse template = checklistService.getTemplateById(templateId);
+        return ResponseEntity.ok(template);
+    }
+
+    /**
+     * Lấy template theo service ID (để auto-match checklist cho dịch vụ)
+     * Endpoint: GET /api/checklist/templates/by-service/{serviceId}
+     */
+    @GetMapping("/templates/by-service/{serviceId}")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'ADMIN')")
+    public ResponseEntity<ChecklistTemplateResponse> getTemplateByServiceId(@PathVariable Long serviceId) {
+        log.info("Get template by service id: {}", serviceId);
+        ChecklistTemplateResponse template = checklistService.getTemplateByServiceId(serviceId);
+        if (template == null) {
+            return ResponseEntity.noContent().build(); // 204 nếu không có template cho service này
+        }
+        return ResponseEntity.ok(template);
+    }
+
+    /**
+     * Tạo checklist cho một service order
+     * Endpoint: POST /api/checklist/service-order/{serviceOrderId}
+     */
+    @PostMapping("/service-order/{serviceOrderId}")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public ResponseEntity<ServiceChecklistResponse> createChecklistForOrder(
+            @PathVariable Long serviceOrderId,
+            @RequestParam Long templateId,
+            @AuthenticationPrincipal User technician) {
+        log.info("Create checklist for serviceOrderId={}, templateId={}, technicianId={}",
+                serviceOrderId, templateId, technician.getUserId());
+        ServiceChecklistResponse response = checklistService.createChecklistForOrder(serviceOrderId, templateId,
+                technician);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Lấy checklist của một service order
+     * Endpoint: GET /api/checklist/service-order/{serviceOrderId}
+     */
+    @GetMapping("/service-order/{serviceOrderId}")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'CUSTOMER', 'ADMIN')")
+    public ResponseEntity<List<ServiceChecklistResponse>> getChecklistsByOrder(
+            @PathVariable Long serviceOrderId,
+            @AuthenticationPrincipal User user) {
+        log.info("Get checklists for serviceOrderId={}, userId={}", serviceOrderId, user.getUserId());
+        List<ServiceChecklistResponse> checklists = checklistService.getChecklistsByOrder(serviceOrderId, user);
+        return ResponseEntity.ok(checklists);
+    }
+
+    /**
      * Submit một hạng mục checklist với S3 key
      * Endpoint: POST /api/checklist/submit
      * 
-     * @param request SubmitChecklistItemRequest
+     * @param request    SubmitChecklistItemRequest
      * @param technician User (từ JWT)
      * @return ChecklistItemResponse
      */
@@ -34,11 +106,10 @@ public class ChecklistController {
     @PreAuthorize("hasRole('TECHNICIAN')")
     public ResponseEntity<ChecklistItemResponse> submitChecklistItem(
             @Valid @RequestBody SubmitChecklistItemRequest request,
-            @AuthenticationPrincipal User technician
-    ) {
-        log.info("Submit checklist item request: checklistId={}, templateItemId={}, status={}, hasMedia={}", 
-                request.getChecklistId(), 
-                request.getTemplateItemId(), 
+            @AuthenticationPrincipal User technician) {
+        log.info("Submit checklist item request: checklistId={}, templateItemId={}, status={}, hasMedia={}",
+                request.getChecklistId(),
+                request.getTemplateItemId(),
                 request.getStatus(),
                 request.getS3Key() != null);
 
@@ -52,15 +123,14 @@ public class ChecklistController {
      * Endpoint: GET /api/checklist/{checklistId}/results
      * 
      * @param checklistId Checklist ID
-     * @param user User (từ JWT)
+     * @param user        User (từ JWT)
      * @return List<ChecklistItemResponse>
      */
     @GetMapping("/{checklistId}/results")
     @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'CUSTOMER', 'ADMIN')")
     public ResponseEntity<List<ChecklistItemResponse>> getChecklistResults(
             @PathVariable Long checklistId,
-            @AuthenticationPrincipal User user
-    ) {
+            @AuthenticationPrincipal User user) {
         log.info("Get checklist results request: checklistId={}, userId={}", checklistId, user.getUserId());
 
         List<ChecklistItemResponse> results = checklistService.getChecklistResults(checklistId, user);
@@ -73,15 +143,14 @@ public class ChecklistController {
      * Endpoint: GET /api/checklist/result/{resultId}
      * 
      * @param resultId Result ID
-     * @param user User (từ JWT)
+     * @param user     User (từ JWT)
      * @return ChecklistItemResponse
      */
     @GetMapping("/result/{resultId}")
     @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'CUSTOMER', 'ADMIN')")
     public ResponseEntity<ChecklistItemResponse> getChecklistItem(
             @PathVariable Long resultId,
-            @AuthenticationPrincipal User user
-    ) {
+            @AuthenticationPrincipal User user) {
         log.info("Get checklist item request: resultId={}, userId={}", resultId, user.getUserId());
 
         ChecklistItemResponse response = checklistService.getChecklistItem(resultId, user);

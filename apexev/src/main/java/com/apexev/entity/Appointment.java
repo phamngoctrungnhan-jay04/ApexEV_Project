@@ -24,10 +24,13 @@ public class Appointment {
 
     @Nationalized
     @Column(name = "requested_service", columnDefinition = "TEXT")
-    private String requestedService; // Dịch vụ khách yêu cầu ban đầu
+    private String requestedService; // Dịch vụ khách yêu cầu ban đầu (tên hiển thị)
+
+    @Column(name = "service_ids", columnDefinition = "TEXT")
+    private String serviceIds; // Lưu danh sách service IDs dạng "1,2,3"
 
     @Column(name = "appointment_time", nullable = false)
-    private LocalDateTime appointmentTime; //thời gian hẹn
+    private LocalDateTime appointmentTime; // thời gian hẹn
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)

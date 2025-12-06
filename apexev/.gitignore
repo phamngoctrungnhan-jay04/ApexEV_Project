@@ -36,3 +36,7 @@ build/
 .env
 .env.local
 .env.*.local
+
+### Application Configuration Files ###
+src/main/resources/application.properties
+src/main/resources/application-dev.properties

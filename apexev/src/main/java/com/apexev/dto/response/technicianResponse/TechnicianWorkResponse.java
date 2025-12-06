@@ -12,16 +12,17 @@ public class TechnicianWorkResponse {
     private Long id;
     private OrderStatus status;
     private LocalDateTime createdAt;
-    
+    private LocalDateTime appointmentTime;
+
     // Thông tin xe
     private String vehicleLicensePlate;
     private String vehicleModel;
     private String vehicleBrand;
-    
+
     // Thông tin khách hàng
     private String customerName;
     private String customerPhone;
-    
+
     // Mô tả ngắn gọn
     private String customerDescription;
 }

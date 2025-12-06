@@ -112,29 +112,31 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
         }
 
         // 7. ⭐️ Map danh sách Món hàng (Phức tạp, cần lấy tên)
-        List<ServiceOrderItemResponse> itemDtos = order.getOrderItems().stream()
-                .map(itemEntity -> {
-                    ServiceOrderItemResponse itemDto = new ServiceOrderItemResponse();
-                    itemDto.setItemType(itemEntity.getItemType());
-                    itemDto.setQuantity(itemEntity.getQuantity());
-                    itemDto.setUnitPrice(itemEntity.getUnitPrice());
+        if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+            List<ServiceOrderItemResponse> itemDtos = order.getOrderItems().stream()
+                    .map(itemEntity -> {
+                        ServiceOrderItemResponse itemDto = new ServiceOrderItemResponse();
+                        itemDto.setItemType(itemEntity.getItemType());
+                        itemDto.setQuantity(itemEntity.getQuantity());
+                        itemDto.setUnitPrice(itemEntity.getUnitPrice());
 
-                    // Lấy tên món hàng (Logic "hoàn hảo")
-                    if (itemEntity.getItemType() == OrderItemType.SERVICE) {
-                        itemDto.setItemName(
-                                maintenanceServiceRepository.findById(itemEntity.getItemRefId())
-                                        .map(MaintenanceService::getName)
-                                        .orElse("Dịch vụ không xác định"));
-                    } else if (itemEntity.getItemType() == OrderItemType.PART) {
-                        itemDto.setItemName(
-                                partRepository.findById(itemEntity.getItemRefId())
-                                        .map(Part::getPartName)
-                                        .orElse("Phụ tùng không xác định"));
-                    }
-                    return itemDto;
-                }).collect(Collectors.toList());
+                        // Lấy tên món hàng (Logic "hoàn hảo")
+                        if (itemEntity.getItemType() == OrderItemType.SERVICE) {
+                            itemDto.setItemName(
+                                    maintenanceServiceRepository.findById(itemEntity.getItemRefId())
+                                            .map(MaintenanceService::getName)
+                                            .orElse("Dịch vụ không xác định"));
+                        } else if (itemEntity.getItemType() == OrderItemType.PART) {
+                            itemDto.setItemName(
+                                    partRepository.findById(itemEntity.getItemRefId())
+                                            .map(Part::getPartName)
+                                            .orElse("Phụ tùng không xác định"));
+                        }
+                        return itemDto;
+                    }).collect(Collectors.toList());
 
-        detailDto.setItems(itemDtos);
+            detailDto.setItems(itemDtos);
+        }
 
         return detailDto;
     }

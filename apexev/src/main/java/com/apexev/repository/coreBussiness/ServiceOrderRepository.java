@@ -15,7 +15,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     List<ServiceOrder> findByCustomerUserIdOrderByCreatedAtDesc(Long customerId);
 
     // Dùng cho KTV
-    List<ServiceOrder> findByTechnicianUserIdAndStatusNot(Long technicianId, OrderStatus status);
+    List<ServiceOrder> findByTechnicianUserIdAndStatusNot(Integer technicianId, OrderStatus status);
 
     // Dùng cho Cố vấn
     List<ServiceOrder> findByServiceAdvisorUserIdOrderByCreatedAtDesc(Long advisorId);
@@ -31,4 +31,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     // Xóa tất cả đơn hàng của 1 khách hàng
     void deleteByCustomerUserId(Integer customerId);
+
+    // Tìm ServiceOrder theo Appointment ID (để lấy technician đã assign)
+    Optional<ServiceOrder> findByAppointmentId(Long appointmentId);
 }

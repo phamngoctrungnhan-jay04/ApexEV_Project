@@ -28,6 +28,12 @@ public class ChecklistTemplate {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    // Liên kết template với dịch vụ cụ thể (để auto-match khi technician làm
+    // checklist)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id")
+    private MaintenanceService service;
+
     // --- Relationships ---
 
     // Một mẫu có nhiều hạng mục con
