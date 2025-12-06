@@ -4,9 +4,11 @@ import com.apexev.dto.request.userAndVehicleRequest.VehicleRequest;
 import com.apexev.dto.response.userAndVehicleResponse.VehicleResponse;
 import com.apexev.entity.User;
 
-import com.apexev.service.serviceImpl.VehicleServiceImpl;
+
+import com.apexev.service.service_Interface.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('CUSTOMER')")
 public class VehicleController {
-    private final VehicleServiceImpl vehicleService;
+    @Autowired
+    private VehicleService vehicleService;
 
     //thêm xe mới vào gara
     @PostMapping("/createVehicle")
