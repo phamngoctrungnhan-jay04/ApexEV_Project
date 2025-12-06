@@ -15,7 +15,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ServiceChecklist { // bảng này là một cái bìa của một quyển sách -> nó chứa thông tin tóm tắt bên ngoài -> ko chứa thông tin pass or fail
+public class ServiceChecklist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "checklist_id")
@@ -29,15 +29,15 @@ public class ServiceChecklist { // bảng này là một cái bìa của một q
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private ServiceOrder serviceOrder; //đơn hàng nào
+    private ServiceOrder serviceOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id", nullable = false)
-    private ChecklistTemplate template; // đã dùng mẫu nào
+    private ChecklistTemplate template; // Mẫu đã dùng
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "technician_id", nullable = false)
-    private User technician; // KTV nào là người thực hiện bài checklist này
+    private User technician; // KTV thực hiện
 
     // Một checklist thực tế có nhiều kết quả
     @OneToMany(mappedBy = "serviceChecklist", cascade = CascadeType.ALL, orphanRemoval = true)
