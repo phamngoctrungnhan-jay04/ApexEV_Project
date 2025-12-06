@@ -1,8 +1,6 @@
 package com.apexev.config;
 
 
-import org.modelmapper.ModelMapper;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,7 +44,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/actuator/health", "/actuator/info", "/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
+                        .requestMatchers("/api/auth/**","/api/chat/**", "/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -58,28 +56,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // 1. Cho phép các nguồn (Origins)
-        // Dùng setAllowedOriginPatterns("*") thay vì setAllowedOrigins("*") 
-        // để có thể dùng chung với setAllowCredentials(true)
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:5173",      // Cho phép Localhost (Dev)
-            "https://*.amplifyapp.com",   // Cho phép tất cả các trang Amplify
-            "*"                           // Hoặc dùng "*" để chấp nhận tất cả (Dễ test nhất)
-        ));
-
-        // 2. Cho phép các Methods
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // FE port
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        
-        // 3. Cho phép các Headers
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-        
-        // 4. Cho phép gửi Cookie/Token
-        configuration.setAllowCredentials(true);
-        
-        // 5. Expose Headers (để FE đọc được các header trả về nếu cần)
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true); // Nếu dùng cookie/token
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
