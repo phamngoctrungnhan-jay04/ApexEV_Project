@@ -37,6 +37,7 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
     private final ServiceOrderRepository serviceOrderRepository;
     private final PartRepository partRepository;
     private final MaintenanceServiceRepository maintenanceServiceRepository;
+    private final UserRepository userRepository;
     private final SNSEmailService snsEmailService;
 
     @Value("${app.appointment-schedule-link:https://apexev.com/appointments/schedule}")
