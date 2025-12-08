@@ -26,6 +26,7 @@ import {
   FiMessageCircle,
   FiHash,
   FiMail,
+  FiFileText,
 } from 'react-icons/fi';
 import { FaCar } from 'react-icons/fa';
 import AdvisorLayout from './AdvisorLayout';

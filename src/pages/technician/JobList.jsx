@@ -367,7 +367,20 @@ const JobList = () => {
     try {
       // Upload lên S3
       const response = await uploadTechnicianFile(file, 'checklist-evidence');
-      const imageUrl = response.url || response.fileUrl || response.s3Key;
+      console.log('Upload response:', response);
+      
+      // Lấy URL từ response (có thể là url, fileUrl, hoặc s3Key)
+      let imageUrl = response.url || response.fileUrl;
+      
+      // Nếu chỉ có s3Key, cần lấy presigned URL
+      if (!imageUrl && response.s3Key) {
+        const viewUrlResponse = await getFileViewUrl(response.s3Key, 1440); // 24 giờ
+        imageUrl = viewUrlResponse.url || viewUrlResponse.presignedUrl;
+      }
+      
+      if (!imageUrl) {
+        throw new Error('Không nhận được URL ảnh từ server');
+      }
       
       // Cập nhật state với ảnh mới
       setServiceChecklists(prev => {
@@ -380,16 +393,20 @@ const JobList = () => {
               ...prev[serviceId].results,
               [itemId]: {
                 ...prev[serviceId].results[itemId],
-                images: [...currentImages, { url: imageUrl, name: file.name }]
+                images: [...currentImages, { 
+                  url: imageUrl, 
+                  name: file.name,
+                  s3Key: response.s3Key // Lưu s3Key để xóa sau này
+                }]
               }
             }
           }
         };
       });
       
-      console.log('Image uploaded:', imageUrl);
+      console.log('✅ Image uploaded and displayed:', imageUrl);
     } catch (err) {
-      console.error('Error uploading image:', err);
+      console.error('❌ Error uploading image:', err);
       alert('Không thể tải ảnh lên. Vui lòng thử lại!');
     } finally {
       setUploadingImage(null);
@@ -821,6 +838,13 @@ const JobList = () => {
                                 src={img.url} 
                                 alt={img.name || `Ảnh ${imgIndex + 1}`}
                                 onClick={() => handlePreviewImage(item.id, img.url)}
+                                onError={(e) => {
+                                  console.error('Image load error:', img.url);
+                                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999"%3EError%3C/text%3E%3C/svg%3E';
+                                  e.target.style.border = '2px solid #ef4444';
+                                }}
+                                onLoad={() => console.log('✅ Image loaded:', img.name)}
+                                loading="lazy"
                               />
                               <button 
                                 className="btn-remove-image"
