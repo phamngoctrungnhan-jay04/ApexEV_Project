@@ -54,6 +54,7 @@ public class AuthController {
                 role);
         return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
     }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         UserRole role = UserRole.valueOf("CUSTOMER");
@@ -62,13 +63,13 @@ public class AuthController {
                 request.getEmail(),
                 request.getPhone(),
                 request.getPassword(),
-                role
-        );
+                role);
         return ResponseEntity.ok(Map.of("message", "Đăng ký thành công! Vui lòng kiểm tra email để nhập mã OTP."));
     }
 
     @PostMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@Valid @RequestBody com.apexev.dto.request.userAndVehicleRequest.VerifyEmailRequest request) {
+    public ResponseEntity<?> verifyEmail(
+            @Valid @RequestBody com.apexev.dto.request.userAndVehicleRequest.VerifyEmailRequest request) {
         try {
             userService.verifyEmailWithOTP(request.getEmail(), request.getOtp());
             return ResponseEntity.ok(Map.of("message", "Email verified successfully! You can now login."));
@@ -78,7 +79,8 @@ public class AuthController {
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<?> resendOTP(@Valid @RequestBody com.apexev.dto.request.userAndVehicleRequest.ResendOTPRequest request) {
+    public ResponseEntity<?> resendOTP(
+            @Valid @RequestBody com.apexev.dto.request.userAndVehicleRequest.ResendOTPRequest request) {
         try {
             userService.resendOTP(request.getEmail());
             return ResponseEntity.ok(Map.of("message", "OTP sent successfully!"));

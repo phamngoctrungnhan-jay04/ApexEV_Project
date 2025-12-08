@@ -62,6 +62,26 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (request.getAppointmentTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Không thể đặt lịch trong quá khứ");
         }
+
+        // ✅ 4.5. Kiểm tra xe đã có đơn đang hoạt động chưa
+        List<OrderStatus> activeStatuses = java.util.Arrays.asList(
+                OrderStatus.CONFIRMED,
+                OrderStatus.RECEPTION,
+                OrderStatus.INSPECTION,
+                OrderStatus.QUOTING,
+                OrderStatus.WAITING_FOR_PARTS,
+                OrderStatus.IN_PROGRESS,
+                OrderStatus.READY_FOR_INVOICE);
+
+        boolean hasActiveOrder = serviceOrderRepository.existsByVehicleIdAndStatusNotIn(
+                vehicle.getId(),
+                java.util.Arrays.asList(OrderStatus.COMPLETED, OrderStatus.CANCELLED));
+
+        if (hasActiveOrder) {
+            throw new IllegalStateException(
+                    "Xe này đang có đơn bảo dưỡng chưa hoàn thành. Vui lòng chờ hoàn tất trước khi đặt lịch mới.");
+        }
+
         // 5. tạo lịch hẹn
         Appointment newAppointment = new Appointment();
         newAppointment.setCustomer(customer);
@@ -191,15 +211,17 @@ public class AppointmentServiceImpl implements AppointmentService {
         try {
             String appointmentDate = savedAppointment.getAppointmentTime()
                     .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-            String vehicleInfo = appointment.getVehicle().getYearManufactured() + " " + appointment.getVehicle().getBrand() + " " + appointment.getVehicle().getModel();
+            String vehicleInfo = appointment.getVehicle().getYearManufactured() + " "
+                    + appointment.getVehicle().getBrand() + " " + appointment.getVehicle().getModel();
             snsEmailService.sendAppointmentConfirmationEmail(
                     appointment.getCustomer().getEmail(),
                     appointment.getCustomer().getFullName(),
                     appointmentDate,
                     vehicleInfo,
-                    savedAppointment.getRequestedService() != null ? savedAppointment.getRequestedService() : "Chưa xác định"
-            );
-            System.out.println("[DEBUG] Appointment confirmation email sent to: " + appointment.getCustomer().getEmail());
+                    savedAppointment.getRequestedService() != null ? savedAppointment.getRequestedService()
+                            : "Chưa xác định");
+            System.out
+                    .println("[DEBUG] Appointment confirmation email sent to: " + appointment.getCustomer().getEmail());
         } catch (Exception e) {
             System.out.println("[ERROR] Error sending appointment confirmation email: " + e.getMessage());
         }

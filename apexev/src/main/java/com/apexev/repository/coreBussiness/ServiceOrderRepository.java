@@ -45,4 +45,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     // Tìm ServiceOrder theo Appointment ID (để lấy technician đã assign)
     Optional<ServiceOrder> findByAppointmentId(Long appointmentId);
+
+    // ✅ Kiểm tra xe có đơn đang active không (chưa hoàn thành)
+    boolean existsByVehicleIdAndStatusNotIn(Long vehicleId, List<OrderStatus> excludedStatuses);
 }

@@ -10,6 +10,7 @@ import com.apexev.entity.ServiceOrderItem;
 import com.apexev.entity.User;
 import com.apexev.enums.OrderItemStatus;
 import com.apexev.enums.OrderItemType;
+import com.apexev.enums.OrderStatus;
 import com.apexev.enums.PartRequestStatus;
 import com.apexev.enums.UserRole;
 import com.apexev.repository.coreBussiness.PartRepository;
@@ -433,6 +434,15 @@ public class PartRequestService {
         }
 
         serviceOrderRepository.save(serviceOrder);
+
+        // ✅ CRITICAL: Tự động chuyển ServiceOrder status sang WAITING_FOR_PARTS
+        // sau khi customer duyệt báo giá
+        if (serviceOrder.getStatus() == OrderStatus.QUOTING) {
+            serviceOrder.setStatus(OrderStatus.WAITING_FOR_PARTS);
+            serviceOrderRepository.save(serviceOrder);
+            log.info("✓ Auto-transitioned order status: QUOTING → WAITING_FOR_PARTS (orderId={})", serviceOrderId);
+        }
+
         log.info("Customer approved all quotes for order: {}", serviceOrderId);
 
         // Gửi notification cho technician
