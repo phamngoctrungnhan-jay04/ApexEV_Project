@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FiCalendar, FiClipboard, FiUser, FiLogOut, FiHome, FiPackage } from 'react-icons/fi';
+import { FiCalendar, FiClipboard, FiUser, FiLogOut, FiHome, FiPackage, FiFileText } from 'react-icons/fi';
 import './AdvisorSidebar.css';
 
 const advisorMenu = [
@@ -7,8 +7,8 @@ const advisorMenu = [
   { label: 'Hồ sơ', icon: <FiUser />, path: '/advisor/profile' },
   { label: 'Lịch hẹn', icon: <FiCalendar />, path: '/advisor/appointments' },
   { label: 'Duyệt phụ tùng', icon: <FiPackage />, path: '/advisor/parts-approval' },
-  { label: 'Đơn hàng', icon: <FiClipboard />, path: '/advisor/orders' },
-
+  { label: 'Xuất hóa đơn', icon: <FiFileText />, path: '/advisor/invoices' },
+  { label: 'Đơn hàng', icon: <FiClipboard />, path: '/advisor/orders' }
 ];
 
 function AdvisorSidebar({ onLogout }) {
@@ -16,8 +16,7 @@ function AdvisorSidebar({ onLogout }) {
   return (
     <aside className="advisor-sidebar glassmorphism">
       <div className="sidebar-brand">
-        <span className="brand-text">APEX</span>
-        <span className="brand-badge">EV</span>
+        <img src="/images/logo.jpg" alt="APEX EV Logo" className="sidebar-logo-img" />
       </div>
       <nav className="sidebar-menu">
         {advisorMenu.map(item => (

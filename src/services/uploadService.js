@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8081/api/files';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/files`;
 
 // Lấy token từ localStorage
 const getAuthHeader = () => {

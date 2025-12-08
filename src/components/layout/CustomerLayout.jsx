@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import AIChatbot from '../common/AIChatbot';
 import './CustomerLayout.css';
 
 const CustomerLayout = () => {
@@ -36,6 +37,9 @@ const CustomerLayout = () => {
           <Outlet />
         </div>
       </main>
+
+      {/* AI Chatbot - Hiện ở tất cả trang Customer */}
+      <AIChatbot />
     </div>
   );
 };

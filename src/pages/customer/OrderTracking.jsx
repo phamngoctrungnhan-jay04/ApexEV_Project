@@ -1,9 +1,9 @@
 // File: src/pages/customer/OrderTracking.jsx
-// Trang theo dõi quy trình bảo dưỡng chi tiết (APEX Modern UI - Full Layout)
+// Giao diện mới: Soft, Clean, Elegant - APEX EV
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Spinner, Alert, Badge, Accordion } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Alert, Badge } from 'react-bootstrap';
 import {
   FiArrowLeft,
   FiUser,
@@ -16,44 +16,144 @@ import {
   FiCheckCircle,
   FiXCircle,
   FiClock,
-  FiImage,
   FiFileText
 } from 'react-icons/fi';
 import { FaCar } from 'react-icons/fa';
 import { getOrderDetail } from '../../services/customerOrderService';
-import { getChecklistsByOrder, getChecklistResults, getTemplateById } from '../../services/checklistService';
-import { getFileViewUrl } from '../../services/uploadService';
+import { getServiceChecklistItemsForOrder } from '../../services/checklistService';
 import OrderTimeline from '../../components/features/OrderTimeline';
 import InvoicePreview from '../../components/features/InvoicePreview';
 import { CustomButton } from '../../components/common';
+import ToastNotification from '../../components/common/ToastNotification';
 import './OrderTracking.css';
 
 const OrderTracking = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
-  const [checklists, setChecklists] = useState([]);
-  const [checklistsWithItems, setChecklistsWithItems] = useState([]);
+  const [checklistItems, setChecklistItems] = useState([]);
+  const [isChecklistCompleted, setIsChecklistCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('timeline');
   const [imageModalUrl, setImageModalUrl] = useState(null);
+  const [serviceCompletionStatus, setServiceCompletionStatus] = useState({});
+  const [previousChecklistItems, setPreviousChecklistItems] = useState([]);
+  const [toastNotification, setToastNotification] = useState(null);
 
   useEffect(() => {
     fetchOrderDetail();
-    fetchChecklists();
+    fetchChecklistItems();
     // Auto refresh mỗi 5s để cập nhật real-time
     const interval = setInterval(() => {
-      fetchChecklists();
+      fetchChecklistItems();
     }, 5000);
     return () => clearInterval(interval);
   }, [orderId]);
+
+  // Detect service completion or issues found
+  useEffect(() => {
+    if (checklistItems.length === 0 || previousChecklistItems.length === 0) {
+      setPreviousChecklistItems(checklistItems);
+      return;
+    }
+
+    // Group items theo service
+    const groupByService = (items) => {
+      return items.reduce((acc, item) => {
+        const serviceId = item.serviceId || 'unknown';
+        const serviceName = item.serviceName || 'Dịch vụ';
+        
+        if (!acc[serviceId]) {
+          acc[serviceId] = {
+            serviceName,
+            items: []
+          };
+        }
+        acc[serviceId].items.push(item);
+        return acc;
+      }, {});
+    };
+
+    const currentServices = groupByService(checklistItems);
+    const previousServices = groupByService(previousChecklistItems);
+
+    // Check từng service
+    Object.entries(currentServices).forEach(([serviceId, { serviceName, items: currentItems }]) => {
+      const previousItems = previousServices[serviceId]?.items || [];
+      
+      // Tính toán status
+      const currentPending = currentItems.filter(i => !i.status || i.status === 'PENDING').length;
+      const previousPending = previousItems.filter(i => !i.status || i.status === 'PENDING').length;
+      
+      const currentFailed = currentItems.filter(i => 
+        i.status === 'FAILED' || 
+        i.status === 'NEEDS_ATTENTION' || 
+        i.status === 'NEEDS_REPLACEMENT'
+      ).length;
+      
+      const previousFailed = previousItems.filter(i => 
+        i.status === 'FAILED' || 
+        i.status === 'NEEDS_ATTENTION' || 
+        i.status === 'NEEDS_REPLACEMENT'
+      ).length;
+
+      // Case 1: Service vừa hoàn thành (pending: 0, trước đó còn pending)
+      if (currentPending === 0 && previousPending > 0) {
+        console.log(`🎉 Service "${serviceName}" đã hoàn thành!`);
+        
+        // Tạo notification
+        const hasIssues = currentFailed > 0;
+        const message = hasIssues 
+          ? `Dịch vụ "${serviceName}" đã hoàn thành nhưng phát hiện ${currentFailed} vấn đề cần xử lý!`
+          : `Dịch vụ "${serviceName}" đã hoàn thành xuất sắc! Tất cả các mục đều đạt yêu cầu.`;
+        
+        // Show toast notification
+        showToast(message, hasIssues ? 'warning' : 'success');
+        
+        // Update service completion status
+        setServiceCompletionStatus(prev => ({
+          ...prev,
+          [serviceId]: {
+            completed: true,
+            hasIssues,
+            timestamp: new Date().toISOString(),
+            message
+          }
+        }));
+      }
+      
+      // Case 2: Phát hiện lỗi mới (failed tăng lên)
+      if (currentFailed > previousFailed) {
+        const newIssuesCount = currentFailed - previousFailed;
+        console.log(`⚠️ Service "${serviceName}" phát hiện ${newIssuesCount} vấn đề mới!`);
+        
+        const message = `Kỹ thuật viên phát hiện ${newIssuesCount} vấn đề trong dịch vụ "${serviceName}". Vui lòng xem chi tiết!`;
+        
+        // Show notification
+        showToast(message, 'warning');
+      }
+    });
+
+    // Update previous state
+    setPreviousChecklistItems(checklistItems);
+  }, [checklistItems]);
+
+  // Toast notification helper
+  const showToast = (message, type = 'success') => {
+    setToastNotification({ message, type });
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      setToastNotification(null);
+    }, 5000);
+  };
 
   const fetchOrderDetail = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await getOrderDetail(orderId);
+      console.log('🔍 Order Data from API:', data);
+      console.log('📋 Available fields:', Object.keys(data));
       setOrder(data);
     } catch (err) {
       console.error('Fetch order error:', err);
@@ -63,80 +163,58 @@ const OrderTracking = () => {
     }
   };
 
-  const fetchChecklists = async () => {
+  const fetchChecklistItems = async () => {
     try {
-      console.log('Fetching checklists for orderId:', orderId);
-      const checklistsData = await getChecklistsByOrder(orderId);
-      console.log('Checklists fetched:', checklistsData);
-      setChecklists(checklistsData || []);
+      console.log('🔄 Fetching service checklist items for orderId:', orderId);
+      const response = await getServiceChecklistItemsForOrder(orderId);
+      console.log('✅ Service checklist response:', response);
       
-      // Fetch template items và results cho mỗi checklist
-      if (checklistsData && checklistsData.length > 0) {
-        const checklistsWithFullData = await Promise.all(
-          checklistsData.map(async (checklist) => {
-            try {
-              // Fetch template và results song song
-              const [template, results] = await Promise.all([
-                getTemplateById(checklist.templateId),
-                getChecklistResults(checklist.checklistId)
-              ]);
-
-              // Map template items với results
-              const allItems = await Promise.all(
-                template.items.map(async (templateItem) => {
-                  const result = results.find(r => r.templateItemId === templateItem.id);
-                  
-                  // Nếu có evidence image, lấy presigned URL
-                  let evidenceUrl = null;
-                  if (result?.s3Key) {
-                    try {
-                      evidenceUrl = await getFileViewUrl(result.s3Key, 60);
-                    } catch (err) {
-                      console.error('Error fetching evidence URL:', err);
-                    }
-                  }
-
-                  return {
-                    templateItemId: templateItem.id,
-                    itemName: templateItem.itemName,
-                    itemDescription: templateItem.itemDescription,
-                    estimatedTime: templateItem.estimatedTime,
-                    isRequired: templateItem.isRequired,
-                    status: result?.status || 'PENDING',
-                    technicianNotes: result?.technicianNotes || null,
-                    s3Key: result?.s3Key || null,
-                    mediaType: result?.mediaType || null,
-                    evidenceUrl: evidenceUrl,
-                    createdAt: result?.createdAt || null
-                  };
-                })
-              );
-
-              return {
-                ...checklist,
-                items: allItems
-              };
-            } catch (err) {
-              console.error('Error fetching checklist details:', err);
-              return checklist;
-            }
-          })
-        );
-        
-        setChecklistsWithItems(checklistsWithFullData);
-        console.log('Checklists with full items:', checklistsWithFullData);
-      } else {
-        setChecklistsWithItems([]);
+      // Response mới có cấu trúc: { isCompleted: boolean, items: [] }
+      const items = response.items || [];
+      const isCompleted = response.isCompleted || false;
+      
+      console.log('📊 Items status breakdown:', {
+        total: items.length,
+        passed: items.filter(i => i.status === 'PASSED').length,
+        failed: items.filter(i => i.status === 'FAILED').length,
+        attention: items.filter(i => i.status === 'NEEDS_ATTENTION').length,
+        replacement: items.filter(i => i.status === 'NEEDS_REPLACEMENT').length,
+        pending: items.filter(i => !i.status || i.status === 'PENDING').length,
+        isCompleted: isCompleted
+      });
+      
+      // Debug: Show first item structure
+      if (items.length > 0) {
+        console.log('🔍 First item structure:', items[0]);
+        console.log('🔍 All statuses:', items.map(i => ({ name: i.itemName, status: i.status })));
       }
+      
+      setChecklistItems(items);
+      setIsChecklistCompleted(isCompleted);
     } catch (err) {
-      console.error('Fetch checklists error:', err);
+      console.error('❌ Error fetching service checklist items:', err);
+      // Nếu lỗi 404 (chưa có items), set empty array
+      if (err.response?.status === 404 || err.response?.status === 204) {
+        setChecklistItems([]);
+        setIsChecklistCompleted(false);
+      }
     }
   };
 
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('vi-VN', {
+    if (!dateString) return 'Chưa cập nhật';
+    
+    // Nếu là array từ Spring Boot: [year, month, day, hour, minute, second, nano]
+    if (Array.isArray(dateString)) {
+      const [year, month, day, hour, minute] = dateString;
+      return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    }
+    
+    // Nếu là string thông thường
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Chưa cập nhật';
+    return date.toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -148,7 +226,17 @@ const OrderTracking = () => {
   // Format time for checklist items
   const formatTime = (dateString) => {
     if (!dateString) return null;
-    return new Date(dateString).toLocaleTimeString('vi-VN', {
+    
+    // Nếu là array từ Spring Boot
+    if (Array.isArray(dateString)) {
+      const [, , , hour, minute] = dateString;
+      return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    }
+    
+    // Nếu là string thông thường
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    return date.toLocaleTimeString('vi-VN', {
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -170,47 +258,6 @@ const OrderTracking = () => {
   };
 
   // Get status config for checklist items
-  const getItemStatusConfig = (status) => {
-    const statusConfig = {
-      PENDING: { 
-        icon: <FiClock />, 
-        className: 'item-pending', 
-        text: 'Chờ kiểm tra',
-        bgColor: '#FEF3C7',
-        textColor: '#92400E'
-      },
-      PASSED: { 
-        icon: <FiCheckCircle />, 
-        className: 'item-passed', 
-        text: 'Đạt',
-        bgColor: '#D1FAE5',
-        textColor: '#065F46'
-      },
-      FAILED: { 
-        icon: <FiXCircle />, 
-        className: 'item-failed', 
-        text: 'Lỗi',
-        bgColor: '#FEE2E2',
-        textColor: '#991B1B'
-      },
-      NEEDS_ATTENTION: { 
-        icon: <FiAlertCircle />, 
-        className: 'item-attention', 
-        text: 'Cần chú ý',
-        bgColor: '#FED7AA',
-        textColor: '#9A3412'
-      },
-      NEEDS_REPLACEMENT: { 
-        icon: <FiTool />, 
-        className: 'item-replacement', 
-        text: 'Cần thay',
-        bgColor: '#DBEAFE',
-        textColor: '#1E40AF'
-      }
-    };
-    return statusConfig[status] || statusConfig.PENDING;
-  };
-
   if (loading) {
     return (
       <div className="order-tracking-fullscreen loading-screen">
@@ -244,312 +291,162 @@ const OrderTracking = () => {
   }
 
   return (
-    <div className="order-tracking-fullscreen">
-      {/* Header Full Width */}
-      <div className="tracking-header">
-        <Container fluid>
-          <div className="header-content">
-            <CustomButton 
-              variant="ghost" 
-              onClick={() => navigate('/customer/history')}
-              className="back-btn"
-            >
-              <FiArrowLeft className="me-2" />
-              Quay lại
-            </CustomButton>
-            <div className="header-title">
-              <h1>Theo dõi quy trình bảo dưỡng</h1>
-              <div className="order-meta">
-                <span className="order-code">Mã đơn: <strong>{order.orderCode || `#${order.orderId}`}</strong></span>
-                <Badge bg={getStatusBadge(order.status).bg} className="status-badge-modern">
-                  {getStatusBadge(order.status).text}
-                </Badge>
-              </div>
+    <div className="tracking-page-soft">
+      {/* Toast Notification */}
+      {toastNotification && (
+        <ToastNotification
+          message={toastNotification.message}
+          type={toastNotification.type}
+          onClose={() => setToastNotification(null)}
+        />
+      )}
+
+      {/* Redesigned Compact Header */}
+      <div className="tracking-header-compact">
+        <Container>
+          <div className="header-wrapper-compact">
+            {/* Back Button */}
+            <button className="btn-back-compact" onClick={() => navigate('/customer/history')}>
+              <FiArrowLeft size={18} />
+              <span>Quay lại</span>
+            </button>
+
+            {/* Status Badge - Moved to top right */}
+            <div className={`status-badge-compact ${order.status.toLowerCase()}`}>
+              {getStatusBadge(order.status).text}
             </div>
+          </div>
+
+          {/* Main Title Bar */}
+          <div className="title-bar-compact">
+            <div className="title-left">
+              <div className="icon-compact">
+                <FiTool size={20} />
+              </div>
+              <h1 className="title-compact">Theo dõi bảo dưỡng</h1>
+            </div>
+          </div>
+
+          {/* Info Row - Compact 3 columns */}
+          <div className="info-row-compact">
+            <div className="info-col-compact">
+              <span className="label-compact">Mã đơn</span>
+              <span className="value-compact">{order.orderCode || `#${order.id}`}</span>
+            </div>
+            <div className="info-col-compact">
+              <span className="label-compact">Thời gian</span>
+              <span className="value-compact">{formatDate(order.createdAt)}</span>
+            </div>
+            {order.customerFullName && (
+              <div className="info-col-compact">
+                <span className="label-compact">Khách hàng</span>
+                <span className="value-compact">{order.customerFullName}</span>
+              </div>
+            )}
           </div>
         </Container>
       </div>
 
-      {/* Main Content Full Width */}
-      <Container fluid className="tracking-content">
-        <Row className="g-4">
-          {/* Left Column - Timeline & Checklist */}
-          <Col xxl={8} xl={7} lg={7}>
-            {/* Tab Navigation */}
-            <div className="tab-navigation">
-              <button 
-                className={`tab-btn ${activeTab === 'timeline' ? 'active' : ''}`}
-                onClick={() => setActiveTab('timeline')}
+      {/* Main Content */}
+      <Container className="tracking-content-soft">
+        {/* Quote Approval Banner - Chỉ hiện khi status = QUOTING */}
+        {order.status === 'QUOTING' && (
+          <Alert variant="warning" className="quote-approval-banner mb-4">
+            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div className="d-flex align-items-center gap-3">
+                <FiFileText size={32} />
+                <div>
+                  <h5 className="mb-1">Báo giá phụ tùng đang chờ duyệt</h5>
+                  <p className="mb-0 text-muted">
+                    Đơn hàng của bạn có phụ tùng cần thay thế. Vui lòng xem và duyệt báo giá để tiếp tục.
+                  </p>
+                </div>
+              </div>
+              <CustomButton 
+                variant="warning" 
+                onClick={() => navigate(`/customer/quote-approval/${orderId}`)}
               >
                 <FiFileText className="me-2" />
-                Quy trình thực hiện
-              </button>
-              <button 
-                className={`tab-btn ${activeTab === 'checklist' ? 'active' : ''}`}
-                onClick={() => setActiveTab('checklist')}
-              >
-                <FiCheckCircle className="me-2" />
-                Kiểm tra chi tiết
-                {checklists.length > 0 && (
-                  <Badge bg="primary" className="ms-2">{checklists.length}</Badge>
-                )}
-              </button>
+                Xem báo giá
+              </CustomButton>
             </div>
+          </Alert>
+        )}
 
+        <Row className="g-4">
+          {/* Left Column - Timeline */}
+          <Col xxl={8} xl={7} lg={7}>
             {/* Timeline Section */}
-            {activeTab === 'timeline' && (
-              <Card className="timeline-card-modern">
-                <Card.Body className="p-4">
-                  <OrderTimeline currentStatus={order.status} checklists={checklists} />
-                </Card.Body>
-              </Card>
-            )}
-
-            {/* Checklist Section - Real-time */}
-            {activeTab === 'checklist' && (
-              <div className="checklist-section-modern">
-                {checklistsWithItems.length === 0 ? (
-                  <Card className="empty-checklist-modern">
-                    <Card.Body className="text-center py-5">
-                      <div className="empty-icon-wrapper">
-                        <FiFileText size={80} />
-                      </div>
-                      <h4 className="empty-title">Chưa có dữ liệu kiểm tra</h4>
-                      <p className="empty-description">
-                        Checklist sẽ xuất hiện khi kỹ thuật viên bắt đầu kiểm tra xe của bạn
-                      </p>
-                    </Card.Body>
-                  </Card>
-                ) : (
-                  <div className="checklists-container">
-                    {checklistsWithItems.map((checklist, idx) => {
-                      const passedCount = checklist.items?.filter(i => i.status === 'PASSED').length || 0;
-                      const failedCount = checklist.items?.filter(i => i.status === 'FAILED').length || 0;
-                      const attentionCount = checklist.items?.filter(i => i.status === 'NEEDS_ATTENTION').length || 0;
-                      const replacementCount = checklist.items?.filter(i => i.status === 'NEEDS_REPLACEMENT').length || 0;
-                      const pendingCount = checklist.items?.filter(i => i.status === 'PENDING').length || 0;
-                      const totalItems = checklist.items?.length || 0;
-                      const completedItems = totalItems - pendingCount;
-                      const progressPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
-
-                      return (
-                        <Card key={checklist.checklistId} className="checklist-card-modern mb-4">
-                          <Card.Header className="checklist-card-header">
-                            <div className="checklist-header-content">
-                              <div className="checklist-title-section">
-                                <FiFileText className="checklist-icon" />
-                                <div>
-                                  <h5 className="checklist-title">
-                                    {checklist.templateName || `Checklist #${idx + 1}`}
-                                  </h5>
-                                  <div className="checklist-meta">
-                                    <span className="meta-item">
-                                      <FiCalendar className="me-1" />
-                                      {formatDate(checklist.createdAt)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="checklist-stats-badges">
-                                {passedCount > 0 && (
-                                  <Badge bg="success" className="stat-badge">
-                                    <FiCheckCircle className="me-1" />
-                                    {passedCount} Đạt
-                                  </Badge>
-                                )}
-                                {failedCount > 0 && (
-                                  <Badge bg="danger" className="stat-badge">
-                                    <FiXCircle className="me-1" />
-                                    {failedCount} Lỗi
-                                  </Badge>
-                                )}
-                                {attentionCount > 0 && (
-                                  <Badge bg="warning" className="stat-badge">
-                                    <FiAlertCircle className="me-1" />
-                                    {attentionCount} Chú ý
-                                  </Badge>
-                                )}
-                                {replacementCount > 0 && (
-                                  <Badge bg="info" className="stat-badge">
-                                    <FiTool className="me-1" />
-                                    {replacementCount} Thay
-                                  </Badge>
-                                )}
-                                {pendingCount > 0 && (
-                                  <Badge bg="secondary" className="stat-badge">
-                                    <FiClock className="me-1" />
-                                    {pendingCount} Chờ
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Progress Bar */}
-                            <div className="checklist-progress">
-                              <div className="progress-info">
-                                <span className="progress-label">Tiến độ kiểm tra</span>
-                                <span className="progress-percentage">{progressPercentage}%</span>
-                              </div>
-                              <div className="progress-bar-container">
-                                <div 
-                                  className="progress-bar-fill" 
-                                  style={{ width: `${progressPercentage}%` }}
-                                />
-                              </div>
-                            </div>
-                          </Card.Header>
-
-                          <Card.Body className="checklist-card-body">
-                            <div className="checklist-items-grid-modern">
-                              {checklist.items && checklist.items.length > 0 ? (
-                                checklist.items.map((item, itemIdx) => {
-                                  const statusConfig = getItemStatusConfig(item.status);
-                                  
-                                  return (
-                                    <div 
-                                      key={itemIdx} 
-                                      className={`checklist-item-card-modern ${statusConfig.className}`}
-                                      style={{
-                                        borderLeftColor: statusConfig.textColor
-                                      }}
-                                    >
-                                      {/* Item Header */}
-                                      <div className="item-header-modern">
-                                        <div className="item-number-badge">{itemIdx + 1}</div>
-                                        <div className="item-status-badge" style={{
-                                          backgroundColor: statusConfig.bgColor,
-                                          color: statusConfig.textColor
-                                        }}>
-                                          {statusConfig.icon}
-                                          <span className="status-text">{statusConfig.text}</span>
-                                        </div>
-                                      </div>
-
-                                      {/* Item Title */}
-                                      <h6 className="item-title-modern">
-                                        {item.itemName}
-                                        {item.isRequired && <span className="required-badge">Bắt buộc</span>}
-                                      </h6>
-
-                                      {/* Item Description */}
-                                      {item.itemDescription && (
-                                        <p className="item-description-modern">
-                                          <FiFileText className="me-1" />
-                                          {item.itemDescription}
-                                        </p>
-                                      )}
-
-                                      {/* Estimated Time */}
-                                      {item.estimatedTime && (
-                                        <div className="item-estimate">
-                                          <FiClock className="me-1" />
-                                          <span>Thời gian ước tính: {item.estimatedTime} phút</span>
-                                        </div>
-                                      )}
-
-                                      {/* Technician Notes */}
-                                      {item.technicianNotes && (
-                                        <div className="item-notes-modern">
-                                          <div className="notes-label">
-                                            <FiAlertCircle className="me-1" />
-                                            Ghi chú kỹ thuật viên:
-                                          </div>
-                                          <p className="notes-content">{item.technicianNotes}</p>
-                                        </div>
-                                      )}
-
-                                      {/* Evidence Image */}
-                                      {item.evidenceUrl && (
-                                        <div className="item-evidence-modern">
-                                          <div className="evidence-label">
-                                            <FiImage className="me-1" />
-                                            Hình ảnh minh chứng:
-                                          </div>
-                                          <div 
-                                            className="evidence-thumbnail"
-                                            onClick={() => setImageModalUrl(item.evidenceUrl)}
-                                          >
-                                            <img src={item.evidenceUrl} alt="Evidence" />
-                                            <div className="evidence-overlay">
-                                              <FiImage size={24} />
-                                              <span>Xem ảnh</span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      )}
-
-                                      {/* Timestamp */}
-                                      {item.createdAt && (
-                                        <div className="item-timestamp">
-                                          <FiClock className="me-1" />
-                                          Kiểm tra lúc: {formatTime(item.createdAt)}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })
-                              ) : (
-                                <p className="text-muted">Chưa có mục kiểm tra</p>
-                              )}
-                            </div>
-                          </Card.Body>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+            <Card className="timeline-card-soft">
+              <Card.Body>
+                <OrderTimeline 
+                  currentStatus={order.status} 
+                  checklists={[]}
+                  checklistItems={checklistItems}
+                  isChecklistCompleted={isChecklistCompleted}
+                />
+              </Card.Body>
+            </Card>
           </Col>
 
           {/* Right Column - Info Cards */}
           <Col xxl={4} xl={5} lg={5}>
-            <div className="info-sidebar">
+            <div className="info-sidebar-soft">
               {/* Vehicle Info */}
-              <Card className="info-card-modern mb-3">
-                <Card.Header>
-                  <h6><FaCar className="me-2" />Thông tin xe</h6>
+              <Card className="info-card-soft mb-3">
+                <Card.Header className="info-card-header-soft">
+                  <FaCar size={16} />
+                  <span>Thông tin xe</span>
                 </Card.Header>
-                <Card.Body>
-                  <div className="info-item">
-                    <FaCar className="info-icon" />
+                <Card.Body className="info-card-body-soft">
+                  <div className="info-row-soft">
+                    <FaCar size={16} className="info-icon-soft" />
                     <div>
-                      <small className="text-muted">Xe</small>
-                      <p className="mb-0 fw-bold">{order.vehicleBrand} {order.vehicleModel}</p>
+                      <small>Xe</small>
+                      <p>
+                        {order.vehicleBrand && order.vehicleModel 
+                          ? `${order.vehicleBrand} ${order.vehicleModel}` 
+                          : 'Chưa cập nhật'}
+                      </p>
                     </div>
                   </div>
-                  <div className="info-item">
-                    <FiMapPin className="info-icon" />
+                  <div className="info-row-soft">
+                    <FiMapPin size={16} className="info-icon-soft" />
                     <div>
-                      <small className="text-muted">Biển số</small>
-                      <p className="mb-0 fw-bold">{order.licensePlate}</p>
+                      <small>Biển số</small>
+                      <p>{order.vehicleLicensePlate || 'Chưa cập nhật'}</p>
                     </div>
                   </div>
                 </Card.Body>
               </Card>
 
               {/* Contact Info */}
-              <Card className="info-card-modern mb-3">
-                <Card.Header>
-                  <h6><FiUser className="me-2" />Thông tin liên hệ</h6>
+              <Card className="info-card-soft mb-3">
+                <Card.Header className="info-card-header-soft">
+                  <FiUser size={16} />
+                  <span>Thông tin liên hệ</span>
                 </Card.Header>
-                <Card.Body>
-                  {order.customerPhone && (
-                    <div className="info-item">
-                      <FiPhone className="info-icon" />
-                      <div>
-                        <small className="text-muted">Điện thoại</small>
-                        <p className="mb-0">{order.customerPhone}</p>
-                      </div>
+                <Card.Body className="info-card-body-soft">
+                  <div className="info-row-soft">
+                    <FiUser size={16} className="info-icon-soft" />
+                    <div>
+                      <small>Khách hàng</small>
+                      <p>{order.customerFullName || 'Chưa cập nhật'}</p>
                     </div>
-                  )}
+                  </div>
+                  <div className="info-row-soft">
+                    <FiPhone size={16} className="info-icon-soft" />
+                    <div>
+                      <small>Điện thoại</small>
+                      <p>{order.customerPhone || 'Chưa cập nhật'}</p>
+                    </div>
+                  </div>
                   {order.customerEmail && (
-                    <div className="info-item">
-                      <FiMail className="info-icon" />
+                    <div className="info-row-soft">
+                      <FiMail size={16} className="info-icon-soft" />
                       <div>
-                        <small className="text-muted">Email</small>
-                        <p className="mb-0">{order.customerEmail}</p>
+                        <small>Email</small>
+                        <p>{order.customerEmail}</p>
                       </div>
                     </div>
                   )}
@@ -557,24 +454,25 @@ const OrderTracking = () => {
               </Card>
 
               {/* Time Info */}
-              <Card className="info-card-modern">
-                <Card.Header>
-                  <h6><FiCalendar className="me-2" />Thời gian</h6>
+              <Card className="info-card-soft">
+                <Card.Header className="info-card-header-soft">
+                  <FiCalendar size={16} />
+                  <span>Thời gian</span>
                 </Card.Header>
-                <Card.Body>
-                  <div className="info-item">
-                    <FiCalendar className="info-icon" />
+                <Card.Body className="info-card-body-soft">
+                  <div className="info-row-soft">
+                    <FiCalendar size={16} className="info-icon-soft" />
                     <div>
-                      <small className="text-muted">Tiếp nhận</small>
-                      <p className="mb-0">{formatDate(order.createdAt)}</p>
+                      <small>Tiếp nhận</small>
+                      <p>{formatDate(order.createdAt)}</p>
                     </div>
                   </div>
                   {order.completedAt && (
-                    <div className="info-item">
-                      <FiCalendar className="info-icon" />
+                    <div className="info-row-soft">
+                      <FiCalendar size={16} className="info-icon-soft" />
                       <div>
-                        <small className="text-muted">Hoàn thành</small>
-                        <p className="mb-0">{formatDate(order.completedAt)}</p>
+                        <small>Hoàn thành</small>
+                        <p>{formatDate(order.completedAt)}</p>
                       </div>
                     </div>
                   )}
@@ -588,27 +486,34 @@ const OrderTracking = () => {
         {(order.customerDescription || order.advisorNotes || order.technicianNotes) && (
           <Row className="mt-4">
             <Col lg={12}>
-              <Card className="notes-card-modern">
-                <Card.Header>
-                  <h6><FiTool className="me-2" />Ghi chú</h6>
+              <Card className="notes-card-soft">
+                <Card.Header className="notes-card-header-soft">
+                  <FiTool size={16} />
+                  <span>Ghi chú</span>
                 </Card.Header>
-                <Card.Body>
+                <Card.Body className="notes-card-body-soft">
                   {order.customerDescription && (
-                    <div className="note-section mb-3">
-                      <strong className="text-primary">Yêu cầu của bạn:</strong>
-                      <p className="mb-0 mt-1">{order.customerDescription}</p>
+                    <div className="note-item-soft mb-3">
+                      <div className="note-label-soft primary">
+                        Yêu cầu của bạn
+                      </div>
+                      <p>{order.customerDescription}</p>
                     </div>
                   )}
                   {order.advisorNotes && (
-                    <div className="note-section mb-3">
-                      <strong className="text-success">Ghi chú từ cố vấn:</strong>
-                      <p className="mb-0 mt-1">{order.advisorNotes}</p>
+                    <div className="note-item-soft mb-3">
+                      <div className="note-label-soft success">
+                        Ghi chú từ cố vấn
+                      </div>
+                      <p>{order.advisorNotes}</p>
                     </div>
                   )}
                   {order.technicianNotes && (
-                    <div className="note-section">
-                      <strong className="text-info">Ghi chú từ kỹ thuật viên:</strong>
-                      <p className="mb-0 mt-1">{order.technicianNotes}</p>
+                    <div className="note-item-soft">
+                      <div className="note-label-soft info">
+                        Ghi chú từ kỹ thuật viên
+                      </div>
+                      <p>{order.technicianNotes}</p>
                     </div>
                   )}
                 </Card.Body>
@@ -630,12 +535,12 @@ const OrderTracking = () => {
 
       {/* Image Modal */}
       {imageModalUrl && (
-        <div className="image-modal-overlay" onClick={() => setImageModalUrl(null)}>
-          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={() => setImageModalUrl(null)}>
-              <FiXCircle size={32} />
+        <div className="modal-overlay-soft" onClick={() => setImageModalUrl(null)}>
+          <div className="modal-content-soft" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-soft" onClick={() => setImageModalUrl(null)}>
+              <FiXCircle size={24} />
             </button>
-            <img src={imageModalUrl} alt="Evidence Full" />
+            <img src={imageModalUrl} alt="Evidence Full" className="modal-image-soft" />
           </div>
         </div>
       )}

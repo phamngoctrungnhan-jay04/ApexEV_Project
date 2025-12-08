@@ -1,0 +1,799 @@
+/* ========================================
+   APEX EV - Quote Approval Premium Design
+   ======================================== */
+
+/* Page Container */
+.quote-approval-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 32px;
+}
+
+/* Loading */
+.quote-approval-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.quote-approval-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #E5E7EB;
+  border-top-color: #338AF3;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.quote-approval-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  gap: 16px;
+}
+
+.quote-approval-error-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #DC2626;
+  font-size: 36px;
+}
+
+.quote-approval-error h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0;
+}
+
+.quote-approval-error p {
+  font-size: 16px;
+  color: #6B7280;
+  margin: 0 0 24px 0;
+}
+
+/* Toast */
+.quote-approval-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  color: white;
+  font-weight: 600;
+  z-index: 9999;
+  animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(12px);
+  max-width: 400px;
+}
+
+.quote-approval-toast.success {
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+}
+
+.quote-approval-toast.error {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.quote-approval-toast.warning {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.quote-approval-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.quote-approval-back-btn {
+  padding: 12px 20px;
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  color: #6B7280;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quote-approval-back-btn:hover {
+  background: #F9FAFB;
+  border-color: #338AF3;
+  color: #338AF3;
+}
+
+.quote-approval-title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.quote-approval-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(51, 138, 243, 0.35);
+}
+
+.quote-approval-icon-wrapper svg {
+  font-size: 28px;
+  color: white;
+}
+
+.quote-approval-title {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1F2937 0%, #338AF3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.quote-approval-subtitle {
+  color: #6B7280;
+  font-size: 16px;
+  margin: 4px 0 0 0;
+}
+
+/* Order Info */
+.quote-approval-order-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.quote-approval-info-item {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  border: 2px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.quote-approval-info-item svg {
+  font-size: 28px;
+  color: #338AF3;
+}
+
+.quote-approval-info-item .label {
+  display: block;
+  font-size: 14px;
+  color: #6B7280;
+  margin-bottom: 4px;
+}
+
+.quote-approval-info-item .value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+/* Card */
+.quote-approval-card {
+  background: white;
+  border-radius: 20px;
+  border: 2px solid #E5E7EB;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.quote-approval-card-header {
+  padding: 24px;
+  background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+  border-bottom: 2px solid #E5E7EB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.quote-approval-card-header .header-left {
+  flex: 1;
+}
+
+.quote-approval-card-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quote-approval-card-header .selected-count {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.quote-approval-card-header .selected-count strong {
+  color: #338AF3;
+  font-weight: 700;
+}
+
+.select-all-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.25);
+}
+
+.select-all-btn:hover {
+  background: linear-gradient(135deg, #005CF0 0%, #0047D0 100%);
+  box-shadow: 0 6px 16px rgba(51, 138, 243, 0.35);
+  transform: translateY(-2px);
+}
+
+/* Table Layout */
+.quote-approval-table-wrapper {
+  overflow-x: auto;
+  padding: 0;
+}
+
+.quote-approval-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.quote-approval-table thead th {
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #E5E7EB;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.quote-approval-table thead th.col-checkbox {
+  width: 60px;
+  text-align: center;
+}
+
+.quote-approval-table thead th.col-part {
+  min-width: 300px;
+}
+
+.quote-approval-table thead th.col-sku {
+  width: 150px;
+}
+
+.quote-approval-table thead th.col-qty {
+  width: 120px;
+  text-align: center;
+}
+
+.quote-approval-table thead th.col-price {
+  width: 150px;
+  text-align: right;
+}
+
+.quote-approval-table thead th.col-total {
+  width: 180px;
+  text-align: right;
+}
+
+.quote-approval-table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.quote-approval-table tbody tr:hover {
+  background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+}
+
+.quote-approval-table tbody tr.selected {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+}
+
+.quote-approval-table tbody tr.selected:hover {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+}
+
+.quote-approval-table tbody td {
+  padding: 20px;
+  border-bottom: 1px solid #F3F4F6;
+  vertical-align: middle;
+}
+
+/* Checkbox */
+.col-checkbox {
+  text-align: center;
+}
+
+.checkbox-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 2px solid #D1D5DB;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.checkbox-wrapper:hover .checkmark {
+  border-color: #338AF3;
+}
+
+.checkbox-wrapper input:checked ~ .checkmark {
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  border-color: #338AF3;
+}
+
+.checkbox-wrapper input:checked ~ .checkmark:after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Part Info */
+.col-part .part-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.col-part .part-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #338AF3;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.col-part .part-details h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 6px 0;
+}
+
+.col-part .part-details .technician-note {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 4px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-style: italic;
+}
+
+.col-part .part-details .technician-note svg {
+  color: #338AF3;
+}
+
+/* SKU Badge */
+.sku-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  font-family: monospace;
+}
+
+/* Quantity Badge */
+.col-qty {
+  text-align: center;
+}
+
+.qty-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #92400E;
+}
+
+/* Price */
+.col-price .price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.col-total .total {
+  font-size: 18px;
+  font-weight: 700;
+  color: #338AF3;
+}
+
+.quote-approval-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Total Section */
+.quote-approval-total-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border: 2px solid #FCD34D;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.quote-approval-total-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.quote-approval-total-left svg {
+  font-size: 24px;
+  color: #D97706;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.quote-approval-total-left > div {
+  flex: 1;
+}
+
+.quote-approval-total-left p {
+  font-size: 14px;
+  color: #92400E;
+  margin: 0 0 8px 0;
+  line-height: 1.6;
+}
+
+.quote-approval-total-left .selected-info {
+  margin: 8px 0 0 0;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.quote-approval-total-left .all-selected {
+  color: #059669;
+}
+
+.quote-approval-total-left .partial-selected {
+  color: #D97706;
+}
+
+.quote-approval-total-left .none-selected {
+  color: #DC2626;
+}
+
+.quote-approval-total-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.quote-approval-total-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400E;
+}
+
+.quote-approval-total-amount {
+  font-size: 32px;
+  font-weight: 800;
+  color: #D97706;
+  letter-spacing: -0.5px;
+}
+
+/* Actions */
+.quote-approval-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+.quote-approval-btn {
+  padding: 16px 32px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quote-approval-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quote-approval-btn.reject {
+  background: white;
+  color: #EF4444;
+  border: 2px solid #EF4444;
+}
+
+.quote-approval-btn.reject:hover:not(:disabled) {
+  background: #FEF2F2;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+  transform: translateY(-2px);
+}
+
+.quote-approval-btn.approve {
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+  color: white;
+}
+
+.quote-approval-btn.approve:hover:not(:disabled) {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.4);
+  transform: translateY(-2px);
+}
+
+.quote-approval-btn svg.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* Modal */
+.quote-approval-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.quote-approval-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.quote-approval-modal-header {
+  margin-bottom: 24px;
+}
+
+.quote-approval-modal-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quote-approval-modal-body label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.quote-approval-modal-body .required {
+  color: #EF4444;
+}
+
+.quote-approval-modal-body textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.quote-approval-modal-body textarea:focus {
+  outline: none;
+  border-color: #338AF3;
+}
+
+.quote-approval-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.quote-approval-modal-actions button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quote-approval-modal-actions .btn-cancel {
+  background: white;
+  color: #6B7280;
+  border: 2px solid #E5E7EB;
+}
+
+.quote-approval-modal-actions .btn-cancel:hover {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+.quote-approval-modal-actions .btn-confirm {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+}
+
+.quote-approval-modal-actions .btn-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.quote-approval-modal-actions .btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quote-approval-page {
+    padding: 16px;
+  }
+
+  .quote-approval-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .quote-approval-title {
+    font-size: 24px;
+  }
+
+  .quote-approval-part-item {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .quote-approval-part-quantity,
+  .quote-approval-part-price,
+  .quote-approval-part-total {
+    align-items: flex-start;
+  }
+
+  .quote-approval-total-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .quote-approval-total-right {
+    align-items: flex-start;
+  }
+
+  .quote-approval-actions {
+    flex-direction: column;
+  }
+
+  .quote-approval-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

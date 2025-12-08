@@ -430,6 +430,110 @@
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
+/* ========== QUOTING Status Banner (Chờ duyệt phụ tùng) ========== */
+.quoting-status-banner {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+  border: 2px solid #fb923c;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(251, 146, 60, 0.2);
+  animation: bannerPulse 2s ease-in-out infinite;
+}
+
+@keyframes bannerPulse {
+  0%, 100% { 
+    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.2);
+  }
+  50% { 
+    box-shadow: 0 6px 20px rgba(251, 146, 60, 0.35);
+  }
+}
+
+.quoting-status-banner .banner-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 12px;
+  color: #ea580c;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15);
+}
+
+.quoting-status-banner .banner-content {
+  flex: 1;
+}
+
+.quoting-status-banner .banner-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #9a3412;
+}
+
+.quoting-status-banner .banner-content p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #7c2d12;
+}
+
+.quoting-status-banner .pending-parts-summary {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border-left: 3px solid #f97316;
+}
+
+.quoting-status-banner .pending-parts-summary strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #9a3412;
+}
+
+.quoting-status-banner .pending-parts-summary ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.quoting-status-banner .pending-parts-summary li {
+  font-size: 13px;
+  color: #7c2d12;
+  line-height: 1.8;
+}
+
+.quoting-status-banner .pending-parts-summary .item-note {
+  font-size: 12px;
+  color: #b45309;
+  font-style: italic;
+}
+
+.quoting-status-banner .pending-parts-summary .urgency-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-left: 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.quoting-status-banner .pending-parts-summary .urgency-urgent {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.quoting-status-banner .pending-parts-summary .urgency-critical {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 /* ========== Detail Info Grid ========== */
 .detail-info-grid {
   display: grid;
@@ -467,6 +571,49 @@
 
 .info-card p strong {
   color: #1f2937;
+}
+
+/* ========== Inspection Guide (Hướng dẫn kiểm tra) ========== */
+.inspection-guide {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.inspection-guide > svg {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: #1d4ed8;
+  margin-top: 2px;
+}
+
+.inspection-guide > div {
+  flex: 1;
+}
+
+.inspection-guide strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #1e40af;
+}
+
+.inspection-guide p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1e3a8a;
+}
+
+.inspection-guide strong:last-of-type {
+  color: #2563eb;
+  font-weight: 700;
 }
 
 /* ========== Services Section ========== */
@@ -1391,5 +1538,168 @@
   .btn-close-preview {
     top: 10px;
     right: 10px;
+  }
+}
+/* ========== Toast Auto-Save ========== */
+.save-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #34c759 0%, #22c55e 100%);
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 10000;
+  animation: slideInUp 0.3s ease, fadeOut 0.5s ease 1.5s forwards;
+}
+
+.save-toast svg {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* ========== Custom Confirmation Modal ========== */
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+.confirm-modal-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  width: 90%;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+.confirm-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.confirm-modal-header .confirm-icon {
+  width: 28px;
+  height: 28px;
+  color: #338af3;
+  flex-shrink: 0;
+}
+
+.confirm-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.confirm-modal-body {
+  padding: 24px;
+}
+
+.confirm-modal-body p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #6b7280;
+}
+
+.confirm-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  justify-content: flex-end;
+}
+
+.confirm-modal-footer .btn-cancel {
+  padding: 10px 24px;
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirm-modal-footer .btn-cancel:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.confirm-modal-footer .btn-confirm {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #34c759 0%, #22c55e 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+.confirm-modal-footer .btn-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }

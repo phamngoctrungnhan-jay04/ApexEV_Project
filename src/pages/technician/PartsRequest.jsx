@@ -3,6 +3,8 @@ import { Container, Row, Col, Card, Button, Form, InputGroup, Table, Modal, Badg
 import { FiSearch, FiPlus, FiTrash2, FiSend, FiPackage, FiAlertCircle, FiCheck, FiInfo, FiClock, FiX, FiList, FiRepeat, FiTool, FiImage } from 'react-icons/fi';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getAllParts, searchParts, createPartRequest, getMyPartRequests, cancelPartRequest } from '../../services/partService';
+import { updateWorkStatus, getOrderItems } from '../../services/technicianWorkService';
+import { completeServiceOrderChecklists } from '../../services/checklistService';
 import './PartsRequest.css';
 
 const PartsRequest = () => {
@@ -20,6 +22,7 @@ const PartsRequest = () => {
   const [requestNote, setRequestNote] = useState('');
   const [urgencyLevel, setUrgencyLevel] = useState('NORMAL');
   const [replacementItems, setReplacementItems] = useState([]); // Items được đánh dấu thay thế từ checklist
+  const [orderStatus, setOrderStatus] = useState(null); // Trạng thái hiện tại của order
   
   // Loading states
   const [loadingParts, setLoadingParts] = useState(true);
@@ -34,7 +37,34 @@ const PartsRequest = () => {
     loadParts();
     loadMyRequests();
     loadReplacementItems();
+    loadOrderStatus();
   }, []);
+
+  // Load order status từ localStorage (được set từ JobList)
+  const loadOrderStatus = async () => {
+    try {
+      // Option 1: Thử load từ localStorage trước
+      const saved = localStorage.getItem('orderStatus');
+      if (saved) {
+        const status = JSON.parse(saved);
+        setOrderStatus(status);
+        console.log('📋 Loaded order status from localStorage:', status);
+        return;
+      }
+      
+      // Option 2: Nếu không có trong localStorage, fetch từ Backend
+      if (orderId) {
+        console.log('📋 Fetching order status from API for orderId:', orderId);
+        const orderDetails = await getOrderItems(orderId);
+        // Backend trả về { orderItems, advisorNotes, ... } nhưng không có status
+        // Cần gọi API khác hoặc lưu status từ JobList
+        console.warn('⚠️ Cannot get status from API. Please navigate from JobList.');
+        showToast('Vui lòng quay lại từ trang Danh sách công việc', 'warning');
+      }
+    } catch (error) {
+      console.error('Load order status error:', error);
+    }
+  };
 
   // Load replacement items từ localStorage
   const loadReplacementItems = () => {
@@ -167,6 +197,12 @@ const PartsRequest = () => {
       return;
     }
 
+    // ✅ CRITICAL: Kiểm tra order phải ở trạng thái INSPECTION
+    if (orderStatus !== 'INSPECTION') {
+      showToast(`Không thể gửi yêu cầu phụ tùng. Order đang ở trạng thái ${orderStatus}. Chỉ có thể gửi khi đang KIỂM TRA.`, 'danger');
+      return;
+    }
+
     const hasInvalidQuantity = selectedParts.some(p => p.requestedQuantity <= 0);
     if (hasInvalidQuantity) {
       showToast('Vui lòng nhập số lượng hợp lệ cho tất cả phụ tùng', 'warning');
@@ -191,6 +227,28 @@ const PartsRequest = () => {
       }
 
       showToast(`Đã gửi ${selectedParts.length} yêu cầu phụ tùng thành công!`, 'success');
+      
+      // Complete checklist và chuyển status sang QUOTING
+      try {
+        await completeServiceOrderChecklists(parseInt(orderId));
+        console.log('✓ Marked checklist as completed');
+        
+        await updateWorkStatus(parseInt(orderId), 'QUOTING');
+        console.log('✓ Transitioned to QUOTING status');
+        
+        // Xóa replacement items từ localStorage
+        localStorage.removeItem('replacementItems');
+        localStorage.removeItem('orderStatus');
+        
+        // Quay về trang JobList sau 1.5 giây
+        setTimeout(() => {
+          navigate('/technician/jobs');
+        }, 1500);
+      } catch (error) {
+        console.error('Error updating status:', error);
+        showToast('Đã gửi yêu cầu nhưng không thể cập nhật trạng thái', 'warning');
+      }
+      
       setShowSendModal(false);
       
       // Reset form
@@ -327,6 +385,42 @@ const PartsRequest = () => {
             Quay lại danh sách công việc
           </Button>
         </div>
+      )}
+
+      {/* Warning if orderStatus is not INSPECTION */}
+      {orderId && orderStatus && orderStatus !== 'INSPECTION' && (
+        <Alert variant="danger" className="mb-4">
+          <FiAlertCircle className="me-2" />
+          <strong>Không thể gửi yêu cầu phụ tùng!</strong>
+          <br />
+          Order đang ở trạng thái <Badge bg="secondary">{orderStatus}</Badge>. 
+          Chỉ có thể gửi yêu cầu khi đang <Badge bg="primary">KIỂM TRA</Badge>.
+          <Button 
+            variant="link" 
+            className="p-0 ms-2"
+            onClick={() => navigate('/technician/jobs')}
+          >
+            Quay lại danh sách công việc
+          </Button>
+        </Alert>
+      )}
+
+      {/* Warning if orderStatus is null */}
+      {orderId && !orderStatus && (
+        <Alert variant="warning" className="mb-4">
+          <FiAlertCircle className="me-2" />
+          <strong>Không xác định được trạng thái order!</strong>
+          <br />
+          Vui lòng quay lại trang <strong>Danh sách công việc</strong> và click vào nút <Badge bg="primary">Yêu cầu phụ tùng thay thế</Badge> để tiếp tục.
+          <Button 
+            variant="primary" 
+            size="sm"
+            className="ms-2"
+            onClick={() => navigate('/technician/jobs')}
+          >
+            Quay lại danh sách công việc
+          </Button>
+        </Alert>
       )}
 
       {/* Replacement Items Section - Các mục cần thay thế từ checklist */}

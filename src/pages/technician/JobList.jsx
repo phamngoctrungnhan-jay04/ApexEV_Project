@@ -5,13 +5,14 @@ import {
   FiClock, FiUser, FiTool, FiCalendar, FiChevronRight, FiChevronDown, 
   FiCheckCircle, FiXCircle, FiAlertTriangle, FiPlay, FiRefreshCw, 
   FiFileText, FiSave, FiMessageSquare, FiLoader, FiAlertCircle,
-  FiCamera, FiImage, FiTrash2, FiX, FiPackage, FiRepeat
+  FiCamera, FiImage, FiTrash2, FiX, FiPackage, FiRepeat, FiInfo
 } from 'react-icons/fi';
 import { FaCar } from 'react-icons/fa';
 import './JobList.css';
 import technicianWorkService from '../../services/technicianWorkService';
 import checklistService from '../../services/checklistService';
 import { uploadTechnicianFile, getFileViewUrl } from '../../services/uploadService';
+import { getPartRequestsByOrder } from '../../services/partService';
 
 // Backend OrderStatus mapping
 const STATUS_LABELS = {
@@ -56,12 +57,13 @@ const JobList = () => {
   
   // State cho danh sách công việc
   const [orders, setOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]); // Danh sách đơn đã hoàn thành
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [advisorNotes, setAdvisorNotes] = useState(''); // Ghi chú từ Advisor
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('active'); // 'active' hoặc 'completed'
 
   // State cho inline checklist
   const [expandedServiceId, setExpandedServiceId] = useState(null);
@@ -71,14 +73,56 @@ const JobList = () => {
   const [uploadingImage, setUploadingImage] = useState(null); // itemId đang upload
   const [imagePreview, setImagePreview] = useState(null); // { itemId, url } để xem ảnh lớn
   const [replacementItems, setReplacementItems] = useState([]); // Danh sách items cần thay thế
+  const [partRequests, setPartRequests] = useState([]); // ✅ Danh sách part requests từ API
   const fileInputRefs = useRef({}); // Refs cho input file của từng item
+  const [showSaveToast, setShowSaveToast] = useState(false); // Toast thông báo auto-save
+  
+  // ✅ Custom Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
 
   // Fetch danh sách công việc
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await technicianWorkService.getMyOrders();
-      setOrders(data || []);
+      
+      // Fetch cả 2 loại: đang làm và đã hoàn thành
+      const [activeData, completedData] = await Promise.all([
+        technicianWorkService.getMyOrders(),
+        technicianWorkService.getMyCompletedOrders()
+      ]);
+      
+      setOrders(activeData || []);
+      setCompletedOrders(completedData || []);
+      
+      // Debug log - Kiểm tra dữ liệu TRƯỚC khi setState
+      console.log('🔍 [BEFORE setState] Raw data:', {
+        activeFirst: activeData?.[0],
+        completedFirst: completedData?.[0]
+      });
+      
+      // Debug: In ra TOÀN BỘ object để xem cấu trúc thật
+      if (completedData?.[0]) {
+        console.log('🔍 [RAW API Response] Completed order FULL:', JSON.stringify(completedData[0], null, 2));
+      }
+      
+      // Debug log - Kiểm tra state SAU khi setState (sẽ chạy ở render tiếp theo)
+      console.log('🔍 [JobList] Fetched orders:', { 
+        activeCount: activeData?.length, 
+        completedCount: completedData?.length,
+        sampleOrder: activeData?.[0] || completedData?.[0]
+      });
+      
+      if (activeData?.[0]) {
+        console.log('🔍 Sample active order keys:', Object.keys(activeData[0]));
+      }
+      if (completedData?.[0]) {
+        console.log('🔍 Sample completed order keys:', Object.keys(completedData[0]));
+      }
     } catch (err) {
       setError('Không thể tải danh sách công việc');
       console.error('Error fetching orders:', err);
@@ -87,21 +131,47 @@ const JobList = () => {
     }
   }, []);
 
+  // Debug: Theo dõi state thay đổi
+  useEffect(() => {
+    console.log('🔍 [State Changed] orders:', orders.length, 'first:', orders[0]);
+    console.log('🔍 [State Changed] completedOrders:', completedOrders.length, 'first:', completedOrders[0]);
+  }, [orders, completedOrders]);
+
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
   // Fetch chi tiết order khi chọn
   const handleSelectOrder = async (order) => {
+    console.log('🔍 [handleSelectOrder] Selected order:', order);
+    
+    if (!order || !order.orderId) {
+      console.error('❌ Invalid order or missing orderId:', order);
+      return;
+    }
+    
     setSelectedOrder(order);
     setExpandedServiceId(null);
     setServiceChecklists({});
     setAdvisorNotes('');
+    setPartRequests([]); // ✅ Reset part requests
     
     try {
       const detail = await technicianWorkService.getOrderItems(order.orderId);
       setOrderItems(detail.orderItems || []);
       setAdvisorNotes(detail.advisorNotes || '');
+      
+      // ✅ Nếu order đang QUOTING, fetch part requests
+      if (order.status === 'QUOTING') {
+        try {
+          const requests = await getPartRequestsByOrder(order.orderId);
+          setPartRequests(requests || []);
+          console.log('✅ Loaded part requests:', requests);
+        } catch (err) {
+          console.warn('⚠️ Could not load part requests:', err);
+          setPartRequests([]);
+        }
+      }
     } catch (err) {
       console.error('Error fetching order items:', err);
       setOrderItems([]);
@@ -124,16 +194,40 @@ const JobList = () => {
     if (!serviceChecklists[serviceId]) {
       setLoadingChecklist(true);
       try {
-        // Lấy checklist items từ API
+        // ✅ Lấy checklist items VÀ results đã lưu từ API
         const checklistItems = await checklistService.getChecklistItemsByService(serviceId);
         
-        // Khởi tạo results cho mỗi item
+        // ✅ Fetch kết quả đã lưu cho order này
+        let savedResults = {};
+        if (selectedOrder?.orderId) {
+          try {
+            const orderResults = await checklistService.getChecklistResultsByOrder(selectedOrder.orderId);
+            console.log('🔍 Loaded saved checklist results:', orderResults);
+            
+            // Map results theo itemId
+            orderResults.forEach(result => {
+              savedResults[result.serviceChecklistItemId] = {
+                status: result.status,
+                notes: result.notes || '',
+                images: result.imageUrl ? [{ url: result.imageUrl }] : [],
+                needsReplacement: result.needsReplacement || false,
+                itemName: result.itemName || ''
+              };
+            });
+          } catch (err) {
+            console.warn('⚠️ Could not load saved results:', err);
+          }
+        }
+
+        // Khởi tạo results cho mỗi item (merge với saved results)
         const results = {};
         checklistItems.forEach(checkItem => {
-          results[checkItem.id] = {
+          results[checkItem.id] = savedResults[checkItem.id] || {
             status: ITEM_STATUS.PENDING,
             notes: '',
-            images: []
+            images: [],
+            needsReplacement: false,
+            itemName: checkItem.name
           };
         });
 
@@ -160,8 +254,12 @@ const JobList = () => {
     }
   };
 
-  // Cập nhật status của checklist item
-  const handleItemStatusChange = (serviceId, itemId, status) => {
+  // Cập nhật status của checklist item VÀ TỰ ĐỘNG LƯU
+  const handleItemStatusChange = async (serviceId, itemId, status) => {
+    // Lấy result hiện tại TRƯỚC KHI update state
+    const currentResult = serviceChecklists[serviceId]?.results[itemId] || {};
+    
+    // Cập nhật state local ngay lập tức để UI responsive
     setServiceChecklists(prev => ({
       ...prev,
       [serviceId]: {
@@ -175,10 +273,38 @@ const JobList = () => {
         }
       }
     }));
+
+    // TỰ ĐỘNG LƯU kết quả lên server
+    try {
+      const imageUrl = currentResult?.images?.[0]?.url || null; // Lấy ảnh đầu tiên (nếu có)
+      
+      console.log('📝 Saving item:', { itemId, orderId: selectedOrder.orderId, currentResult });
+      console.log('📝 Notes to send:', currentResult?.notes || '');
+      
+      // Gọi API lưu kết quả với serviceOrderId và itemId
+      await checklistService.saveChecklistItemResult(
+        selectedOrder.orderId, // serviceOrderId
+        itemId, // service_checklist_item id
+        status,
+        currentResult?.notes || '',
+        imageUrl
+      );
+      
+      // Hiển thị toast thông báo
+      setShowSaveToast(true);
+      setTimeout(() => setShowSaveToast(false), 2000);
+      
+      console.log('✓ Đã lưu tự động:', { orderId: selectedOrder.orderId, itemId, status });
+    } catch (err) {
+      console.error('Error auto-saving checklist item:', err);
+      // Không hiển thị alert để không làm gián đoạn workflow
+      // Người dùng vẫn có thể dùng nút Lưu thủ công nếu cần
+    }
   };
 
-  // Cập nhật notes của checklist item
-  const handleItemNotesChange = (serviceId, itemId, notes) => {
+  // Cập nhật notes của checklist item VÀ TỰ ĐỘNG LƯU
+  const handleItemNotesChange = async (serviceId, itemId, notes) => {
+    // Cập nhật state local
     setServiceChecklists(prev => ({
       ...prev,
       [serviceId]: {
@@ -192,6 +318,33 @@ const JobList = () => {
         }
       }
     }));
+    
+    // Auto-save notes sau 1 giây (debounced)
+    const currentResult = serviceChecklists[serviceId]?.results[itemId] || {};
+    const currentStatus = currentResult.status || 'PENDING';
+    const imageUrl = currentResult?.images?.[0]?.url || null;
+    
+    // Clear timeout cũ nếu có
+    if (window.notesDebounceTimeout) {
+      clearTimeout(window.notesDebounceTimeout);
+    }
+    
+    // Set timeout mới để lưu sau 1.5 giây
+    window.notesDebounceTimeout = setTimeout(async () => {
+      try {
+        console.log('💾 Auto-saving notes:', { itemId, notes });
+        await checklistService.saveChecklistItemResult(
+          selectedOrder.orderId,
+          itemId,
+          currentStatus,
+          notes,
+          imageUrl
+        );
+        console.log('✅ Notes saved!');
+      } catch (err) {
+        console.error('Error auto-saving notes:', err);
+      }
+    }, 1500);
   };
 
   // Upload ảnh cho checklist item
@@ -297,6 +450,27 @@ const JobList = () => {
     }
   };
 
+  // ✅ Helper: Show custom confirm modal
+  const showConfirm = (title, message, onConfirm) => {
+    setConfirmModal({
+      show: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
+  const handleConfirmModalClose = () => {
+    setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+  };
+
+  const handleConfirmModalOk = () => {
+    if (confirmModal.onConfirm) {
+      confirmModal.onConfirm();
+    }
+    handleConfirmModalClose();
+  };
+
   // Tính progress của service
   const getServiceProgress = (serviceId) => {
     const checklist = serviceChecklists[serviceId];
@@ -327,39 +501,70 @@ const JobList = () => {
           nextStatus = 'INSPECTION';
           break;
         case 'INSPECTION':
-          // Bước 2: Kiểm tra xong → Kiểm tra xem có cần phụ tùng không
-          // Nếu có replacement items → QUOTING (để báo giá)
-          // Nếu không có → IN_PROGRESS (thực hiện luôn)
-          if (replacementItems.length > 0) {
-            // Có phụ tùng cần thay → Chuyển sang báo giá
-            if (window.confirm('Phát hiện có phụ tùng cần thay thế. Chuyển sang gửi báo giá?')) {
-              nextStatus = 'QUOTING';
-            } else {
-              return; // Không chuyển trạng thái
-            }
-          } else {
-            // Không cần phụ tùng → Thực hiện luôn
-            nextStatus = 'IN_PROGRESS';
+          // Bước 2: Kiểm tra xong → Đánh dấu checklist hoàn thành → Chuyển status
+          
+          // ✅ VALIDATION: Kiểm tra xem có ít nhất 1 mục checklist đánh dấu cần thay thế không
+          let hasReplacementNeeded = false;
+          console.log('🔍 Checking for NEEDS_REPLACEMENT items...');
+          console.log('serviceChecklists:', serviceChecklists);
+          
+          Object.entries(serviceChecklists).forEach(([serviceId, checklist]) => {
+            console.log(`Service ${serviceId}:`, checklist);
+            Object.entries(checklist.results || {}).forEach(([itemId, result]) => {
+              console.log(`  Item ${itemId}:`, result);
+              // ✅ FIX: Kiểm tra status thay vì needsReplacement
+              if (result.status === 'NEEDS_REPLACEMENT') {
+                hasReplacementNeeded = true;
+                console.log('✓ Found NEEDS_REPLACEMENT item!');
+              }
+            });
+          });
+
+          console.log('hasReplacementNeeded:', hasReplacementNeeded);
+
+          // Kiểm tra xem có cần phụ tùng không
+          if (hasReplacementNeeded) {
+            // Có ít nhất 1 mục cần thay → Hiển thị alert và giữ ở INSPECTION
+            // Kỹ thuật viên cần bấm nút "Yêu cầu phụ tùng" để chọn parts
+            alert('⚠️ Bạn đã đánh dấu có phụ tùng cần thay thế.\n\nVui lòng bấm nút "Yêu cầu phụ tùng thay thế" để chọn phụ tùng cần thiết.');
+            return; // Không chuyển trạng thái, giữ ở INSPECTION
           }
+
+          // Không cần phụ tùng → Complete checklist và chuyển sang IN_PROGRESS
+          try {
+            await checklistService.completeServiceOrderChecklists(orderId);
+            console.log('✓ No replacement needed, marked checklist as completed');
+          } catch (error) {
+            console.error('Error marking checklist completed:', error);
+            alert('Lỗi khi hoàn tất kiểm tra. Vui lòng thử lại.');
+            return;
+          }
+
+          console.log('✓ Transitioning to IN_PROGRESS');
+          nextStatus = 'IN_PROGRESS';
           break;
         case 'QUOTING':
-          // Bước 3: Sau khi báo giá được duyệt → Kiểm tra phụ tùng có sẵn không
-          // Logic này cần check với backend/advisor
-          // Tạm thời cho phép chuyển sang WAITING_FOR_PARTS hoặc IN_PROGRESS
-          if (window.confirm('Phụ tùng đã có sẵn trong kho?\nChọn YES nếu có sẵn (bắt đầu thực hiện)\nChọn NO nếu chưa có (chờ phụ tùng)')) {
-            nextStatus = 'IN_PROGRESS'; // Có sẵn → Thực hiện luôn
-          } else {
-            nextStatus = 'WAITING_FOR_PARTS'; // Chưa có → Chờ phụ tùng
-          }
+          // Bước 3: Customer đã duyệt báo giá → Chuyển sang WAITING_FOR_PARTS
+          // Logic này được trigger khi Kỹ thuật viên bấm "Xác nhận phụ tùng"
+          // (sau khi all partRequests có status === FULFILLED)
+          nextStatus = 'WAITING_FOR_PARTS';
           break;
         case 'WAITING_FOR_PARTS':
           // Bước 4: Phụ tùng đã về → Bắt đầu thực hiện
-          if (window.confirm('Phụ tùng đã về đầy đủ. Bắt đầu thực hiện?')) {
-            nextStatus = 'IN_PROGRESS';
-          } else {
-            return;
-          }
-          break;
+          showConfirm(
+            'Xác nhận phụ tùng đã về',
+            'Phụ tùng đã về đầy đủ. Bắt đầu thực hiện?',
+            async () => {
+              try {
+                await technicianWorkService.updateWorkStatus(orderId, 'IN_PROGRESS');
+                fetchOrders();
+                setSelectedOrder(prev => ({ ...prev, status: 'IN_PROGRESS' }));
+              } catch (err) {
+                alert('Lỗi khi cập nhật trạng thái: ' + err.message);
+              }
+            }
+          );
+          return; // Exit early vì confirm modal sẽ handle việc cập nhật
         default:
           nextStatus = 'IN_PROGRESS';
       }
@@ -391,9 +596,22 @@ const JobList = () => {
     });
 
     if (!allCompleted) {
-      if (!window.confirm('Một số hạng mục kiểm tra chưa hoàn thành. Bạn có chắc muốn hoàn thành công việc?')) {
-        return;
-      }
+      showConfirm(
+        'Xác nhận hoàn thành công việc',
+        'Một số hạng mục kiểm tra chưa hoàn thành. Bạn có chắc muốn hoàn thành công việc?',
+        async () => {
+          try {
+            await technicianWorkService.completeWork(orderId);
+            fetchOrders();
+            if (selectedOrder && selectedOrder.orderId === orderId) {
+              setSelectedOrder({ ...selectedOrder, status: 'READY_FOR_INVOICE' });
+            }
+          } catch (err) {
+            alert('Lỗi khi hoàn thành công việc: ' + err.message);
+          }
+        }
+      );
+      return;
     }
 
     try {
@@ -410,20 +628,7 @@ const JobList = () => {
   };
 
   // Filter orders theo tab
-  const filteredOrders = orders.filter(order => {
-    if (activeTab === 'all') return true;
-    // Pending = chờ thực hiện (CONFIRMED, RECEPTION, INSPECTION, QUOTING, WAITING_FOR_PARTS)
-    if (activeTab === 'pending') {
-      return ['CONFIRMED', 'RECEPTION', 'INSPECTION', 'QUOTING', 'WAITING_FOR_PARTS'].includes(order.status);
-    }
-    // In Progress = đang thực hiện
-    if (activeTab === 'inProgress') return order.status === 'IN_PROGRESS';
-    // Completed = đã hoàn thành hoặc sẵn sàng xuất hóa đơn
-    if (activeTab === 'completed') {
-      return ['READY_FOR_INVOICE', 'COMPLETED'].includes(order.status);
-    }
-    return true;
-  });
+  const filteredOrders = activeTab === 'active' ? orders : completedOrders;
 
   // Render status badge
   const renderStatusBadge = (status) => (
@@ -703,28 +908,16 @@ const JobList = () => {
       {/* Tabs */}
       <div className="joblist-tabs">
         <button 
-          className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveTab('all')}
+          className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
+          onClick={() => setActiveTab('active')}
         >
-          Tất cả ({orders.length})
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-          onClick={() => setActiveTab('pending')}
-        >
-          Chờ xử lý ({orders.filter(o => o.status === 'ASSIGNED').length})
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'inProgress' ? 'active' : ''}`}
-          onClick={() => setActiveTab('inProgress')}
-        >
-          Đang thực hiện ({orders.filter(o => o.status === 'IN_PROGRESS').length})
+          Đang làm ({orders.length})
         </button>
         <button 
           className={`tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
           onClick={() => setActiveTab('completed')}
         >
-          Hoàn thành ({orders.filter(o => o.status === 'COMPLETED').length})
+          Đã hoàn thành ({completedOrders.length})
         </button>
       </div>
 
@@ -744,55 +937,68 @@ const JobList = () => {
             </div>
           ) : (
             <div className="orders-list">
-              {filteredOrders.map(order => (
-                <div 
-                  key={order.orderId}
-                  className={`order-card ${selectedOrder?.orderId === order.orderId ? 'selected' : ''}`}
-                  onClick={() => handleSelectOrder(order)}
-                >
-                  <div className="order-card-header">
-                    <span className="order-id">#{order.orderId}</span>
-                    {renderStatusBadge(order.status)}
-                  </div>
-                  
-                  <div className="order-card-body">
-                    <div className="order-info">
-                      <FiUser />
-                      <span>{order.customerName || 'Khách hàng'}</span>
+              {filteredOrders.map((order, index) => {
+                // Debug: Log mỗi order khi render
+                if (index === 0) {
+                  console.log('🔍 [Render] First order in list:', order);
+                }
+                
+                return (
+                  <div 
+                    key={order.orderId || `order-${index}`}
+                    className={`order-card ${selectedOrder?.orderId === order.orderId ? 'selected' : ''}`}
+                    onClick={() => {
+                      console.log('🔍 [onClick] Clicking order:', order);
+                      handleSelectOrder(order);
+                    }}
+                  >
+                    <div className="order-card-header">
+                      <span className="order-id">#{order.orderId}</span>
+                      {renderStatusBadge(order.status)}
                     </div>
-                    {order.createdAt && (
-                      <div className="order-info" style={{ fontSize: '0.85em', color: '#9CA3AF' }}>
-                        <FiFileText />
-                        <span>Đặt: {(() => {
-                          const date = new Date(order.createdAt);
-                          return date.toLocaleString('vi-VN', { 
-                            day: '2-digit', 
-                            month: '2-digit', 
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          });
-                        })()}</span>
+                    
+                    <div className="order-card-body">
+                      <div className="order-info">
+                        <FiUser />
+                        <span>{order.customerName || 'Khách hàng'}</span>
                       </div>
-                    )}
-                    <div className="order-info">
-                      <FiCalendar />
-                      <span>Hẹn: {order.appointmentDate || 'Chưa có'}</span>
+                      {order.createdAt && (
+                        <div className="order-info" style={{ fontSize: '0.85em', color: '#9CA3AF' }}>
+                          <FiFileText />
+                          <span>Đặt: {(() => {
+                            const date = new Date(order.createdAt);
+                            return date.toLocaleString('vi-VN', { 
+                              day: '2-digit', 
+                              month: '2-digit', 
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            });
+                          })()}</span>
+                        </div>
+                      )}
+                      <div className="order-info">
+                        <FiCalendar />
+                        <span>Hẹn: {order.appointmentDate || 'Chưa có'}</span>
+                      </div>
+                      <div className="order-info">
+                        <FiClock />
+                        <span>{order.appointmentTime || 'Chưa có giờ'}</span>
+                      </div>
                     </div>
-                    <div className="order-info">
-                      <FiClock />
-                      <span>{order.appointmentTime || 'Chưa có giờ'}</span>
-                    </div>
-                  </div>
 
-                  <div className="order-card-footer">
-                    <span className="vehicle-info">
-                      <FaCar />
-                      {order.vehicleBrand} {order.vehicleModel} - {order.licensePlate}
-                    </span>
-                    <FiChevronRight />
+                    <div className="order-card-footer">
+                      <span className="vehicle-info">
+                        <FaCar />
+                        {/* Hiển thị thông tin xe - ưu tiên vehicleName từ Backend */}
+                        {order.vehicleName || order.licensePlate 
+                          ? (order.vehicleName || `${order.vehicleBrand || ''} ${order.vehicleModel || ''} - ${order.licensePlate || ''}`.trim())
+                          : 'Chưa có thông tin xe'}
+                      </span>
+                      <FiChevronRight />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -816,22 +1022,36 @@ const JobList = () => {
                 
                 <div className="detail-actions">
                   {/* Cho phép chuyển trạng thái theo BUSINESS FLOW */}
-                  {['CONFIRMED', 'RECEPTION', 'INSPECTION', 'QUOTING', 'WAITING_FOR_PARTS'].includes(selectedOrder.status) && (
-                    <button 
-                      className="btn-start"
-                      onClick={() => handleStartWork(selectedOrder.orderId)}
-                    >
-                      <FiPlay />
-                      {selectedOrder.status === 'CONFIRMED' ? 'Tiếp nhận xe' :
-                       selectedOrder.status === 'RECEPTION' ? 'Bắt đầu kiểm tra xe' : 
-                       selectedOrder.status === 'INSPECTION' ? 'Hoàn tất kiểm tra' : 
-                       selectedOrder.status === 'QUOTING' ? 'Xác nhận phụ tùng' :
-                       selectedOrder.status === 'WAITING_FOR_PARTS' ? 'Phụ tùng đã về' : 'Tiếp tục'}
-                    </button>
-                  )}
+                  {/* Hiện nút "Hoàn tất kiểm tra" CHỈ KHI không có replacement items */}
+                  {(() => {
+                    const isQuotingStatus = selectedOrder.status === 'QUOTING';
+                    const hasApprovedParts = partRequests.length > 0 && partRequests.every(req => req.status === 'FULFILLED');
+                    const canProceedFromQuoting = !isQuotingStatus || hasApprovedParts;
+
+                    return (
+                      ['CONFIRMED', 'RECEPTION', 'INSPECTION', 'QUOTING', 'WAITING_FOR_PARTS'].includes(selectedOrder.status) && 
+                      !(selectedOrder.status === 'INSPECTION' && replacementItems.length > 0) && (
+                        <button 
+                          className="btn-start"
+                          onClick={() => handleStartWork(selectedOrder.orderId)}
+                          disabled={isQuotingStatus && !hasApprovedParts}
+                          title={isQuotingStatus && !hasApprovedParts ? 'Vui lòng chờ khách hàng duyệt báo giá phụ tùng' : ''}
+                        >
+                          <FiPlay />
+                          {selectedOrder.status === 'CONFIRMED' ? 'Tiếp nhận xe' :
+                           selectedOrder.status === 'RECEPTION' ? 'Bắt đầu kiểm tra xe' : 
+                           selectedOrder.status === 'INSPECTION' ? 'Hoàn tất kiểm tra' : 
+                           selectedOrder.status === 'QUOTING' ? (hasApprovedParts ? 'Chuyển sang Chờ phụ tùng' : '⏳ Chờ duyệt báo giá') :
+                           selectedOrder.status === 'WAITING_FOR_PARTS' ? 'Phụ tùng đã về' : 'Tiếp tục'}
+                        </button>
+                      )
+                    );
+                  })()}
                   
-                  {/* Nút yêu cầu phụ tùng - CHỈ hiển thị ở bước INSPECTION hoặc QUOTING */}
-                  {['INSPECTION', 'QUOTING'].includes(selectedOrder.status) && (
+                  {/* NÚT YÊU CẦU PHỤ TÙNG - Hiện khi có NEEDS_REPLACEMENT, thay thế nút "Hoàn tất kiểm tra"
+                      Flow: Đánh dấu "Cần thay thế" → Click nút này → Chọn phụ tùng → Gửi yêu cầu
+                  */}
+                  {['INSPECTION'].includes(selectedOrder.status) && replacementItems.length > 0 && (
                     <button 
                       className="btn-request-parts"
                       onClick={() => {
@@ -839,11 +1059,13 @@ const JobList = () => {
                         if (replacementItems.length > 0) {
                           localStorage.setItem('replacementItems', JSON.stringify(replacementItems));
                         }
+                        // ✅ Lưu order status để PartsRequest validate
+                        localStorage.setItem('orderStatus', JSON.stringify(selectedOrder.status));
                         navigate(`/technician/parts-request?orderId=${selectedOrder.orderId}`);
                       }}
                     >
                       <FiPackage />
-                      {selectedOrder.status === 'INSPECTION' ? 'Chọn phụ tùng cần thay' : 'Chỉnh sửa phụ tùng'}
+                      Yêu cầu phụ tùng thay thế
                       {replacementItems.length > 0 && (
                         <span className="replacement-count">{replacementItems.length}</span>
                       )}
@@ -861,6 +1083,55 @@ const JobList = () => {
                   )}
                 </div>
               </div>
+
+              {/* Banner thông báo trạng thái QUOTING - Chờ duyệt phụ tùng */}
+              {selectedOrder.status === 'QUOTING' && (() => {
+                // ✅ Sử dụng partRequests từ API thay vì đếm từ state
+                const replacementCount = partRequests.length;
+                const replacementItemsList = partRequests.map(req => ({
+                  name: req.partName || 'Phụ tùng',
+                  notes: req.notes,
+                  quantity: req.quantity,
+                  urgency: req.urgency
+                }));
+
+                return (
+                  <div className="quoting-status-banner">
+                    <div className="banner-icon">
+                      <FiClock size={24} />
+                    </div>
+                    <div className="banner-content">
+                      <h4>⏳ Đang chờ duyệt phụ tùng ({replacementCount} mục)</h4>
+                      <p>
+                        Yêu cầu phụ tùng thay thế đã được gửi. 
+                        Advisor đang xem xét và gửi báo giá cho khách hàng.
+                        Bạn sẽ nhận được thông báo khi được phê duyệt.
+                      </p>
+                      {replacementItemsList.length > 0 && (
+                        <div className="pending-parts-summary">
+                          <strong>Mục cần thay thế:</strong>
+                          <ul>
+                            {replacementItemsList.slice(0, 5).map((item, idx) => (
+                              <li key={idx}>
+                                <strong>{item.name}</strong> x {item.quantity}
+                                {item.urgency && item.urgency !== 'NORMAL' && (
+                                  <span className="urgency-badge urgency-{item.urgency.toLowerCase()}">
+                                    {item.urgency === 'URGENT' ? '⚡ Khẩn cấp' : '🔥 Rất khẩn'}
+                                  </span>
+                                )}
+                                {item.notes && <span className="item-note"> - {item.notes}</span>}
+                              </li>
+                            ))}
+                            {replacementItemsList.length > 5 && (
+                              <li>...và {replacementItemsList.length - 5} mục khác</li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Customer & Vehicle info */}
               <div className="detail-info-grid">
@@ -899,6 +1170,21 @@ const JobList = () => {
                   <FiTool />
                   Dịch vụ cần thực hiện
                 </h3>
+
+                {/* Hướng dẫn cho kỹ thuật viên ở bước INSPECTION */}
+                {selectedOrder.status === 'INSPECTION' && (
+                  <div className="inspection-guide">
+                    <FiInfo />
+                    <div>
+                      <strong>Hướng dẫn kiểm tra:</strong>
+                      <p>
+                        Kiểm tra từng mục bên dưới. Nếu phát hiện cần thay phụ tùng, 
+                        đánh dấu ✅ "Cần thay thế" và ghi chú chi tiết. 
+                        Sau đó click <strong>"Hoàn tất kiểm tra"</strong> ở trên.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {orderItems.length === 0 ? (
                   <div className="empty-services">
@@ -984,6 +1270,37 @@ const JobList = () => {
               <FiX />
             </button>
             <img src={imagePreview.url} alt="Preview" />
+          </div>
+        </div>
+      )}
+
+      {/* Toast thông báo auto-save */}
+      {showSaveToast && (
+        <div className="save-toast">
+          <FiCheckCircle />
+          <span>Đã lưu tự động</span>
+        </div>
+      )}
+
+      {/* ✅ Custom Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="confirm-modal-overlay" onClick={handleConfirmModalClose}>
+          <div className="confirm-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-modal-header">
+              <FiAlertCircle className="confirm-icon" />
+              <h3>{confirmModal.title}</h3>
+            </div>
+            <div className="confirm-modal-body">
+              <p>{confirmModal.message}</p>
+            </div>
+            <div className="confirm-modal-footer">
+              <button className="btn-cancel" onClick={handleConfirmModalClose}>
+                Hủy
+              </button>
+              <button className="btn-confirm" onClick={handleConfirmModalOk}>
+                OK
+              </button>
+            </div>
           </div>
         </div>
       )}

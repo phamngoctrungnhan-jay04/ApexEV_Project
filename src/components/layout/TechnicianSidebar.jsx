@@ -16,7 +16,6 @@ import './TechnicianSidebar.css';
 const technicianMenu = [
   { to: '/technician/dashboard', label: 'Dashboard', icon: <FiHome /> },
   { to: '/technician/jobs', label: 'Công việc của tôi', icon: <FiClipboard /> },
-  { to: '/technician/checklist', label: 'Checklist bảo dưỡng', icon: <FiCheckSquare /> },
   { to: '/technician/parts-request', label: 'Yêu cầu linh kiện', icon: <FiTool /> },
   { to: '/technician/profile', label: 'Hồ sơ cá nhân', icon: <FiUser /> },
 ];
@@ -35,8 +34,7 @@ const TechnicianSidebar = () => {
   return (
     <aside className="technician-sidebar glassmorphism">
       <div className="sidebar-brand">
-        <span className="brand-text">APEX</span>
-        <span className="brand-badge">EV</span>
+        <img src="/images/logo.jpg" alt="APEX EV Logo" className="sidebar-logo-img" />
       </div>
       
       <nav className="sidebar-menu">

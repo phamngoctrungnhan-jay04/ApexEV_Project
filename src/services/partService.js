@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8081/api/parts';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/parts`;
 
 // Lấy token từ localStorage
 const getAuthHeader = () => {
@@ -162,7 +162,7 @@ export const cancelPartRequest = async (requestId) => {
 
 // ==================== ADMIN CRUD APIs ====================
 
-const ADMIN_API_URL = 'http://localhost:8081/api/parts/admin';
+const ADMIN_API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/parts/admin`;
 
 /**
  * Lấy tất cả phụ tùng cho Admin (entity đầy đủ)
@@ -262,6 +262,64 @@ export const updateStock = async (partId, quantity, action = 'add') => {
   }
 };
 
+/**
+ * Gửi email báo giá cho customer sau khi approve tất cả part requests
+ */
+export const sendQuoteEmail = async (orderId) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/requests/send-quote/${orderId}`,
+      null,
+      {
+        headers: getAuthHeader()
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('sendQuoteEmail error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Customer duyệt báo giá (QUOTED -> FULFILLED)
+ */
+export const approveQuote = async (orderId) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/requests/approve-quote/${orderId}`,
+      null,
+      {
+        headers: getAuthHeader()
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('approveQuote error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Customer từ chối báo giá (QUOTED -> REJECTED)
+ */
+export const rejectQuote = async (orderId, reason) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/requests/reject-quote/${orderId}`,
+      null,
+      {
+        params: { reason },
+        headers: getAuthHeader()
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('rejectQuote error:', error);
+    throw error;
+  }
+};
+
 export default {
   getAllParts,
   searchParts,
@@ -277,5 +335,8 @@ export default {
   getPendingPartRequests,
   approvePartRequest,
   rejectPartRequest,
-  cancelPartRequest
+  cancelPartRequest,
+  sendQuoteEmail,
+  approveQuote,
+  rejectQuote
 };

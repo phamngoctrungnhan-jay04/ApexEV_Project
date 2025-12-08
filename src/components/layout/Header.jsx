@@ -64,9 +64,12 @@ const Header = ({ onToggleSidebar }) => {
         
         {/* --- 1. BRAND LOGO --- */}
         <Link to="/Homepage" className="navbar-brand">
-          <FiZap size={28} color="#338AF3" /> {/* Icon sấm sét cho xe điện */}
-          <span className="brand-text">ReGen</span>
-          <span className="brand-badge">Z</span>
+          <img
+            src="/images/logo.jpg"
+            alt="APEX EV Logo"
+            className="brand-logo-img"
+            style={{ height: '65px', width: 'auto', maxWidth: '140px', borderRadius: '8px' }}
+          />
         </Link>
 
         {/* --- 2. MAIN NAVIGATION --- */}
@@ -79,9 +82,6 @@ const Header = ({ onToggleSidebar }) => {
           </Link>
           <Link to="/customer/history" className={`nav-link ${isActive('/customer/history')}`}>
             <FiClock /> <span>Lịch sử</span>
-          </Link>
-          <Link to="/customer/vehicles" className={`nav-link ${isActive('/customer/vehicles')}`}>
-            <IoCarSportOutline /> <span>Xe của tôi</span>
           </Link>
         </div>
 

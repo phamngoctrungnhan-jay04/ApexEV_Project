@@ -5,7 +5,7 @@
 const RAW_BASE = import.meta.env.VITE_API_URL;
 const API_BASE_URL = (RAW_BASE && RAW_BASE.trim())
   ? `${RAW_BASE.replace(/\/$/, '')}/user-profile`
-  : 'http://localhost:8081/user-profile';
+  : `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/user-profile`;
 // console.debug('[userService] API_BASE_URL =', API_BASE_URL);
 
 const userService = {

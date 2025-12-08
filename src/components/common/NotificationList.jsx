@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FiBell, FiCheckCircle, FiDollarSign, FiCalendar, FiXCircle, FiTrash2 } from 'react-icons/fi';
+import { FiBell, FiCheckCircle, FiCalendar, FiXCircle, FiTrash2, FiFileText } from 'react-icons/fi';
 // Giả sử bạn import đúng service
 import notificationService from '../../services/notificationService'; 
 import './NotificationList.css';
@@ -7,7 +7,7 @@ import './NotificationList.css';
 const iconMap = {
   'booking-confirmed': <FiCheckCircle color="#34c759" />,
   'service-completed': <FiCheckCircle color="#338AF3" />,
-  'payment-received': <FiDollarSign color="#10B981" />,
+  'payment-received': <FiFileText color="#10B981" />,
   'service-reminder': <FiCalendar color="#F59E0B" />,
   'cancelled': <FiXCircle color="#EF4444" />,
   'default': <FiBell color="#338AF3" />

@@ -16,7 +16,6 @@ import {
   FiType,
   FiAlignLeft,
   FiList,
-  FiDollarSign,
   FiClock,
   FiInfo,
   FiAlertTriangle,
@@ -177,7 +176,6 @@ const AdminServiceManager = () => {
                 Giá dự kiến (VNĐ) <span className="required">*</span>
               </label>
               <div className="form-input-wrapper">
-                <FiDollarSign />
                 <input
                   id={controlId('service-price')}
                   type="number"

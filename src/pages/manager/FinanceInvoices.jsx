@@ -15,8 +15,6 @@ import {
   FiXCircle,
   FiCalendar,
   FiUser,
-
-  FiDollarSign,
   FiAlertTriangle,
   FiClock,
   FiDownload,
@@ -433,7 +431,7 @@ const FinanceInvoices = () => {
               </div>
 
               <div className="detail-section">
-                <h4><FiDollarSign /> Thông tin thanh toán</h4>
+                <h4><FiFileText /> Thông tin thanh toán</h4>
                 <div className="detail-grid">
                   <div className="detail-item">
                     <span className="label">Trạng thái:</span>

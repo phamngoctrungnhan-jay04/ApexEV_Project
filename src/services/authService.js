@@ -1,6 +1,6 @@
 // Authentication Service for API calls
 
-const API_BASE_URL = import.meta.env.VITE_API_URL + '/api/auth' || 'http://localhost:8081/api/auth';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/auth`;
 
 // Normalize role from backend to FE
 function normalizeRole(role) {
@@ -292,6 +292,58 @@ class AuthService {
     const token = this.getAccessToken();
     const tokenType = localStorage.getItem('tokenType') || 'Bearer';
     return token ? { Authorization: `${tokenType} ${token}` } : {};
+  }
+
+  // Verify OTP
+  async verifyOTP({ email, otp }) {
+    try {
+      console.log('Verify OTP request:', { email, otp });
+
+      const response = await fetch(`${API_BASE_URL}/verify-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await response.json();
+      console.log('Verify OTP response:', { status: response.status, data });      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Mã OTP không đúng');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      throw error;
+    }
+  }
+
+  // Resend OTP
+  async resendOTP({ email }) {
+    try {
+      console.log('Resend OTP request:', { email });
+      
+      const response = await fetch(`${API_BASE_URL}/resend-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      console.log('Resend OTP response:', { status: response.status, data });
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Không thể gửi lại mã OTP');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      throw error;
+    }
   }
 }
 

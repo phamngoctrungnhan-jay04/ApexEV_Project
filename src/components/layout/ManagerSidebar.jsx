@@ -4,20 +4,20 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  FiHome, 
-  FiDollarSign, 
+  FiHome,
   FiFileText, 
   FiUser, 
   FiTrendingUp, 
   FiLogOut,
   FiAlertCircle,
-  FiPieChart
+  FiPieChart,
+  FiBarChart2
 } from 'react-icons/fi';
 import './ManagerSidebar.css';
 
 const managerLinks = [
   { to: '/manager/dashboard', label: 'Dashboard', icon: <FiHome /> },
-  { to: '/manager/finance', label: 'Quản lý tài chính', icon: <FiDollarSign /> },
+  { to: '/manager/finance', label: 'Quản lý tài chính', icon: <FiBarChart2 /> },
   { to: '/manager/invoices', label: 'Danh sách hóa đơn', icon: <FiFileText /> },
   { to: '/manager/overdue', label: 'Hóa đơn quá hạn', icon: <FiAlertCircle /> },
   { to: '/manager/reports', label: 'Báo cáo thống kê', icon: <FiPieChart /> },
@@ -37,8 +37,7 @@ const ManagerSidebar = () => {
   return (
     <aside className="manager-sidebar glassmorphism">
       <div className="sidebar-brand">
-        <span className="brand-text">APEX</span>
-        <span className="brand-badge">Finance</span>
+        <img src="/images/logo.jpg" alt="APEX EV Logo" className="sidebar-logo-img" />
       </div>
       <nav className="sidebar-menu">
         {managerLinks.map((link) => (

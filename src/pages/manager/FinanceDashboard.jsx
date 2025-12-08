@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import ManagerLayout from '../../components/layout/ManagerLayout';
 import CustomAlert from '../../components/common/CustomAlert';
 import {
-  FiDollarSign,
   FiTrendingUp,
   FiTrendingDown,
   FiClock,
@@ -133,7 +132,7 @@ const FinanceDashboard = () => {
         <div className="stats-grid">
           <div className="stat-card stat-revenue">
             <div className="stat-icon">
-              <FiDollarSign />
+              <FiTrendingUp />
             </div>
             <div className="stat-content">
               <p className="stat-label">Tổng doanh thu</p>

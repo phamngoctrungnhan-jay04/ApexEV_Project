@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8081/api/checklist';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/checklist`;
 
 // Lấy token từ localStorage
 const getAuthHeader = () => {
@@ -74,7 +74,7 @@ export const createChecklistForOrder = async (serviceOrderId, templateId) => {
 };
 
 /**
- * Lấy danh sách checklists của một service order
+ * Lấy danh sách checklists của một service order (API CŨ)
  */
 export const getChecklistsByOrder = async (serviceOrderId) => {
   try {
@@ -84,6 +84,24 @@ export const getChecklistsByOrder = async (serviceOrderId) => {
     return response.data;
   } catch (error) {
     console.error('getChecklistsByOrder error:', error);
+    throw error;
+  }
+};
+
+/**
+ * API MỚI: Lấy service checklist items cho order kèm results
+ * Trả về tất cả checklist items của service, kèm theo kết quả đã submit (nếu có)
+ * @param {number} serviceOrderId 
+ * @returns {Promise<Array>} Array of ServiceChecklistItemWithResultResponse
+ */
+export const getServiceChecklistItemsForOrder = async (serviceOrderId) => {
+  try {
+    const response = await axios.get(`${API_URL}/service-order/${serviceOrderId}/items`, {
+      headers: getAuthHeader()
+    });
+    return response.data;
+  } catch (error) {
+    console.error('getServiceChecklistItemsForOrder error:', error);
     throw error;
   }
 };
@@ -99,6 +117,28 @@ export const getChecklistResults = async (checklistId) => {
     return response.data;
   } catch (error) {
     console.error('getChecklistResults error:', error);
+    throw error;
+  }
+};
+
+/**
+ * ✅ Lấy tất cả kết quả checklist theo service order ID
+ * GET /api/checklist/service-order/{serviceOrderId}/results
+ * @param {number} serviceOrderId - ID của service order
+ * @returns {Array} Danh sách results với needsReplacement flag
+ */
+export const getChecklistResultsByOrder = async (serviceOrderId) => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/checklist/service-order/${serviceOrderId}/results`,
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 204 || error.response?.status === 404) {
+      return []; // Chưa có kết quả nào
+    }
+    console.error('getChecklistResultsByOrder error:', error);
     throw error;
   }
 };
@@ -148,7 +188,7 @@ export const getChecklistItem = async (resultId) => {
 export const getChecklistItemsByService = async (serviceId) => {
   try {
     const response = await axios.get(
-      `http://localhost:8081/api/service-checklist-items/service/${serviceId}`,
+      `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/service-checklist-items/service/${serviceId}`,
       { headers: getAuthHeader() }
     );
     return response.data;
@@ -161,6 +201,53 @@ export const getChecklistItemsByService = async (serviceId) => {
   }
 };
 
+/**
+ * Lưu kết quả checklist item (auto-save) - API ĐƠN GIẢN
+ * POST /api/checklist/service-order/{serviceOrderId}/items/{itemId}/result
+ * @param {number} serviceOrderId - ID của service order
+ * @param {number} itemId - ID của service_checklist_item
+ * @param {string} status - PENDING, PASSED, FAILED, NEEDS_ATTENTION, NEEDS_REPLACEMENT
+ * @param {string} technicianNotes - Ghi chú của kỹ thuật viên
+ * @param {string} s3Key - S3 key của ảnh (nếu có)
+ */
+export const saveChecklistItemResult = async (serviceOrderId, itemId, status, technicianNotes = '', s3Key = null) => {
+  try {
+    const params = new URLSearchParams();
+    params.append('status', status);
+    if (technicianNotes) params.append('technicianNotes', technicianNotes);
+    if (s3Key) params.append('s3Key', s3Key);
+
+    const response = await axios.post(
+      `${API_URL}/service-order/${serviceOrderId}/items/${itemId}/result?${params.toString()}`,
+      {},
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('saveChecklistItemResult error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Đánh dấu tất cả checklist của service order đã hoàn thành
+ * Được gọi khi kỹ thuật viên bấm "Hoàn tất kiểm tra"
+ * Endpoint: POST /api/checklist/service-order/{serviceOrderId}/complete
+ */
+export const completeServiceOrderChecklists = async (serviceOrderId) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/service-order/${serviceOrderId}/complete`,
+      {},
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('completeServiceOrderChecklists error:', error);
+    throw error;
+  }
+};
+
 export default {
   getTemplates,
   getTemplateById,
@@ -168,7 +255,11 @@ export default {
   createChecklistForOrder,
   getChecklistsByOrder,
   getChecklistResults,
+  getChecklistResultsByOrder,
+  getServiceChecklistItemsForOrder,
   submitChecklistItem,
   getChecklistItem,
-  getChecklistItemsByService
+  getChecklistItemsByService,
+  saveChecklistItemResult,
+  completeServiceOrderChecklists
 };

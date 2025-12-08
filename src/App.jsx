@@ -18,18 +18,18 @@ import './styles/Alert.css';
 import Homepage from './pages/landing/Homepage';
 import LoginPage from './pages/auth/LoginPageModern';
 import RegisterPage from './pages/auth/RegisterPageModern';
+import OTPVerification from './pages/auth/OTPVerification';
 import Booking from './pages/customer/Booking';
 import History from './pages/customer/History';
 import OrderTracking from './pages/customer/OrderTracking';
+import QuoteApproval from './pages/customer/QuoteApproval';
 import Invoices from './pages/customer/Invoices';
 import CustomerProfile from './pages/customer/CustomerProfile';
 import Settings from './pages/customer/Settings';
 import Chat from './pages/customer/Chat';
 import Ratings from './pages/customer/Ratings';
-import OrderDetail from './pages/customer/OrderDetail';
 import TechnicianDashboard from './pages/technician/TechnicianDashboard';
 import JobList from './pages/technician/JobList';
-import MaintenanceChecklist from './pages/technician/MaintenanceChecklist';
 import UploadEvidence from './pages/technician/UploadEvidence';
 import PartsRequest from './pages/technician/PartsRequest';
 import TechnicianProfile from './pages/technician/TechnicianProfile';
@@ -38,10 +38,12 @@ import AdvisorDashboard from './pages/advisor/AdvisorDashboard';
 import AdvisorProfile from './pages/advisor/AdvisorProfile';
 import AdvisorAppointments from './pages/advisor/AdvisorAppointments';
 import PartsApproval from './pages/advisor/PartsApproval';
+import InvoiceManagement from './pages/advisor/InvoiceManagement';
 
 // Layout
 import { CustomerLayout, TechnicianLayout } from './components/layout';
 import AdminLayout from './components/layout/AdminLayout';
+import AdvisorLayout from './pages/advisor/AdvisorLayout';
 
 // Protected Route Component
 function ProtectedRoute({ children, requiredRole }) {
@@ -72,6 +74,7 @@ function AppRoutes() {
       {/* Public routes */}
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
       <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+      <Route path="/verify-otp" element={<OTPVerification />} />
       {/* Admin - Dashboard */}
       <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="ADMIN"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
       {/* Admin - Hồ sơ quản trị */}
@@ -113,7 +116,7 @@ function AppRoutes() {
         <Route path="booking" element={<Booking />} />
         <Route path="history" element={<History />} />
         <Route path="order-tracking/:orderId" element={<OrderTracking />} />
-        <Route path="order/:orderId" element={<OrderDetail />} />
+        <Route path="quote-approval/:orderId" element={<QuoteApproval />} />
         <Route path="invoices" element={<Invoices />} />
         <Route path="profile" element={<CustomerProfile />} />
         <Route path="settings" element={<Settings />} />
@@ -132,7 +135,6 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<TechnicianDashboard />} />
         <Route path="jobs" element={<JobList />} />
-        <Route path="checklist" element={<MaintenanceChecklist />} />
         <Route path="upload-evidence" element={<UploadEvidence />} />
         <Route path="parts-request" element={<PartsRequest />} />
         <Route path="profile" element={<TechnicianProfile />} />
@@ -143,7 +145,9 @@ function AppRoutes() {
         path="/advisor/dashboard" 
         element={
           <ProtectedRoute>
-            <AdvisorDashboard />
+            <AdvisorLayout>
+              <AdvisorDashboard />
+            </AdvisorLayout>
           </ProtectedRoute>
         }
       />
@@ -151,7 +155,9 @@ function AppRoutes() {
         path="/advisor/profile" 
         element={
           <ProtectedRoute>
-            <AdvisorProfile />
+            <AdvisorLayout>
+              <AdvisorProfile />
+            </AdvisorLayout>
           </ProtectedRoute>
         }
       />
@@ -159,7 +165,9 @@ function AppRoutes() {
         path="/advisor/appointments" 
         element={
           <ProtectedRoute>
-            <AdvisorAppointments />
+            <AdvisorLayout>
+              <AdvisorAppointments />
+            </AdvisorLayout>
           </ProtectedRoute>
         }
       />
@@ -167,7 +175,19 @@ function AppRoutes() {
         path="/advisor/parts-approval" 
         element={
           <ProtectedRoute>
-            <PartsApproval />
+            <AdvisorLayout>
+              <PartsApproval />
+            </AdvisorLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route 
+        path="/advisor/invoices" 
+        element={
+          <ProtectedRoute>
+            <AdvisorLayout>
+              <InvoiceManagement />
+            </AdvisorLayout>
           </ProtectedRoute>
         }
       />

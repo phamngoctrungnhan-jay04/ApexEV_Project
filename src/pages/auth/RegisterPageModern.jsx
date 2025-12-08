@@ -74,19 +74,18 @@ const RegisterPageModern = () => {
         role: 'CUSTOMER'
       });
 
-      // Show success message
+      // Show success and redirect to OTP page
       setSuccess(true);
       setLoading(false);
 
-      // Clear form
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: ''
-      });
-      setAgreeTerms(false);
+      // Redirect to OTP verification page after 1 second
+      setTimeout(() => {
+        navigate('/verify-otp', { 
+          state: { 
+            email: formData.email 
+          } 
+        });
+      }, 1000);
 
     } catch (err) {
       setLoading(false);
@@ -156,8 +155,7 @@ const RegisterPageModern = () => {
           <div className="col-lg-6 register-left">
             <div className="brand-section">
               <div className="brand-logo-simple" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
-                <span className="logo-apex">APEX</span>
-                <span className="logo-ev">EV</span>
+                <img src="/images/logo.jpg" alt="APEX EV Logo" className="auth-logo-img" style={{ height: '150px', width: 'auto', maxWidth: '300px', borderRadius: '40px' }} />
               </div>
               <p className="brand-subtitle">
                 Tham gia cộng đồng chủ xe điện thông minh

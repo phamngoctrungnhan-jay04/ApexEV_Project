@@ -764,6 +764,164 @@
   cursor: not-allowed;
 }
 
+.btn-select.selected {
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+  border: 2px solid #28a745;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+  font-weight: 700;
+}
+
+/* ============ PREVIEW KỸ THUẬT VIÊN ĐÃ CHỌN ============ */
+.selected-tech-preview {
+  margin-top: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(51, 138, 243, 0.08) 0%, rgba(52, 199, 89, 0.08) 100%);
+  border: 2px solid #338af3;
+  border-radius: 12px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.selected-tech-preview .preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: #338af3;
+}
+
+.selected-tech-preview .preview-header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selected-tech-preview .preview-header svg {
+  font-size: 18px;
+}
+
+.btn-unselect {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  color: #ef4444;
+  border: 2px solid #ef4444;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-unselect:hover {
+  background: #ef4444;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-unselect svg {
+  font-size: 14px;
+}
+
+.selected-tech-preview .preview-content {
+  padding-left: 26px;
+}
+
+.selected-tech-preview .preview-content p {
+  margin: 6px 0;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+.selected-tech-preview .preview-email {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.selected-tech-preview .preview-email svg {
+  font-size: 14px;
+}
+
+.selected-tech-preview .preview-workload {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* ============ MODAL FOOTER ============ */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  border-radius: 0 0 14px 14px;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-confirm-assign {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #338af3 0%, #005cf0 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+}
+
+.btn-confirm-assign:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(51, 138, 243, 0.4);
+}
+
+.btn-confirm-assign:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 1024px) {
   .appointments-table th:nth-child(3),

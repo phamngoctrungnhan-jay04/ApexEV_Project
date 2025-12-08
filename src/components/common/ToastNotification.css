@@ -1,0 +1,115 @@
+/* ============================================
+   TOAST NOTIFICATION
+   ============================================ */
+.toast-notification {
+  position: fixed;
+  top: 100px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 360px;
+  max-width: 480px;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+.toast-notification.closing {
+  animation: slideOutRight 0.3s ease-out forwards;
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.toast-success .toast-icon {
+  background: linear-gradient(135deg, #34C759 0%, #2EAD4F 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+.toast-warning .toast-icon {
+  background: linear-gradient(135deg, #FF9500 0%, #FF7A00 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-message {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1F2937;
+  line-height: 1.5;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toast-close:hover {
+  background: #F3F4F6;
+  color: #1F2937;
+}
+
+.toast-close:active {
+  transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 575px) {
+  .toast-notification {
+    top: 80px;
+    right: 16px;
+    left: 16px;
+    min-width: unset;
+    max-width: unset;
+  }
+}

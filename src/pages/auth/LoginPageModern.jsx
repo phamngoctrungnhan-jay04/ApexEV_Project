@@ -130,8 +130,7 @@ const LoginPageModern = () => {
           <div className="col-lg-6 login-left">
             <div className="brand-section">
               <div className="brand-logo-simple" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
-                <span className="logo-apex">APEX</span>
-                <span className="logo-ev">EV</span>
+                <img src="/images/logo.jpg" alt="APEX EV Logo" className="auth-logo-img" style={{ height: '150 px', width: 'auto', maxWidth: '300px', borderRadius: '40px' }} />
               </div>
               <p className="brand-subtitle">
                 {t('auth.loginSubtitle') || 'Hệ thống quản lý bảo dưỡng xe điện chuyên nghiệp'}

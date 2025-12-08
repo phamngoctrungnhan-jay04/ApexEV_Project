@@ -1,13 +1,16 @@
 // src/pages/customer/OrderDetail.jsx
+// Giao diện mới: Soft, Clean, Modern - APEX EV
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Badge, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Spinner, Alert, ProgressBar } from 'react-bootstrap';
 import { 
   FiArrowLeft, FiClock, FiUser, FiTool, FiCheckCircle, 
-  FiXCircle, FiAlertTriangle, FiRefreshCw, FiImage 
+  FiXCircle, FiAlertTriangle, FiRefreshCw, FiImage,
+  FiZap, FiEye, FiChevronDown, FiChevronUp
 } from 'react-icons/fi';
 import { FaCar } from 'react-icons/fa';
-import { getChecklistsByOrder, getChecklistResults, getTemplateById } from '../../services/checklistService';
+import { getServiceChecklistItemsForOrder } from '../../services/checklistService';
 import { getFileViewUrl } from '../../services/uploadService';
 import './OrderDetail.css';
 
@@ -76,45 +79,57 @@ function OrderDetail() {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [imageModal, setImageModal] = useState(null);
+  const [expandedChecklist, setExpandedChecklist] = useState(null);
 
-  // Fetch checklists, templates và results
+  // Fetch checklists và results (dùng API mới)
   const fetchChecklistData = async () => {
     try {
-      const checklistsData = await getChecklistsByOrder(orderId);
-      setChecklists(checklistsData);
-
-      // Fetch template và results cho từng checklist
-      const dataPromises = checklistsData.map(async (cl) => {
-        const [template, results] = await Promise.all([
-          getTemplateById(cl.templateId),
-          getChecklistResults(cl.id)
-        ]);
-        
-        // Map template items với results
-        const allItems = template.items.map(templateItem => {
-          const result = results.find(r => r.templateItemId === templateItem.id);
-          return {
-            id: result?.id || null,
-            templateItemId: templateItem.id,
-            itemName: templateItem.itemName,
-            itemDescription: templateItem.itemDescription,
-            status: result?.status || 'PENDING',
-            technicianNotes: result?.technicianNotes || null,
-            s3Key: result?.s3Key || null,
-            mediaUrl: result?.mediaUrl || null,
-            mediaType: result?.mediaType || null
+      // API mới: Lấy tất cả service checklist items kèm results
+      const itemsWithResults = await getServiceChecklistItemsForOrder(orderId);
+      
+      // Group items theo serviceId để hiển thị theo service
+      const servicesMap = {};
+      itemsWithResults.forEach(item => {
+        if (!servicesMap[item.serviceId]) {
+          servicesMap[item.serviceId] = {
+            serviceId: item.serviceId,
+            serviceName: item.serviceName,
+            items: []
           };
-        });
+        }
         
-        return { checklistId: cl.id, items: allItems };
+        servicesMap[item.serviceId].items.push({
+          id: item.resultId, // resultId (nếu đã submit)
+          itemId: item.itemId, // service_checklist_item id
+          itemName: item.itemName,
+          itemDescription: item.itemDescription,
+          status: item.status || 'PENDING',
+          technicianNotes: item.technicianNotes || null,
+          s3Key: item.s3Key || null,
+          mediaUrl: item.mediaUrl || null,
+          mediaType: item.mediaType || null,
+          category: item.category,
+          stepOrder: item.stepOrder
+        });
       });
       
-      const allData = await Promise.all(dataPromises);
+      // Convert map to array và sort items theo stepOrder
+      const servicesArray = Object.values(servicesMap).map(service => ({
+        ...service,
+        items: service.items.sort((a, b) => (a.stepOrder || 0) - (b.stepOrder || 0))
+      }));
       
+      setChecklists(servicesArray);
+      
+      // Build resultsMap for expandedChecklist (dùng serviceId làm key)
       const resultsMap = {};
-      allData.forEach(({ checklistId, items }) => {
-        resultsMap[checklistId] = items;
+      servicesArray.forEach(service => {
+        resultsMap[service.serviceId] = service.items;
       });
+      
+      console.log('🔍 [Customer OrderDetail] Fetched data:', { servicesArray, resultsMap });
+      console.log('🔍 Sample item:', servicesArray[0]?.items[0]);
       
       setChecklistResults(resultsMap);
       setLastUpdated(new Date());
@@ -177,45 +192,52 @@ function OrderDetail() {
   }
 
   return (
-    <Container className="order-detail-container py-4">
-      {/* Header */}
-      <Row className="mb-4">
-        <Col>
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="d-flex align-items-center gap-3">
-              <button 
-                className="btn btn-outline-primary"
-                onClick={() => navigate(-1)}
-              >
-                <FiArrowLeft className="me-2" />
-                Quay lại
-              </button>
-              <div>
-                <h2 className="mb-1">Chi tiết đơn hàng #{orderId}</h2>
-                <Badge bg="info" className={STATUS_CLASSES[orderStatus]}>
+    <div className="order-detail-page-new">
+      {/* Soft Header */}
+      <div className="soft-header">
+        <Container>
+          <div className="header-wrapper">
+            <button className="btn-back-soft" onClick={() => navigate(-1)}>
+              <FiArrowLeft />
+              <span>Quay lại</span>
+            </button>
+            
+            <div className="header-info">
+              <div className="order-badge">
+                <FiZap className="badge-icon" />
+                <div>
+                  <span className="badge-label">Đơn hàng</span>
+                  <h2>#{orderId}</h2>
+                </div>
+              </div>
+              
+              <div className="header-actions">
+                <Badge className={`status-soft ${STATUS_CLASSES[orderStatus]}`}>
                   {STATUS_LABELS[orderStatus] || orderStatus}
                 </Badge>
+                
+                <button
+                  className={`btn-auto-refresh ${autoRefresh ? 'active' : ''}`}
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  title={autoRefresh ? 'Tắt tự động cập nhật' : 'Bật tự động cập nhật'}
+                >
+                  <FiRefreshCw className={autoRefresh ? 'spinning' : ''} />
+                </button>
               </div>
             </div>
-            <div className="d-flex align-items-center gap-2">
-              <button
-                className={`btn btn-sm ${autoRefresh ? 'btn-success' : 'btn-outline-secondary'}`}
-                onClick={() => setAutoRefresh(!autoRefresh)}
-              >
-                <FiRefreshCw className={autoRefresh ? 'spinner-icon' : ''} />
-                <span className="ms-2">
-                  {autoRefresh ? 'Tự động cập nhật' : 'Đã tắt tự động'}
-                </span>
-              </button>
-              {lastUpdated && (
-                <small className="text-muted">
-                  Cập nhật lúc: {formatDateTime(lastUpdated)}
-                </small>
-              )}
-            </div>
+            
+            {lastUpdated && (
+              <div className="last-update">
+                <FiClock />
+                <span>Cập nhật: {formatDateTime(lastUpdated)}</span>
+              </div>
+            )}
           </div>
-        </Col>
-      </Row>
+        </Container>
+      </div>
+
+      {/* Main Content */}
+      <Container className="content-wrapper">
 
       {/* Error Alert */}
       {error && (
@@ -236,82 +258,142 @@ function OrderDetail() {
               </Card.Body>
             </Card>
           ) : (
-            checklists.map(checklist => {
-              const results = checklistResults[checklist.id] || [];
+            checklists.map(service => {
+              const isExpanded = expandedChecklist === service.serviceId;
+              const results = checklistResults[service.serviceId] || [];
               const totalItems = results.length;
               const completedItems = results.filter(r => r.status !== 'PENDING').length;
               const progressPercent = totalItems > 0 ? (completedItems / totalItems * 100).toFixed(0) : 0;
 
               return (
-                <Card key={checklist.id} className="checklist-card mb-4 shadow-sm">
-                  <Card.Header className="bg-primary text-white">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h5 className="mb-1">
-                          <FiTool className="me-2" />
-                          {checklist.templateName}
-                        </h5>
-                        <small>Kỹ thuật viên: {checklist.technicianName}</small>
+                <Card key={service.serviceId} className="checklist-card-soft">
+                  <Card.Header 
+                    className="card-header-soft"
+                    onClick={() => setExpandedChecklist(isExpanded ? null : service.serviceId)}
+                  >
+                    <div className="header-main">
+                      <div className="header-left">
+                        <div className="icon-circle">
+                          <FiTool />
+                        </div>
+                        <div>
+                          <h5 className="checklist-title">{service.serviceName}</h5>
+                          <p className="technician-name">
+                            <FiUser size={14} />
+                            Kỹ thuật viên
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-end">
-                        <div className="progress-text">
-                          {completedItems}/{totalItems} mục
+                      
+                      <div className="header-right">
+                        <div className="progress-number">
+                          <span className="current">{completedItems}</span>
+                          <span className="divider">/</span>
+                          <span className="total">{totalItems}</span>
                         </div>
-                        <div className="progress mt-1" style={{ width: '150px', height: '8px' }}>
-                          <div 
-                            className="progress-bar bg-success" 
-                            role="progressbar" 
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
+                        {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
                       </div>
                     </div>
+                    
+                    {/* Soft Progress Bar */}
+                    <div className="progress-wrapper">
+                      <div className="progress-bar-soft">
+                        <div 
+                          className="progress-fill-soft" 
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                      <span className="progress-text">{progressPercent}%</span>
+                    </div>
+                    
+                    {/* Status Summary */}
+                    <div className="status-summary-soft">
+                      {results.filter(r => r.status === 'PASSED').length > 0 && (
+                        <div className="status-chip success">
+                          <FiCheckCircle size={14} />
+                          <span>{results.filter(r => r.status === 'PASSED').length}</span>
+                        </div>
+                      )}
+                      {results.filter(r => r.status === 'FAILED').length > 0 && (
+                        <div className="status-chip error">
+                          <FiXCircle size={14} />
+                          <span>{results.filter(r => r.status === 'FAILED').length}</span>
+                        </div>
+                      )}
+                      {results.filter(r => r.status === 'NEEDS_ATTENTION').length > 0 && (
+                        <div className="status-chip warning">
+                          <FiAlertTriangle size={14} />
+                          <span>{results.filter(r => r.status === 'NEEDS_ATTENTION').length}</span>
+                        </div>
+                      )}
+                      {results.filter(r => r.status === 'PENDING').length > 0 && (
+                        <div className="status-chip pending">
+                          <FiClock size={14} />
+                          <span>{results.filter(r => r.status === 'PENDING').length}</span>
+                        </div>
+                      )}
+                    </div>
                   </Card.Header>
-                  <Card.Body>
+                  <Card.Body className={`card-body-soft ${isExpanded ? 'expanded' : ''}`}>
                     {results.length === 0 ? (
-                      <div className="text-center text-muted py-3">
-                        <FiClock size={32} className="mb-2" />
-                        <p>Kỹ thuật viên chưa bắt đầu kiểm tra</p>
+                      <div className="empty-state-soft">
+                        <FiClock className="empty-icon" />
+                        <h6>Chưa bắt đầu kiểm tra</h6>
+                        <p>Kỹ thuật viên sẽ cập nhật kết quả sớm thôi</p>
                       </div>
                     ) : (
-                      <div className="checklist-items">
-                        {results.map((item, index) => (
-                          <div key={item.id} className="checklist-item-row mb-3 pb-3 border-bottom">
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div className="item-info flex-grow-1">
-                                <div className="d-flex align-items-center mb-2">
-                                  <span className="item-number me-2">{index + 1}</span>
-                                  <h6 className="mb-0">{item.itemName}</h6>
+                      <div className="items-grid-soft">
+                        {results.map((item, index) => {
+                          const Icon = ITEM_STATUS_ICONS[item.status] || FiClock;
+                          const statusClass = ITEM_STATUS_CLASSES[item.status] || 'item-pending';
+                          
+                          return (
+                            <div key={item.id} className={`item-card-soft ${statusClass}`}>
+                              {/* Item Header */}
+                              <div className="item-header-soft">
+                                <span className="item-number">{index + 1}</span>
+                                <div className={`status-badge-soft ${statusClass}`}>
+                                  <Icon size={16} />
+                                  <span>{ITEM_STATUS_LABELS[item.status]}</span>
                                 </div>
-                                {item.itemDescription && (
-                                  <div className="item-description mt-1 mb-2">
-                                    <small className="text-muted">{item.itemDescription}</small>
-                                  </div>
-                                )}
-                                {item.technicianNotes && (
-                                  <div className="item-notes mt-2">
-                                    <small className="text-muted">
-                                      <strong>Ghi chú:</strong> {item.technicianNotes}
-                                    </small>
-                                  </div>
-                                )}
-                                {item.s3Key && (
-                                  <div className="item-image mt-2">
-                                    <img 
-                                      src={getFileViewUrl(item.s3Key)} 
-                                      alt="Evidence"
-                                      className="evidence-thumbnail"
-                                      onClick={() => window.open(getFileViewUrl(item.s3Key), '_blank')}
-                                    />
-                                  </div>
-                                )}
                               </div>
-                              <div className="item-status">
-                                {renderStatusBadge(item.status)}
+                              
+                              {/* Item Body */}
+                              <div className="item-body-soft">
+                                <h6 className="item-title">{item.itemName}</h6>
+                                
+                                {item.itemDescription && (
+                                  <p className="item-desc">
+                                    <FiEye size={14} />
+                                    {item.itemDescription}
+                                  </p>
+                                )}
+                                
+                                {item.technicianNotes && (
+                                  <div className="notes-box-soft">
+                                    <div className="notes-label">
+                                      <FiAlertTriangle size={14} />
+                                      <span>Ghi chú</span>
+                                    </div>
+                                    <p>{item.technicianNotes}</p>
+                                  </div>
+                                )}
+                                
+                                {item.s3Key && (
+                                  <div className="image-preview-soft"
+                                    onClick={() => setImageModal(getFileViewUrl(item.s3Key))}
+                                  >
+                                    <img src={getFileViewUrl(item.s3Key)} alt="Evidence" />
+                                    <div className="image-overlay">
+                                      <FiImage size={24} />
+                                      <span>Xem ảnh</span>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </Card.Body>
@@ -321,7 +403,20 @@ function OrderDetail() {
           )}
         </Col>
       </Row>
-    </Container>
+      </Container>
+
+      {/* Image Modal Soft */}
+      {imageModal && (
+        <div className="modal-overlay-soft" onClick={() => setImageModal(null)}>
+          <div className="modal-content-soft" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-soft" onClick={() => setImageModal(null)}>
+              <FiXCircle size={24} />
+            </button>
+            <img src={imageModal} alt="Evidence Full" />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

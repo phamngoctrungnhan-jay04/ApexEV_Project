@@ -42,16 +42,74 @@ function Booking() {
     fetchVehicles();
   }, []);
 
-  // Form states
-  const [step, setStep] = useState(1); // 1: Select Service, 2: Select Date/Time, 3: Vehicle & Notes, 4: Confirmation
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedServices, setSelectedServices] = useState([]);
-  const [selectedVehicle, setSelectedVehicle] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [notes, setNotes] = useState('');
+  // Form states - Khôi phục từ localStorage nếu có
+  const [step, setStep] = useState(() => {
+    const saved = localStorage.getItem('booking_step');
+    return saved ? parseInt(saved) : 1;
+  });
+  
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    const saved = localStorage.getItem('booking_category');
+    return saved || 'all';
+  });
+  
+  const [selectedServices, setSelectedServices] = useState(() => {
+    const saved = localStorage.getItem('booking_services');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [selectedVehicle, setSelectedVehicle] = useState(() => {
+    const saved = localStorage.getItem('booking_vehicle');
+    return saved || '';
+  });
+  
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const saved = localStorage.getItem('booking_date');
+    return saved || '';
+  });
+  
+  const [selectedTime, setSelectedTime] = useState(() => {
+    const saved = localStorage.getItem('booking_time');
+    return saved || '';
+  });
+  
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem('booking_notes');
+    return saved || '';
+  });
+  
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [services, setServices] = useState([]);
+
+  // Lưu trạng thái vào localStorage mỗi khi thay đổi
+  useEffect(() => {
+    localStorage.setItem('booking_step', step.toString());
+  }, [step]);
+
+  useEffect(() => {
+    localStorage.setItem('booking_category', selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    localStorage.setItem('booking_services', JSON.stringify(selectedServices));
+  }, [selectedServices]);
+
+  useEffect(() => {
+    localStorage.setItem('booking_vehicle', selectedVehicle);
+  }, [selectedVehicle]);
+
+  useEffect(() => {
+    localStorage.setItem('booking_date', selectedDate);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    localStorage.setItem('booking_time', selectedTime);
+  }, [selectedTime]);
+
+  useEffect(() => {
+    localStorage.setItem('booking_notes', notes);
+  }, [notes]);
 
   // Toggle chọn/bỏ dịch vụ
   const toggleService = (serviceId) => {
@@ -66,6 +124,20 @@ function Booking() {
   useEffect(() => {
     serviceService.getAllServices().then(setServices);
   }, []);
+
+  // Làm sạch selectedServices sau khi services được load (loại bỏ ID không hợp lệ)
+  useEffect(() => {
+    if (services.length > 0 && selectedServices.length > 0) {
+      const validServiceIds = services.map(s => s.id);
+      const cleanedServices = selectedServices.filter(id => validServiceIds.includes(id));
+      
+      // Nếu có service ID không hợp lệ, cập nhật lại
+      if (cleanedServices.length !== selectedServices.length) {
+        setSelectedServices(cleanedServices);
+        console.warn('Đã loại bỏ các service ID không hợp lệ từ localStorage');
+      }
+    }
+  }, [services]); // Chỉ chạy khi services thay đổi
 
   // KHẮC PHỤC LỖI: Lọc theo service.category (ĐÃ KHẮC PHỤC LỖI THAM CHIẾU)
   const filteredServices = selectedCategory === 'all'
@@ -103,6 +175,17 @@ function Booking() {
     setShowConfirmModal(true);
   };
 
+  // Xóa dữ liệu booking trong localStorage
+  const clearBookingData = () => {
+    localStorage.removeItem('booking_step');
+    localStorage.removeItem('booking_category');
+    localStorage.removeItem('booking_services');
+    localStorage.removeItem('booking_vehicle');
+    localStorage.removeItem('booking_date');
+    localStorage.removeItem('booking_time');
+    localStorage.removeItem('booking_notes');
+  };
+
   const confirmBooking = () => {
     const bookingData = {
         // Cần chuyển vehicleId sang Integer nếu BE cần
@@ -116,14 +199,20 @@ function Booking() {
     appointmentService.createAppointment(bookingData)
         .then(response => {
             console.log('Đặt lịch thành công!', response);
+            clearBookingData(); // Xóa dữ liệu đã lưu sau khi đặt lịch thành công
             setShowConfirmModal(false);
-            navigate('/customer/history');
+            setShowSuccessModal(true); // Hiển thị modal thành công
         })
         .catch(error => {
             console.error('Lỗi đặt lịch:', error);
             alert(`Đặt lịch thất bại: ${error.message}`);
             setShowConfirmModal(false);
         });
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    navigate('/customer/history');
   };
 
   // Get next available dates (next 30 days, excluding Sundays)
@@ -150,20 +239,46 @@ function Booking() {
     '15:00', '15:30', '16:00', '16:30', '17:00'
   ];
 
+  // Reset toàn bộ form
+  const handleResetBooking = () => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ thông tin đặt lịch?')) {
+      clearBookingData();
+      setStep(1);
+      setSelectedCategory('all');
+      setSelectedServices([]);
+      setSelectedVehicle('');
+      setSelectedDate('');
+      setSelectedTime('');
+      setNotes('');
+    }
+  };
+
   return (
     <div className="booking-page">
       {/* Sử dụng navbar từ Header.jsx */}
       {/* Container fluid được dùng cho toàn bộ nội dung, CSS đã được tùy chỉnh để full layout */}
       <Container fluid>
         {/* Page Header */}
-        <div className="page-header mb-4">
-          <h2>
-            <FiCalendar className="me-2" />
-            {t('booking.title') || 'Đặt lịch bảo dưỡng'}
-          </h2>
-          <p className="text-muted">
-            {t('booking.subtitle') || 'Chọn dịch vụ và thời gian phù hợp với bạn'}
-          </p>
+        <div className="page-header mb-4 d-flex justify-content-between align-items-center">
+          <div>
+            <h2>
+              <FiCalendar className="me-2" />
+              {t('booking.title') || 'Đặt lịch bảo dưỡng'}
+            </h2>
+            <p className="text-muted mb-0">
+              {t('booking.subtitle') || 'Chọn dịch vụ và thời gian phù hợp với bạn'}
+            </p>
+          </div>
+          {(step > 1 || selectedServices.length > 0) && (
+            <CustomButton
+              variant="outline-danger"
+              size="sm"
+              onClick={handleResetBooking}
+            >
+              <FiLogOut className="me-2" />
+              Xóa & Bắt đầu lại
+            </CustomButton>
+          )}
         </div>
         {/* Progress Steps và các bước booking giữ nguyên */}
         <Card className="steps-card mb-4">
@@ -274,17 +389,6 @@ function Booking() {
                         ))
                     )}
                   </div>
-
-                  {/* Next Button */}
-                  <div className="d-flex justify-content-end mt-4">
-                    <CustomButton
-                      variant="primary"
-                      onClick={() => setStep(2)}
-                      disabled={selectedServices.length === 0}
-                    >
-                      Tiếp tục <FiArrowRight className="ms-2" />
-                    </CustomButton>
-                  </div>
                 </Card.Body>
               </Card>
             )}
@@ -338,19 +442,12 @@ function Booking() {
                   </Form.Group>
 
                   {/* Navigation Buttons */}
-                  <div className="d-flex justify-content-between mt-4">
+                  <div className="d-flex justify-content-start mt-4">
                     <CustomButton
                       variant="outline-secondary"
                       onClick={() => setStep(1)}
                     >
                       Quay lại
-                    </CustomButton>
-                    <CustomButton
-                      variant="primary"
-                      onClick={() => setStep(3)}
-                      disabled={!selectedDate || !selectedTime}
-                    >
-                      Tiếp tục <FiArrowRight className="ms-2" />
                     </CustomButton>
                   </div>
                 </Card.Body>
@@ -396,19 +493,12 @@ function Booking() {
                   </Form.Group>
 
                   {/* Navigation Buttons */}
-                  <div className="d-flex justify-content-between mt-4">
+                  <div className="d-flex justify-content-start mt-4">
                     <CustomButton
                       variant="outline-secondary"
                       onClick={() => setStep(2)}
                     >
                       Quay lại
-                    </CustomButton>
-                    <CustomButton
-                      variant="primary"
-                      onClick={() => setStep(4)}
-                      disabled={!selectedVehicle}
-                    >
-                      Tiếp tục <FiArrowRight className="ms-2" />
                     </CustomButton>
                   </div>
                 </Card.Body>
@@ -430,6 +520,8 @@ function Booking() {
                       <h6 className="summary-title">Dịch vụ đã chọn</h6>
                       {selectedServices.map(serviceId => {
                         const service = services.find(s => s.id === serviceId);
+                        // Kiểm tra service tồn tại để tránh lỗi
+                        if (!service) return null;
                         // SỬ DỤNG service.name/nameEn và unitPrice (camelCase)
                         return (
                           <div key={serviceId} className="summary-item">
@@ -483,19 +575,12 @@ function Booking() {
                   </div>
 
                   {/* Navigation Buttons */}
-                  <div className="d-flex justify-content-between mt-4">
+                  <div className="d-flex justify-content-start mt-4">
                     <CustomButton
                       variant="outline-secondary"
                       onClick={() => setStep(3)}
                     >
                       Quay lại
-                    </CustomButton>
-                    <CustomButton
-                      variant="success"
-                      onClick={handleSubmit}
-                    >
-                      <FiCheck className="me-2" />
-                      Xác nhận đặt lịch
                     </CustomButton>
                   </div>
                 </Card.Body>
@@ -515,6 +600,8 @@ function Booking() {
                     <h6 className="text-muted mb-2">Dịch vụ ({selectedServices.length})</h6>
                     {selectedServices.map(serviceId => {
                       const service = services.find(s => s.id === serviceId);
+                      // Kiểm tra service tồn tại để tránh lỗi
+                      if (!service) return null;
                       // SỬ DỤNG service.name/nameEn
                       return (
                         <div key={serviceId} className="selected-service-item">
@@ -582,31 +669,171 @@ function Booking() {
                     Chi phí cuối cùng có thể thay đổi sau khi kiểm tra xe
                   </small>
                 </div>
+
+                {/* Nút Tiếp tục - Hiển thị theo từng bước */}
+                {step === 1 && selectedServices.length > 0 && (
+                  <div className="mt-4">
+                    <CustomButton
+                      variant="primary"
+                      onClick={() => setStep(2)}
+                      className="w-100"
+                    >
+                      Tiếp tục <FiArrowRight className="ms-2" />
+                    </CustomButton>
+                  </div>
+                )}
+
+                {step === 2 && selectedDate && selectedTime && (
+                  <div className="mt-4">
+                    <CustomButton
+                      variant="primary"
+                      onClick={() => setStep(3)}
+                      className="w-100"
+                    >
+                      Tiếp tục <FiArrowRight className="ms-2" />
+                    </CustomButton>
+                  </div>
+                )}
+
+                {step === 3 && selectedVehicle && (
+                  <div className="mt-4">
+                    <CustomButton
+                      variant="primary"
+                      onClick={() => setStep(4)}
+                      className="w-100"
+                    >
+                      Tiếp tục <FiArrowRight className="ms-2" />
+                    </CustomButton>
+                  </div>
+                )}
+
+                {step === 4 && (
+                  <div className="mt-4">
+                    <CustomButton
+                      variant="success"
+                      onClick={handleSubmit}
+                      className="w-100"
+                    >
+                      <FiCheck className="me-2" />
+                      Xác nhận đặt lịch
+                    </CustomButton>
+                  </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
         </Row>
 
         {/* Confirmation Modal */}
-        <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Xác nhận đặt lịch</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <p>Bạn có chắc chắn muốn đặt lịch bảo dưỡng?</p>
-            <p className="text-muted mb-0">
-              Chúng tôi sẽ gửi email xác nhận đến {'{email}'}
-            </p>
+        <Modal 
+          show={showConfirmModal} 
+          onHide={() => setShowConfirmModal(false)} 
+          centered
+          size="md"
+          backdrop="static"
+          dialogClassName="confirm-modal-custom"
+        >
+          <Modal.Body className="p-0">
+            <div className="confirm-modal-content">
+              {/* Header với gradient background */}
+              <div className="confirm-modal-header">
+                <div className="confirm-icon-wrapper">
+                  <FiCheck className="confirm-icon" />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="confirm-modal-body">
+                <h3 className="confirm-title">Xác nhận đặt lịch bảo dưỡng</h3>
+                <p className="confirm-subtitle">
+                  Bạn có chắc chắn muốn đặt lịch bảo dưỡng?
+                </p>
+
+                {/* Info Card */}
+                <div className="confirm-info-card">
+                  <div className="confirm-info-icon-wrapper">
+                    <FiInfo className="confirm-info-icon" />
+                  </div>
+                  <div className="confirm-info-text">
+                    <p className="mb-0">
+                      Chúng tôi sẽ gửi <strong>thông báo</strong> đến email của bạn khi lịch hẹn được xác nhận
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="confirm-actions">
+                  <CustomButton 
+                    variant="outline-secondary" 
+                    onClick={() => setShowConfirmModal(false)}
+                    className="confirm-cancel-btn"
+                  >
+                    Hủy
+                  </CustomButton>
+                  <CustomButton 
+                    variant="success" 
+                    onClick={confirmBooking}
+                    className="confirm-submit-btn"
+                  >
+                    <FiCheck className="me-2" />
+                    Xác nhận
+                  </CustomButton>
+                </div>
+              </div>
+            </div>
           </Modal.Body>
-          <Modal.Footer>
-            <CustomButton variant="outline-secondary" onClick={() => setShowConfirmModal(false)}>
-              Hủy
-            </CustomButton>
-            <CustomButton variant="success" onClick={confirmBooking}>
-              <FiCheck className="me-2" />
-              Xác nhận
-            </CustomButton>
-          </Modal.Footer>
+        </Modal>
+
+        {/* Success Modal */}
+        <Modal 
+          show={showSuccessModal} 
+          onHide={handleSuccessModalClose} 
+          centered
+          size="md"
+          backdrop="static"
+          dialogClassName="success-modal-custom"
+        >
+          <Modal.Body className="p-0">
+            <div className="success-modal-content">
+              {/* Header với gradient background */}
+              <div className="success-modal-header">
+                <div className="success-icon-wrapper">
+                  <div className="success-icon-bg">
+                    <FiCheck className="success-icon" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="success-modal-body">
+                <h3 className="success-title">Đặt lịch thành công!</h3>
+                <p className="success-subtitle">
+                  Lịch hẹn bảo dưỡng của bạn đã được ghi nhận
+                </p>
+
+                {/* Info Card */}
+                <div className="success-info-card">
+                  <div className="success-info-icon-wrapper">
+                    <FiInfo className="success-info-icon" />
+                  </div>
+                  <div className="success-info-text">
+                    <p className="mb-0">
+                      Chúng tôi sẽ gửi <strong>email xác nhận</strong> chi tiết đến bạn trong vài phút tới
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <CustomButton 
+                  variant="success" 
+                  onClick={handleSuccessModalClose}
+                  className="success-action-btn"
+                >
+                  Xem lịch sử đặt lịch
+                </CustomButton>
+              </div>
+            </div>
+          </Modal.Body>
         </Modal>
       </Container>
     </div>

@@ -25,8 +25,7 @@ import {
   FiImage,
   FiMessageCircle,
   FiHash,
-  FiDollarSign,
-
+  FiMail,
 } from 'react-icons/fi';
 import { FaCar } from 'react-icons/fa';
 import AdvisorLayout from './AdvisorLayout';
@@ -35,7 +34,8 @@ import {
   getPendingPartRequests,
   getPartRequestsByOrder,
   approvePartRequest,
-  rejectPartRequest
+  rejectPartRequest,
+  sendQuoteEmail
 } from '../../services/partService';
 
 // Constants
@@ -43,6 +43,7 @@ const REQUEST_STATUS = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
+  QUOTED: 'QUOTED',
   FULFILLED: 'FULFILLED',
   CANCELLED: 'CANCELLED'
 };
@@ -79,6 +80,12 @@ function PartsApproval() {
   const [rejectNote, setRejectNote] = useState('');
   const [rejectError, setRejectError] = useState('');
   const [processing, setProcessing] = useState(false);
+  
+  // State cho gửi báo giá
+  const [sendingQuote, setSendingQuote] = useState(false);
+  
+  // State cho duyệt tất cả
+  const [approvingAll, setApprovingAll] = useState(false);
 
   // Toast notification
   const [toast, setToast] = useState({ show: false, type: '', message: '' });
@@ -265,10 +272,19 @@ function PartsApproval() {
         
         // Cập nhật pending count trong order
         const pendingCount = requests.filter(r => r.status === REQUEST_STATUS.PENDING).length;
-        if (pendingCount === 0) {
-          // Đóng modal nếu hết request pending
-          handleCloseOrderModal();
+        const allApproved = requests.every(r => 
+          r.status === REQUEST_STATUS.APPROVED || 
+          r.status === REQUEST_STATUS.QUOTED || 
+          r.status === REQUEST_STATUS.FULFILLED
+        );
+        
+        // ✅ Nếu tất cả requests đã được duyệt, hiện thông báo
+        if (allApproved && requests.length > 0) {
+          showToast('info', '✓ Tất cả phụ tùng đã được duyệt! Bạn có thể gửi báo giá cho khách hàng.');
         }
+        
+        // ⚠️ KHÔNG đóng modal tự động, để advisor có thể gửi báo giá
+        // Modal sẽ chỉ đóng khi user click nút đóng hoặc sau khi gửi báo giá thành công
       }
       
       // Refresh danh sách đơn hàng
@@ -281,6 +297,103 @@ function PartsApproval() {
       showToast('error', errorMsg);
     } finally {
       setProcessing(false);
+    }
+  };
+
+  // Xử lý gửi báo giá cho customer
+  const handleSendQuote = async () => {
+    if (!selectedOrder) return;
+    
+    try {
+      setSendingQuote(true);
+      await sendQuoteEmail(selectedOrder.orderId);
+      
+      showToast('success', '✓ Đã gửi báo giá qua email cho khách hàng!');
+      
+      // Refresh data để cập nhật status sang QUOTED
+      if (selectedOrder) {
+        const requests = await getPartRequestsByOrder(selectedOrder.orderId);
+        setOrderRequests(requests);
+      }
+      fetchData();
+      
+      // Đóng modal sau khi gửi báo giá thành công
+      setTimeout(() => {
+        handleCloseOrderModal();
+      }, 1500);
+      
+    } catch (err) {
+      console.error('Error sending quote:', err);
+      const errorMsg = err.response?.data?.message || err.response?.data || 'Không thể gửi báo giá. Vui lòng thử lại.';
+      showToast('error', errorMsg);
+    } finally {
+      setSendingQuote(false);
+    }
+  };
+
+  // Xử lý duyệt tất cả (batch approval)
+  const handleApproveAll = async () => {
+    const pendingRequests = orderRequests.filter(r => r.status === REQUEST_STATUS.PENDING);
+    
+    if (pendingRequests.length === 0) {
+      showToast('warning', 'Không có yêu cầu nào đang chờ duyệt');
+      return;
+    }
+
+    try {
+      setApprovingAll(true);
+      
+      let successCount = 0;
+      let failCount = 0;
+      const errors = [];
+
+      // Duyệt từng request
+      for (const request of pendingRequests) {
+        try {
+          await approvePartRequest(request.id, null);
+          successCount++;
+        } catch (err) {
+          failCount++;
+          errors.push(`${request.partName}: ${err.response?.data?.message || 'Lỗi không xác định'}`);
+        }
+      }
+
+      // Hiển thị kết quả
+      if (failCount === 0) {
+        showToast('success', `✓ Đã duyệt thành công ${successCount} yêu cầu phụ tùng!`);
+      } else if (successCount === 0) {
+        showToast('error', `Không thể duyệt. Lỗi: ${errors.join('; ')}`);
+      } else {
+        showToast('warning', `Duyệt thành công ${successCount}/${pendingRequests.length}. Thất bại: ${failCount}`);
+      }
+
+      // Refresh data
+      if (selectedOrder) {
+        const requests = await getPartRequestsByOrder(selectedOrder.orderId);
+        setOrderRequests(requests);
+        
+        // Kiểm tra xem tất cả đã được duyệt chưa
+        const allApproved = requests.every(r => 
+          r.status === REQUEST_STATUS.APPROVED || 
+          r.status === REQUEST_STATUS.QUOTED || 
+          r.status === REQUEST_STATUS.FULFILLED
+        );
+        
+        if (allApproved && requests.length > 0) {
+          setTimeout(() => {
+            showToast('info', '✓ Tất cả phụ tùng đã được duyệt! Bạn có thể gửi báo giá cho khách hàng.');
+          }, 1000);
+        }
+      }
+      
+      // Refresh danh sách đơn hàng
+      fetchData();
+      
+    } catch (err) {
+      console.error('Error in batch approval:', err);
+      showToast('error', 'Có lỗi xảy ra khi duyệt hàng loạt');
+    } finally {
+      setApprovingAll(false);
     }
   };
 
@@ -520,7 +633,6 @@ function PartsApproval() {
                       <span>{order.technicianName}</span>
                     </div>
                     <div className="parts-approval-meta-item">
-                      <FiDollarSign />
                       <span>{formatCurrency(order.totalAmount)}</span>
                     </div>
                   </div>
@@ -588,7 +700,7 @@ function PartsApproval() {
                     </div>
                   </div>
                   <div className="parts-approval-order-info-item">
-                    <div className="info-icon"><FiDollarSign /></div>
+                    <div className="info-icon"><FiFileText /></div>
                     <div className="info-content">
                       <h4>Tổng giá trị</h4>
                       <p>{formatCurrency(selectedOrder.totalAmount)}</p>
@@ -598,7 +710,27 @@ function PartsApproval() {
 
                 {/* Requests Section */}
                 <div className="parts-approval-requests-section">
-                  <h3><FiPackage /> Danh sách yêu cầu phụ tùng ({orderRequests.length})</h3>
+                  <div className="parts-approval-requests-header">
+                    <h3><FiPackage /> Danh sách yêu cầu phụ tùng ({orderRequests.length})</h3>
+                    
+                    {/* Nút Duyệt tất cả - Hiện khi có ít nhất 1 request PENDING */}
+                    {(() => {
+                      const pendingCount = orderRequests.filter(r => r.status === REQUEST_STATUS.PENDING).length;
+                      return pendingCount >= 1 && (
+                        <button 
+                          className="parts-approval-batch-approve-btn"
+                          onClick={handleApproveAll}
+                          disabled={approvingAll || loadingRequests}
+                        >
+                          {approvingAll ? (
+                            <><FiLoader className="spinning" /> Đang duyệt...</>
+                          ) : (
+                            <><FiCheckCircle /> Duyệt tất cả ({pendingCount})</>
+                          )}
+                        </button>
+                      );
+                    })()}
+                  </div>
                   
                   {loadingRequests ? (
                     <div className="parts-approval-loading">
@@ -629,6 +761,8 @@ function PartsApproval() {
                             <span className={`parts-approval-status-badge ${request.status?.toLowerCase()}`}>
                               {request.status === 'PENDING' && <><FiClock /> Chờ duyệt</>}
                               {request.status === 'APPROVED' && <><FiCheckCircle /> Đã duyệt</>}
+                              {request.status === 'QUOTED' && <><FiMail /> Đã gửi báo giá</>}
+                              {request.status === 'FULFILLED' && <><FiCheckCircle /> Đã xuất kho</>}
                               {request.status === 'REJECTED' && <><FiXCircle /> Từ chối</>}
                             </span>
                             <span className={`parts-approval-urgency-badge ${request.urgency?.toLowerCase()}`}>
@@ -713,6 +847,39 @@ function PartsApproval() {
                     ))
                   )}
                 </div>
+                
+                {/* Nút Gửi Báo Giá (hiện khi tất cả requests đã APPROVED) */}
+                {(() => {
+                  const allApproved = orderRequests.every(r => 
+                    r.status === REQUEST_STATUS.APPROVED || 
+                    r.status === REQUEST_STATUS.QUOTED || 
+                    r.status === REQUEST_STATUS.FULFILLED
+                  );
+                  const hasApproved = orderRequests.some(r => r.status === REQUEST_STATUS.APPROVED);
+                  
+                  return allApproved && hasApproved && orderRequests.length > 0 && (
+                    <div className="parts-approval-send-quote-section">
+                      <div className="parts-approval-send-quote-info">
+                        <FiMail />
+                        <div>
+                          <h4>Gửi báo giá cho khách hàng</h4>
+                          <p>Tất cả phụ tùng đã được duyệt. Gửi email báo giá đến khách hàng để xác nhận.</p>
+                        </div>
+                      </div>
+                      <button 
+                        className="parts-approval-send-quote-btn"
+                        onClick={handleSendQuote}
+                        disabled={sendingQuote}
+                      >
+                        {sendingQuote ? (
+                          <><FiLoader className="spinning" /> Đang gửi...</>
+                        ) : (
+                          <><FiMail /> Gửi báo giá qua email</>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -755,7 +922,7 @@ function PartsApproval() {
                       <span className="value stock">{selectedRequest.quantityInStock}</span>
                     </div>
                     <div className="confirm-detail-row">
-                      <span className="label"><FiDollarSign /> Đơn giá:</span>
+                      <span className="label">Đơn giá:</span>
                       <span className="value">{formatCurrency(selectedRequest.partPrice || selectedRequest.price)}</span>
                     </div>
                     <div className="confirm-detail-row total">
@@ -829,7 +996,7 @@ function PartsApproval() {
                       <span className="value quantity">{selectedRequest.quantityRequested}</span>
                     </div>
                     <div className="confirm-detail-row">
-                      <span className="label"><FiDollarSign /> Giá trị:</span>
+                      <span className="label">Giá trị:</span>
                       <span className="value">{formatCurrency((selectedRequest.partPrice || selectedRequest.price) * selectedRequest.quantityRequested)}</span>
                     </div>
                   </div>

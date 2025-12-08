@@ -12,7 +12,6 @@ import {
   FiPackage,
   FiType,
   FiAlignLeft,
-  FiDollarSign,
   FiInfo,
   FiAlertTriangle,
   FiHash,
@@ -187,7 +186,6 @@ const AdminPartsManager = () => {
                 Đơn giá (VNĐ) <span className="required">*</span>
               </label>
               <div className="form-input-wrapper">
-                <FiDollarSign />
                 <input
                   id={controlId('part-price')}
                   type="number"
@@ -464,7 +462,7 @@ const AdminPartsManager = () => {
               </div>
             </div>
             <div className="stat-card success">
-              <div className="stat-icon"><FiDollarSign /></div>
+              <div className="stat-icon"><FiTrendingUp /></div>
               <div className="stat-info">
                 <span className="stat-value">{(stats.totalValue / 1000000).toFixed(1)}M</span>
                 <span className="stat-label">Giá trị tồn kho</span>

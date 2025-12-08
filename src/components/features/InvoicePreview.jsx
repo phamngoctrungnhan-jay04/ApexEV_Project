@@ -4,7 +4,6 @@
 import React from 'react';
 import { Card, Table, Badge } from 'react-bootstrap';
 import { 
-  FiDollarSign, 
   FiFileText, 
   FiTool, 
   FiPackage,
@@ -168,7 +167,6 @@ const InvoicePreview = ({ invoice, orderItems = [] }) => {
         <div className="invoice-total">
           <div className="total-row">
             <span className="total-label">
-              <FiDollarSign className="me-2" />
               TỔNG HÓA ĐƠN:
             </span>
             <span className="total-amount">{formatCurrency(grandTotal)}</span>

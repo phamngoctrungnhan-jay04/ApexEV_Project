@@ -1,7 +1,7 @@
 // File: src/services/technicianWorkService.js
 // Service API cho công việc của Kỹ thuật viên - APEX EV
 
-const API_BASE = 'http://localhost:8081/api';
+const API_BASE = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api`;
 
 // Helper function để lấy token
 const getAuthHeaders = () => {
@@ -39,6 +39,9 @@ export const getMyOrders = async () => {
       headers: getAuthHeaders()
     });
     const works = await handleResponse(response);
+    
+    // Debug: In ra response từ Backend
+    console.log('🔍 [API Raw Response] First work:', works[0]);
     
     // Transform to consistent format for JobList
     return works.map(work => {
@@ -210,8 +213,67 @@ export const updateOrderNotes = async (orderId, notes) => {
   }
 };
 
+/**
+ * Lấy danh sách công việc đã hoàn thành
+ * GET /api/technician/my-works/completed
+ */
+export const getMyCompletedOrders = async () => {
+  try {
+    const response = await fetch(`${API_BASE}/technician/my-works/completed`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    const works = await handleResponse(response);
+    
+    // Debug: In ra response từ Backend
+    console.log('🔍 [API Raw Response COMPLETED] First work:', works[0]);
+    
+    // Transform to consistent format for JobList
+    return works.map(work => {
+      // Parse appointmentTime (ngày hẹn) - có thể là string ISO hoặc array từ LocalDateTime Java
+      let appointmentDate = null;
+      let appointmentTime = null;
+      
+      if (work.appointmentTime) {
+        if (typeof work.appointmentTime === 'string') {
+          const dt = new Date(work.appointmentTime);
+          appointmentDate = dt.toLocaleDateString('vi-VN');
+          appointmentTime = dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        } else if (Array.isArray(work.appointmentTime)) {
+          // LocalDateTime từ Java trả về [year, month, day, hour, minute]
+          const [year, month, day, hour, minute] = work.appointmentTime;
+          const dt = new Date(year, month - 1, day, hour, minute);
+          appointmentDate = dt.toLocaleDateString('vi-VN');
+          appointmentTime = dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        }
+      }
+      
+      return {
+        orderId: work.id, // FIX: Backend trả về 'id' chứ không phải 'orderId'
+        customerName: work.customerName,
+        customerPhone: work.customerPhone,
+        // Thông tin xe - backend trả về vehicleLicensePlate, vehicleModel, vehicleBrand
+        vehicleName: work.vehicleLicensePlate 
+          ? `${work.vehicleBrand || ''} ${work.vehicleModel || ''} - ${work.vehicleLicensePlate}`.trim()
+          : null,
+        licensePlate: work.vehicleLicensePlate,
+        vehicleBrand: work.vehicleBrand,
+        vehicleModel: work.vehicleModel,
+        status: work.status,
+        appointmentDate,
+        appointmentTime,
+        orderCreatedAt: work.orderCreatedAt
+      };
+    });
+  } catch (error) {
+    console.error('getMyCompletedOrders error:', error);
+    throw error;
+  }
+};
+
 export default {
   getMyOrders,
+  getMyCompletedOrders,
   getOrderItems,
   updateWorkStatus,
   startWork,

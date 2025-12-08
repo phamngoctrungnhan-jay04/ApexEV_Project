@@ -17,11 +17,26 @@
 .sidebar-brand {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 32px;
 }
+
+.sidebar-logo-img {
+  height: 65px !important;
+  width: auto !important;
+  max-width: 140px !important;
+  object-fit: contain;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-brand:hover .sidebar-logo-img {
+  transform: scale(1.05);
+}
+
 .brand-text { color: #338AF3; }
 .brand-badge {
   background: #338AF3;

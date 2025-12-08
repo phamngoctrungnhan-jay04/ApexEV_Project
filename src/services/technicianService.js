@@ -1,7 +1,7 @@
 // File: src/services/technicianService.js
 // Service API cho Kỹ thuật viên - APEX EV
 
-const API_BASE = 'http://localhost:8081/api';
+const API_BASE = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api`;
 
 // Helper function để lấy token
 const getAuthHeaders = () => {

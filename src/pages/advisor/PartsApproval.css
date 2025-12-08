@@ -889,11 +889,18 @@
   margin-top: 8px;
 }
 
+.parts-approval-requests-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
 .parts-approval-requests-section h3 {
   font-size: 20px;
   font-weight: 700;
   color: #1F2937;
-  margin: 0 0 24px 0;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -901,6 +908,47 @@
 
 .parts-approval-requests-section h3 svg {
   color: #338AF3;
+}
+
+/* Batch Approve Button */
+.parts-approval-batch-approve-btn {
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #34C759 0%, #30B350 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+  transition: all 0.3s ease;
+}
+
+.parts-approval-batch-approve-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #30B350 0%, #28A745 100%);
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.4);
+  transform: translateY(-2px);
+}
+
+.parts-approval-batch-approve-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.parts-approval-batch-approve-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.parts-approval-batch-approve-btn svg.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Request Item Card */
@@ -1505,5 +1553,112 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Send Quote Section */
+.parts-approval-send-quote-section {
+  margin-top: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-radius: 16px;
+  border: 2px solid #BFDBFE;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.parts-approval-send-quote-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.parts-approval-send-quote-info > svg {
+  font-size: 32px;
+  color: #338AF3;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.parts-approval-send-quote-info h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 8px 0;
+}
+
+.parts-approval-send-quote-info p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.parts-approval-send-quote-btn {
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.3);
+  white-space: nowrap;
+}
+
+.parts-approval-send-quote-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #005CF0 0%, #0047C2 100%);
+  box-shadow: 0 6px 16px rgba(51, 138, 243, 0.4);
+  transform: translateY(-2px);
+}
+
+.parts-approval-send-quote-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.parts-approval-send-quote-btn svg.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Status Badge cho QUOTED */
+.parts-approval-status-badge.quoted {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+  color: #1E40AF;
+  border-color: #93C5FD;
+}
+
+/* Status Badge cho FULFILLED */
+.parts-approval-status-badge.fulfilled {
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  color: #065F46;
+  border-color: #6EE7B7;
+}
+
+@media (max-width: 768px) {
+  .parts-approval-send-quote-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .parts-approval-send-quote-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

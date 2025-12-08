@@ -179,8 +179,9 @@ const MaintenanceChecklist = () => {
     }
   };
 
-  // Handle item status change
-  const handleStatusChange = (itemId, status) => {
+  // Handle status change and auto-submit
+  const handleStatusChange = async (itemId, status) => {
+    // Update UI immediately
     setItemResults(prev => ({
       ...prev,
       [itemId]: {
@@ -188,9 +189,26 @@ const MaintenanceChecklist = () => {
         status
       }
     }));
+
+    // Auto-submit to save immediately
+    if (currentChecklist) {
+      try {
+        const itemResult = itemResults[itemId] || {};
+        await submitChecklistItem(
+          currentChecklist.id,
+          itemId,
+          status,
+          itemResult.notes || ''
+        );
+        showToast('✅ Đã lưu kết quả!', 'success');
+      } catch (err) {
+        console.error('Error auto-submitting:', err);
+        showToast('⚠️ Lưu tự động thất bại. Vui lòng click nút Lưu.', 'warning');
+      }
+    }
   };
 
-  // Handle item notes change
+  // Handle notes change
   const handleNotesChange = (itemId, notes) => {
     setItemResults(prev => ({
       ...prev,
@@ -199,6 +217,27 @@ const MaintenanceChecklist = () => {
         notes
       }
     }));
+  };
+
+  // Auto-submit notes when blur
+  const handleNotesBlur = async (itemId) => {
+    if (!currentChecklist) return;
+    
+    const itemResult = itemResults[itemId];
+    if (itemResult?.status) {
+      try {
+        await submitChecklistItem(
+          currentChecklist.id,
+          itemId,
+          itemResult.status,
+          itemResult.notes || ''
+        );
+        showToast('✅ Đã lưu ghi chú!', 'success');
+      } catch (err) {
+        console.error('Error auto-submitting notes:', err);
+        showToast('⚠️ Không thể lưu ghi chú', 'warning');
+      }
+    }
   };
 
   // Submit single item
@@ -278,11 +317,13 @@ const MaintenanceChecklist = () => {
       case 'PASSED':
         return <Badge bg="success"><FiCheckCircle className="me-1" /> Đạt</Badge>;
       case 'FAILED':
-        return <Badge bg="danger"><FiXCircle className="me-1" /> Không đạt</Badge>;
+        return <Badge bg="danger"><FiXCircle className="me-1" /> Lỗi</Badge>;
       case 'NEEDS_ATTENTION':
-        return <Badge bg="warning"><FiAlertTriangle className="me-1" /> Cần chú ý</Badge>;
+        return <Badge bg="warning"><FiAlertTriangle className="me-1" /> Chú ý</Badge>;
+      case 'NEEDS_REPLACEMENT':
+        return <Badge bg="info"><FiAlertCircle className="me-1" /> Thay thế</Badge>;
       default:
-        return <Badge bg="secondary"><FiCircle className="me-1" /> Chưa kiểm tra</Badge>;
+        return <Badge bg="secondary"><FiClock className="me-1" /> Chờ kiểm tra</Badge>;
     }
   };
 
@@ -386,7 +427,13 @@ const MaintenanceChecklist = () => {
                           Đạt: {Object.values(itemResults).filter(r => r?.status === 'PASSED').length}
                         </span>
                         <span className="stat-item ms-2 text-danger">
-                          Không đạt: {Object.values(itemResults).filter(r => r?.status === 'FAILED').length}
+                          Lỗi: {Object.values(itemResults).filter(r => r?.status === 'FAILED').length}
+                        </span>
+                        <span className="stat-item ms-2 text-warning">
+                          Chú ý: {Object.values(itemResults).filter(r => r?.status === 'NEEDS_ATTENTION').length}
+                        </span>
+                        <span className="stat-item ms-2 text-info">
+                          Thay thế: {Object.values(itemResults).filter(r => r?.status === 'NEEDS_REPLACEMENT').length}
                         </span>
                       </div>
                     </div>
@@ -443,6 +490,7 @@ const MaintenanceChecklist = () => {
                                 variant={result?.status === 'PASSED' ? 'success' : 'outline-success'}
                                 onClick={() => handleStatusChange(item.id, 'PASSED')}
                                 className="status-btn"
+                                disabled={submitting}
                               >
                                 <FiCheckCircle /> Đạt
                               </Button>
@@ -451,16 +499,27 @@ const MaintenanceChecklist = () => {
                                 variant={result?.status === 'FAILED' ? 'danger' : 'outline-danger'}
                                 onClick={() => handleStatusChange(item.id, 'FAILED')}
                                 className="status-btn"
+                                disabled={submitting}
                               >
-                                <FiXCircle /> Không đạt
+                                <FiXCircle /> Lỗi
                               </Button>
                               <Button 
                                 size="sm"
                                 variant={result?.status === 'NEEDS_ATTENTION' ? 'warning' : 'outline-warning'}
                                 onClick={() => handleStatusChange(item.id, 'NEEDS_ATTENTION')}
                                 className="status-btn"
+                                disabled={submitting}
                               >
-                                <FiAlertTriangle /> Cần chú ý
+                                <FiAlertTriangle /> Chú ý
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant={result?.status === 'NEEDS_REPLACEMENT' ? 'info' : 'outline-info'}
+                                onClick={() => handleStatusChange(item.id, 'NEEDS_REPLACEMENT')}
+                                className="status-btn"
+                                disabled={submitting}
+                              >
+                                <FiAlertCircle /> Thay thế
                               </Button>
                             </div>
                           </div>
@@ -478,15 +537,19 @@ const MaintenanceChecklist = () => {
                               placeholder="Ghi chú kỹ thuật (mô tả vấn đề, đề xuất sửa chữa...)"
                               value={result?.notes || ''}
                               onChange={(e) => handleNotesChange(item.id, e.target.value)}
+                              onBlur={() => handleNotesBlur(item.id)}
                               className="notes-input"
                             />
-                            <Button 
-                              variant="outline-primary"
-                              onClick={() => handleSubmitItem(item.id)}
-                              disabled={submitting || !result?.status}
-                            >
-                              {submitting ? <Spinner size="sm" /> : <FiSave />}
-                            </Button>
+                            {result?.status && (
+                              <Button 
+                                variant="outline-primary"
+                                onClick={() => handleSubmitItem(item.id)}
+                                disabled={submitting}
+                                title="Lưu thủ công (tự động lưu khi chọn status hoặc blur ghi chú)"
+                              >
+                                {submitting ? <Spinner size="sm" /> : <FiSave />}
+                              </Button>
+                            )}
                           </InputGroup>
                         </div>
                       </div>

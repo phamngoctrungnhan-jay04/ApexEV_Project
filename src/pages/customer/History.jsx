@@ -16,7 +16,6 @@ import {
 
   FiUser,
   FiCalendar,
-  FiDollarSign,
   FiFileText,
   FiFilter,
   FiSearch,

@@ -31,6 +31,19 @@
   margin-bottom: 16px;
 }
 
+.sidebar-logo-img {
+  height: 65px !important;
+  width: auto !important;
+  max-width: 140px !important;
+  object-fit: contain;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.manager-sidebar .sidebar-brand:hover .sidebar-logo-img {
+  transform: scale(1.05);
+}
+
 .manager-sidebar .brand-text {
   font-size: 26px;
   font-weight: 800;

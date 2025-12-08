@@ -23,6 +23,7 @@ function AdvisorAppointments() {
   const [processingId, setProcessingId] = useState(null);
   const [advisorNotes, setAdvisorNotes] = useState(''); // Ghi chú của cố vấn
   const [successMessage, setSuccessMessage] = useState(''); // Thông báo thành công
+  const [selectedTechnician, setSelectedTechnician] = useState(null); // Kỹ thuật viên đã chọn: {id, name, email, activeWorkCount}
 
   // Hàm lấy tổng giá dịch vụ từ tên dịch vụ
   function getTotalServicePrice(requestedService) {
@@ -94,19 +95,6 @@ function AdvisorAppointments() {
     fetchAppointments();
   }, []);
 
-  // Xác nhận lịch hẹn (sau khi đã assign technician)
-  const handleConfirm = async (id) => {
-    try {
-      setProcessingId(id);
-      await appointmentService.confirmAppointment(id);
-      await fetchAppointments();
-    } catch (err) {
-      setError('Xác nhận thất bại: ' + err.message);
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
   // Từ chối lịch hẹn
   const handleReject = async (id) => {
     if (!window.confirm('Bạn có chắc muốn từ chối lịch hẹn này?')) return;
@@ -161,6 +149,17 @@ function AdvisorAppointments() {
     setSelectedAppointment(null);
     setTechnicians([]);
     setAdvisorNotes(''); // Reset ghi chú
+    setSelectedTechnician(null); // Reset kỹ thuật viên đã chọn
+  };
+
+  // Chọn kỹ thuật viên (chưa gọi API)
+  const handleSelectTechnician = (tech) => {
+    setSelectedTechnician({
+      id: tech.userId,
+      name: tech.fullName,
+      email: tech.email,
+      activeWorkCount: tech.activeWorkCount
+    });
   };
 
   // Assign technician (bước 2 trong workflow)
@@ -168,7 +167,16 @@ function AdvisorAppointments() {
     if (!selectedAppointment) return;
     setAssigning(true);
     try {
+      console.log('🔄 Đang phân công kỹ thuật viên:', {
+        appointmentId: selectedAppointment.id,
+        technicianId,
+        technicianName,
+        advisorNotes
+      });
+      
       const result = await appointmentService.assignTechnician(selectedAppointment.id, technicianId, advisorNotes);
+      
+      console.log('✅ Phân công thành công:', result);
       
       // Cập nhật local state với thông tin từ response
       setAppointments(prev => prev.map(app => 
@@ -190,7 +198,10 @@ function AdvisorAppointments() {
       // Tự động ẩn thông báo sau 5 giây
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (err) {
+      console.error('❌ Lỗi phân công kỹ thuật viên:', err);
       setError('Phân công thất bại: ' + err.message);
+      // Tự động ẩn thông báo lỗi sau 5 giây
+      setTimeout(() => setError(''), 5000);
     } finally {
       setAssigning(false);
     }
@@ -438,35 +449,6 @@ function AdvisorAppointments() {
                             </>
                           )}
                           
-                          {app.status === 'PENDING' && hasAssignedTech && (
-                            <>
-                              <button
-                                className="btn-action success"
-                                onClick={() => handleConfirm(app.id)}
-                                disabled={processingId === app.id}
-                                title="Xác nhận"
-                              >
-                                <FiCheckCircle />
-                              </button>
-                              <button
-                                className="btn-action secondary"
-                                onClick={() => handleOpenAssignModal(app)}
-                                disabled={processingId === app.id}
-                                title="Đổi KTV"
-                              >
-                                <FiUserPlus />
-                              </button>
-                              <button
-                                className="btn-action danger"
-                                onClick={() => handleReject(app.id)}
-                                disabled={processingId === app.id}
-                                title="Từ chối"
-                              >
-                                <FiX />
-                              </button>
-                            </>
-                          )}
-
                           {app.status === 'CONFIRMED' && (
                             <span className="completed-text">
                               <FiCheckCircle /> Hoàn tất
@@ -544,18 +526,61 @@ function AdvisorAppointments() {
                             </div>
                           </div>
                           <button
-                            className="btn-select"
-                            onClick={() => handleAssignTechnician(tech.userId, tech.fullName)}
-                            disabled={assigning || !tech.isAvailable}
+                            className={`btn-select ${selectedTechnician?.id === tech.userId ? 'selected' : ''}`}
+                            onClick={() => handleSelectTechnician(tech)}
+                            disabled={!tech.isAvailable}
                           >
-                            {assigning ? '...' : 'Chọn'}
+                            {selectedTechnician?.id === tech.userId ? '✓ Đã chọn' : 'Chọn'}
                           </button>
                         </div>
                       ))
                     )}
                   </div>
                 )}
+
+                {/* Preview kỹ thuật viên đã chọn */}
+                {selectedTechnician && (
+                  <div className="selected-tech-preview">
+                    <div className="preview-header">
+                      <div>
+                        <FiUser /> <strong>Kỹ thuật viên đã chọn:</strong>
+                      </div>
+                      <button 
+                        className="btn-unselect"
+                        onClick={() => setSelectedTechnician(null)}
+                        title="Bỏ chọn"
+                      >
+                        <FiX /> Bỏ chọn
+                      </button>
+                    </div>
+                    <div className="preview-content">
+                      <p><strong>{selectedTechnician.name}</strong></p>
+                      <p className="preview-email"><FiMail /> {selectedTechnician.email}</p>
+                      <p className="preview-workload">Đang có {selectedTechnician.activeWorkCount} công việc</p>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Footer với nút Xác nhận */}
+              {selectedTechnician && (
+                <div className="modal-footer">
+                  <button 
+                    className="btn-cancel" 
+                    onClick={handleCloseAssignModal}
+                    disabled={assigning}
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    className="btn-confirm-assign"
+                    onClick={() => handleAssignTechnician(selectedTechnician.id, selectedTechnician.name)}
+                    disabled={assigning}
+                  >
+                    {assigning ? 'Đang xử lý...' : 'Xác nhận phân công'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -4,7 +4,6 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 import {
   FiCalendar,
   FiClock,
-  FiDollarSign,
   FiTool,
   FiLogOut,
   FiArrowRight,
@@ -78,7 +77,7 @@ function CustomerDashboard() {
       color: '#F59E0B'
     },
     {
-      icon: <FiDollarSign />,
+      icon: <FiFileText />,
       title: 'Hóa đơn',
       description: 'Lịch sử thanh toán',
       path: '/customer/invoices',
@@ -208,7 +207,7 @@ function CustomerDashboard() {
                   <Card className="stat-card stat-card-purple slide-up" style={{animationDelay: '0.3s'}}>
                     <Card.Body>
                       <div className="stat-icon">
-                        <FiDollarSign />
+                        <FiFileText />
                       </div>
                       <h3 className="stat-number">{formatCurrency(stats?.totalSpent || 0)}</h3>
                       <p className="stat-label">Tổng chi phí</p>

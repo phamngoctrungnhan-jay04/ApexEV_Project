@@ -24,8 +24,7 @@ const AdminSidebar = () => {
   return (
     <aside className="admin-sidebar glassmorphism">
       <div className="sidebar-brand">
-        <span className="brand-text">APEX</span>
-        <span className="brand-badge">EV</span>
+        <img src="/images/logo.jpg" alt="APEX EV Logo" className="sidebar-logo-img" />
       </div>
       <nav className="sidebar-menu">
         {adminLinks.map((link) => (
