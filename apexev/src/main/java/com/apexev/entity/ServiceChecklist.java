@@ -15,7 +15,8 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ServiceChecklist { // bảng này là một cái bìa của một quyển sách -> nó chứa thông tin tóm tắt bên ngoài -> ko chứa thông tin pass or fail
+public class ServiceChecklist { // bảng này là một cái bìa của một quyển sách -> nó chứa thông tin tóm tắt bên
+                                // ngoài -> ko chứa thông tin pass or fail
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "checklist_id")
@@ -25,15 +26,21 @@ public class ServiceChecklist { // bảng này là một cái bìa của một q
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "is_completed", nullable = false)
+    private Boolean isCompleted = false;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     // --- Relationships ---
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private ServiceOrder serviceOrder; //đơn hàng nào
+    private ServiceOrder serviceOrder; // đơn hàng nào
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = false)
-    private ChecklistTemplate template; // đã dùng mẫu nào
+    @JoinColumn(name = "template_id", nullable = true) // Cho phép null vì không phải service nào cũng có template
+    private ChecklistTemplate template; // đã dùng mẫu nào (có thể null)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "technician_id", nullable = false)

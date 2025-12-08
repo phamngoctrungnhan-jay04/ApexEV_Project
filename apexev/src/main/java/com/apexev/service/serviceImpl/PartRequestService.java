@@ -16,6 +16,7 @@ import com.apexev.repository.coreBussiness.PartRepository;
 import com.apexev.repository.coreBussiness.PartRequestRepository;
 import com.apexev.repository.coreBussiness.ServiceOrderRepository;
 import com.apexev.repository.userAndVehicle.UserRepository;
+import com.apexev.service.service_Interface.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,8 @@ public class PartRequestService {
     private final PartRequestRepository partRequestRepository;
     private final ServiceOrderRepository serviceOrderRepository;
     private final UserRepository userRepository;
+    private final SNSEmailService snsEmailService;
+    private final NotificationService notificationService;
 
     /**
      * Lấy danh sách tất cả phụ tùng
@@ -153,7 +156,9 @@ public class PartRequestService {
 
     /**
      * Duyệt/Từ chối yêu cầu (Service Advisor/Admin)
-     * Khi DUYỆT: Tự động xuất kho (trừ số lượng) và cập nhật status = FULFILLED
+     * FLOW MỚI:
+     * - Khi DUYỆT: Chỉ đổi status PENDING -> APPROVED, KHÔNG xuất kho
+     * - Xuất kho sẽ diễn ra khi Customer duyệt báo giá (approveQuote)
      */
     @Transactional
     public PartRequestResponse approveOrRejectPartRequest(Long requestId, boolean approve, String notes,
@@ -174,49 +179,26 @@ public class PartRequestService {
         partRequest.setApprovedAt(LocalDateTime.now());
 
         if (approve) {
-            // === TỰ ĐỘNG XUẤT KHO KHI DUYỆT ===
+            // Kiểm tra tồn kho trước khi duyệt
             Part part = partRequest.getPart();
             int requestedQty = partRequest.getQuantityRequested();
             int currentStock = part.getQuantityInStock();
 
-            // Kiểm tra tồn kho
             if (currentStock < requestedQty) {
                 throw new IllegalStateException(
                         String.format("Không đủ tồn kho! Yêu cầu: %d, Tồn kho: %d (%s)",
                                 requestedQty, currentStock, part.getPartName()));
             }
 
-            // Trừ số lượng tồn kho
-            part.setQuantityInStock(currentStock - requestedQty);
-            partRepository.save(part);
+            // Chỉ đổi status sang APPROVED, KHÔNG xuất kho
+            // Xuất kho sẽ diễn ra khi customer duyệt báo giá
+            partRequest.setStatus(PartRequestStatus.APPROVED);
 
-            log.info("Auto deducted stock: partId={}, partName={}, qty={}, oldStock={}, newStock={}",
-                    part.getId(), part.getPartName(), requestedQty, currentStock, part.getQuantityInStock());
-
-            // === TỰ ĐỘNG TẠO ServiceOrderItem ĐỂ GHI VÀO HÓA ĐƠN ===
-            ServiceOrder serviceOrder = partRequest.getServiceOrder();
-            ServiceOrderItem orderItem = new ServiceOrderItem();
-            orderItem.setItemType(OrderItemType.PART);
-            orderItem.setItemRefId(part.getId());
-            orderItem.setQuantity(requestedQty);
-            orderItem.setUnitPrice(part.getPrice()); // Giá tại thời điểm duyệt
-            orderItem.setStatus(OrderItemStatus.APPROVED);
-            orderItem.setServiceOrder(serviceOrder);
-
-            // Thêm vào ServiceOrder
-            serviceOrder.getOrderItems().add(orderItem);
-            serviceOrderRepository.save(serviceOrder);
-
-            log.info("Auto created ServiceOrderItem: orderId={}, partId={}, partName={}, qty={}, unitPrice={}",
-                    serviceOrder.getId(), part.getId(), part.getPartName(), requestedQty, part.getPrice());
-
-            // Cập nhật status = FULFILLED (đã xuất kho, sẵn sàng giao cho KTV)
-            partRequest.setStatus(PartRequestStatus.FULFILLED);
-
-            log.info("Approved & fulfilled part request: id={}, approver={}, partId={}, qty={}",
+            log.info(
+                    "Approved part request (waiting for customer quote approval): id={}, approver={}, partId={}, qty={}",
                     requestId, approver.getUserId(), part.getId(), requestedQty);
         } else {
-            // Từ chối
+            // Từ chối - lưu lý do vào approverNotes
             partRequest.setStatus(PartRequestStatus.REJECTED);
             log.info("Rejected part request: id={}, approver={}, reason={}",
                     requestId, approver.getUserId(), notes);
@@ -293,5 +275,220 @@ public class PartRequestService {
         }
 
         return response;
+    }
+
+    /**
+     * Gửi email báo giá cho customer sau khi advisor duyệt tất cả part requests
+     */
+    @Transactional
+    public void sendQuoteToCustomer(Long serviceOrderId, User advisor) {
+        // Validate advisor role
+        if (advisor.getRole() != UserRole.SERVICE_ADVISOR && advisor.getRole() != UserRole.ADMIN) {
+            throw new AccessDeniedException("Chỉ advisor hoặc admin mới có thể gửi báo giá");
+        }
+
+        // Tìm service order
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy service order với ID: " + serviceOrderId));
+
+        // Lấy tất cả part requests của order này
+        List<PartRequest> partRequests = partRequestRepository.findByServiceOrderIdOrderByCreatedAtDesc(serviceOrderId);
+
+        if (partRequests.isEmpty()) {
+            throw new IllegalStateException("Không có yêu cầu phụ tùng nào cho đơn hàng này");
+        }
+
+        // Kiểm tra xem còn request nào cần chuyển sang QUOTED không
+        long approvedCount = partRequests.stream()
+                .filter(r -> r.getStatus() == PartRequestStatus.APPROVED)
+                .count();
+
+        long quotedCount = partRequests.stream()
+                .filter(r -> r.getStatus() == PartRequestStatus.QUOTED)
+                .count();
+
+        // Nếu tất cả đã QUOTED rồi, không cần gửi lại
+        if (approvedCount == 0 && quotedCount > 0) {
+            throw new IllegalStateException("Báo giá đã được gửi cho đơn hàng này");
+        }
+
+        // Phải có ít nhất 1 request APPROVED hoặc QUOTED
+        if (approvedCount == 0 && quotedCount == 0) {
+            throw new IllegalStateException("Chưa duyệt hết tất cả yêu cầu phụ tùng");
+        }
+
+        // Tính tổng tiền và format chi tiết phụ tùng
+        double totalAmount = 0.0;
+        StringBuilder partsDetails = new StringBuilder();
+
+        for (PartRequest req : partRequests) {
+            if (req.getStatus() == PartRequestStatus.APPROVED) {
+                double itemTotal = req.getPart().getPrice().doubleValue() * req.getQuantityRequested();
+                totalAmount += itemTotal;
+
+                partsDetails.append(String.format(
+                        "- %s (x%d): %,.0f VNĐ\n",
+                        req.getPart().getPartName(),
+                        req.getQuantityRequested(),
+                        itemTotal));
+
+                // Chuyển status sang QUOTED
+                req.setStatus(PartRequestStatus.QUOTED);
+                partRequestRepository.save(req);
+            }
+        }
+
+        // Gửi email cho customer
+        User customer = serviceOrder.getCustomer();
+        String vehicleInfo = serviceOrder.getVehicle().getLicensePlate() + " - " +
+                serviceOrder.getVehicle().getBrand() + " " +
+                serviceOrder.getVehicle().getModel();
+
+        // Thử gửi email, nhưng không fail toàn bộ nếu email lỗi
+        try {
+            snsEmailService.sendPartQuoteEmail(
+                    customer.getEmail(),
+                    customer.getFullName(),
+                    serviceOrderId,
+                    vehicleInfo,
+                    partsDetails.toString(),
+                    totalAmount);
+            log.info("Sent quote email for order: orderId={}, customer={}, totalAmount={}",
+                    serviceOrderId, customer.getEmail(), totalAmount);
+        } catch (Exception e) {
+            log.warn("Failed to send quote email for order: orderId={}, customer={}, error={}",
+                    serviceOrderId, customer.getEmail(), e.getMessage());
+            // Không throw exception, chỉ log warning
+            // Status đã được chuyển sang QUOTED ở trên, customer vẫn có thể xem trong
+            // timeline
+        }
+    }
+
+    /**
+     * Customer duyệt báo giá (chuyển QUOTED -> FULFILLED)
+     */
+    @Transactional
+    public void approveQuote(Long serviceOrderId, User customer) {
+        // Validate customer role
+        if (customer.getRole() != UserRole.CUSTOMER) {
+            throw new AccessDeniedException("Chỉ customer mới có thể duyệt báo giá");
+        }
+
+        // Tìm service order
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy service order với ID: " + serviceOrderId));
+
+        // Kiểm tra customer có phải chủ của order không
+        if (!serviceOrder.getCustomer().getUserId().equals(customer.getUserId())) {
+            throw new AccessDeniedException("Bạn không có quyền duyệt báo giá của đơn hàng này");
+        }
+
+        // Lấy tất cả part requests có status QUOTED
+        List<PartRequest> quotedRequests = partRequestRepository
+                .findByServiceOrderIdOrderByCreatedAtDesc(serviceOrderId)
+                .stream()
+                .filter(r -> r.getStatus() == PartRequestStatus.QUOTED)
+                .collect(Collectors.toList());
+
+        if (quotedRequests.isEmpty()) {
+            throw new IllegalStateException("Không có báo giá nào đang chờ duyệt");
+        }
+
+        // Chuyển status sang FULFILLED và trừ tồn kho
+        for (PartRequest partRequest : quotedRequests) {
+            Part part = partRequest.getPart();
+            int requestedQty = partRequest.getQuantityRequested();
+            int currentStock = part.getQuantityInStock();
+
+            // Kiểm tra tồn kho
+            if (currentStock < requestedQty) {
+                throw new IllegalStateException(
+                        String.format("Không đủ tồn kho! Yêu cầu: %d, Tồn kho: %d (%s)",
+                                requestedQty, currentStock, part.getPartName()));
+            }
+
+            // Trừ số lượng tồn kho
+            part.setQuantityInStock(currentStock - requestedQty);
+            partRepository.save(part);
+
+            // Tạo ServiceOrderItem để ghi vào hóa đơn
+            ServiceOrderItem orderItem = new ServiceOrderItem();
+            orderItem.setItemType(OrderItemType.PART);
+            orderItem.setItemRefId(part.getId());
+            orderItem.setQuantity(requestedQty);
+            orderItem.setUnitPrice(part.getPrice());
+            orderItem.setStatus(OrderItemStatus.APPROVED);
+            orderItem.setServiceOrder(serviceOrder);
+
+            serviceOrder.getOrderItems().add(orderItem);
+
+            // Cập nhật status = FULFILLED
+            partRequest.setStatus(PartRequestStatus.FULFILLED);
+            partRequestRepository.save(partRequest);
+
+            log.info("Customer approved quote: orderId={}, partId={}, partName={}, qty={}",
+                    serviceOrderId, part.getId(), part.getPartName(), requestedQty);
+        }
+
+        serviceOrderRepository.save(serviceOrder);
+        log.info("Customer approved all quotes for order: {}", serviceOrderId);
+
+        // Gửi notification cho technician
+        User technician = serviceOrder.getTechnician();
+        if (technician != null) {
+            String message = String.format(
+                    "Khách hàng đã duyệt %d phụ tùng cho đơn #%d. Bạn có thể lấy phụ tùng và bắt đầu thay thế.",
+                    quotedRequests.size(),
+                    serviceOrderId);
+            notificationService.sendNotification(technician, message, serviceOrder);
+            log.info("Sent notification to technician: technicianId={}, orderId={}", technician.getUserId(),
+                    serviceOrderId);
+        }
+    }
+
+    /**
+     * Customer từ chối báo giá (chuyển QUOTED -> REJECTED)
+     */
+    @Transactional
+    public void rejectQuote(Long serviceOrderId, String reason, User customer) {
+        // Validate customer role
+        if (customer.getRole() != UserRole.CUSTOMER) {
+            throw new AccessDeniedException("Chỉ customer mới có thể từ chối báo giá");
+        }
+
+        // Tìm service order
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy service order với ID: " + serviceOrderId));
+
+        // Kiểm tra customer có phải chủ của order không
+        if (!serviceOrder.getCustomer().getUserId().equals(customer.getUserId())) {
+            throw new AccessDeniedException("Bạn không có quyền từ chối báo giá của đơn hàng này");
+        }
+
+        // Lấy tất cả part requests có status QUOTED
+        List<PartRequest> quotedRequests = partRequestRepository
+                .findByServiceOrderIdOrderByCreatedAtDesc(serviceOrderId)
+                .stream()
+                .filter(r -> r.getStatus() == PartRequestStatus.QUOTED)
+                .collect(Collectors.toList());
+
+        if (quotedRequests.isEmpty()) {
+            throw new IllegalStateException("Không có báo giá nào đang chờ duyệt");
+        }
+
+        // Chuyển status sang REJECTED
+        for (PartRequest partRequest : quotedRequests) {
+            partRequest.setStatus(PartRequestStatus.REJECTED);
+            partRequest.setApproverNotes(reason != null ? reason : "Customer từ chối báo giá");
+            partRequestRepository.save(partRequest);
+
+            log.info("Customer rejected quote: orderId={}, partId={}, reason={}",
+                    serviceOrderId, partRequest.getPart().getId(), reason);
+        }
+
+        log.info("Customer rejected all quotes for order: {}", serviceOrderId);
     }
 }

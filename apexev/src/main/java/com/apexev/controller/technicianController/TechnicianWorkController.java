@@ -31,6 +31,15 @@ public class TechnicianWorkController {
         return ResponseEntity.ok(works);
     }
 
+    // Lấy lịch sử công việc đã hoàn thành
+    @GetMapping("/my-works/completed")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public ResponseEntity<List<TechnicianWorkResponse>> getMyCompletedWorks(
+            @AuthenticationPrincipal User loggedInUser) {
+        List<TechnicianWorkResponse> works = technicianWorkService.getMyCompletedWorks(loggedInUser);
+        return ResponseEntity.ok(works);
+    }
+
     // Xem chi tiết 1 công việc
     @GetMapping("/works/{id}")
     @PreAuthorize("hasRole('TECHNICIAN')")

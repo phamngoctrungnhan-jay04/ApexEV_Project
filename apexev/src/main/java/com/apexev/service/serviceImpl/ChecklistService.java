@@ -4,11 +4,16 @@ import com.apexev.dto.request.SubmitChecklistItemRequest;
 import com.apexev.dto.response.ChecklistItemResponse;
 import com.apexev.dto.response.ChecklistTemplateResponse;
 import com.apexev.dto.response.ServiceChecklistResponse;
+import com.apexev.dto.response.ServiceChecklistItemWithResultResponse;
+import com.apexev.dto.response.ServiceOrderChecklistResponse;
 import com.apexev.entity.ChecklistTemplate;
 import com.apexev.entity.ChecklistTemplateItem;
+import com.apexev.entity.MaintenanceService;
 import com.apexev.entity.ServiceChecklist;
 import com.apexev.entity.ServiceChecklistResult;
+import com.apexev.entity.ServiceChecklistItem;
 import com.apexev.entity.ServiceOrder;
+import com.apexev.entity.ServiceOrderItem;
 import com.apexev.entity.User;
 import com.apexev.enums.ChecklistItemStatus;
 import com.apexev.enums.UserRole;
@@ -17,6 +22,7 @@ import com.apexev.repository.maintenance.ChecklistTemplateItemRepository;
 import com.apexev.repository.maintenance.ChecklistTemplateRepository;
 import com.apexev.repository.maintenance.ServiceChecklistRepository;
 import com.apexev.repository.maintenance.ServiceChecklistResultRepository;
+import com.apexev.repository.maintenance.ServiceChecklistItemRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +45,8 @@ public class ChecklistService {
     private final ChecklistTemplateItemRepository templateItemRepository;
     private final ChecklistTemplateRepository templateRepository;
     private final ServiceOrderRepository serviceOrderRepository;
+    private final ServiceChecklistItemRepository checklistItemRepository;
+    private final com.apexev.repository.coreBussiness.MaintenanceServiceRepository maintenanceServiceRepository;
     private final S3Service s3Service;
 
     /**
@@ -348,5 +358,145 @@ public class ChecklistService {
             return "VIDEO";
         }
         return "UNKNOWN";
+    }
+
+    /**
+     * API MỚI: Lấy tất cả service_checklist_items của order kèm kết quả đã submit
+     * - Lấy tất cả ServiceOrderItem trong order
+     * - Với mỗi service_id, lấy tất cả service_checklist_items
+     * - Kết hợp với service_checklist_results (nếu technician đã submit)
+     * - Bao gồm trạng thái isCompleted (đã hoàn tất kiểm tra chưa)
+     * 
+     * @param serviceOrderId Service Order ID
+     * @param user           User (Customer/Technician/Advisor/Admin)
+     * @return ServiceOrderChecklistResponse (bao gồm isCompleted và list items)
+     */
+    public ServiceOrderChecklistResponse getServiceChecklistItemsForOrder(Long serviceOrderId, User user) {
+        // Validate service order
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Không tìm thấy service order với ID: " + serviceOrderId));
+
+        // Kiểm tra quyền truy cập
+        if (user.getRole() == UserRole.TECHNICIAN) {
+            if (serviceOrder.getTechnician() == null ||
+                    !serviceOrder.getTechnician().getUserId().equals(user.getUserId())) {
+                throw new AccessDeniedException("Bạn không có quyền xem checklist của đơn hàng này");
+            }
+        } else if (user.getRole() == UserRole.CUSTOMER) {
+            if (!serviceOrder.getCustomer().getUserId().equals(user.getUserId())) {
+                throw new AccessDeniedException("Bạn không có quyền xem checklist của đơn hàng này");
+            }
+        }
+        // SERVICE_ADVISOR và ADMIN có thể xem tất cả
+
+        // Lấy tất cả service_ids từ order items (chỉ lấy items có itemType = SERVICE)
+        List<Long> serviceIds = serviceOrder.getOrderItems().stream()
+                .filter(item -> item.getItemType().toString().equals("SERVICE"))
+                .map(ServiceOrderItem::getItemRefId)
+                .distinct()
+                .toList();
+
+        if (serviceIds.isEmpty()) {
+            log.warn("Service order {} has no service items", serviceOrderId);
+            return ServiceOrderChecklistResponse.builder()
+                    .isCompleted(false)
+                    .items(List.of())
+                    .build();
+        }
+
+        // Lấy tất cả service_checklist_items của các services này
+        List<ServiceChecklistItem> allItems = new ArrayList<>();
+        for (Long serviceId : serviceIds) {
+            List<ServiceChecklistItem> items = checklistItemRepository
+                    .findByServiceIdAndIsActiveTrueOrderByStepOrderAsc(serviceId);
+            allItems.addAll(items);
+        }
+
+        if (allItems.isEmpty()) {
+            log.warn("No checklist items found for services: {}", serviceIds);
+            return ServiceOrderChecklistResponse.builder()
+                    .isCompleted(false)
+                    .items(List.of())
+                    .build();
+        }
+
+        // Lấy thông tin services để map serviceId -> serviceName
+        List<MaintenanceService> services = maintenanceServiceRepository.findAllById(serviceIds);
+        Map<Long, String> serviceNameMap = services.stream()
+                .collect(Collectors.toMap(MaintenanceService::getId, MaintenanceService::getName));
+
+        // Lấy tất cả checklists đã tạo cho order này (nếu có)
+        List<ServiceChecklist> checklists = checklistRepository.findByServiceOrderId(serviceOrderId);
+
+        // Lấy tất cả results đã submit
+        List<ServiceChecklistResult> allResults = new ArrayList<>();
+        for (ServiceChecklist checklist : checklists) {
+            List<ServiceChecklistResult> results = resultRepository.findByServiceChecklistId(checklist.getId());
+            allResults.addAll(results);
+        }
+
+        // Tạo map để tra cứu kết quả nhanh: itemId -> ServiceChecklistResult
+        // CHÚ Ý: Dùng serviceChecklistItem.id làm key (KHÔNG phải templateItem.id)
+        Map<Long, ServiceChecklistResult> resultsMap = allResults.stream()
+                .filter(result -> result.getServiceChecklistItem() != null)
+                .collect(Collectors.toMap(
+                        result -> result.getServiceChecklistItem().getId(),
+                        result -> result,
+                        (existing, replacement) -> replacement // Nếu trùng, lấy mới nhất
+                ));
+
+        // Kết hợp ServiceChecklistItem + ServiceChecklistResult
+        List<ServiceChecklistItemWithResultResponse> responses = new ArrayList<>();
+        for (ServiceChecklistItem item : allItems) {
+            ServiceChecklistItemWithResultResponse response = ServiceChecklistItemWithResultResponse.builder()
+                    .serviceId(item.getService().getId())
+                    .serviceName(serviceNameMap.getOrDefault(item.getService().getId(), "Unknown Service"))
+                    .itemId(item.getId())
+                    .itemName(item.getItemName())
+                    .itemNameEn(item.getItemNameEn())
+                    .itemDescription(item.getItemDescription())
+                    .itemDescriptionEn(item.getItemDescriptionEn())
+                    .stepOrder(item.getStepOrder())
+                    .category(item.getCategory())
+                    .estimatedTime(item.getEstimatedTime())
+                    .isRequired(item.getIsRequired())
+                    .build();
+
+            // Tìm kết quả đã submit (nếu có)
+            ServiceChecklistResult result = resultsMap.get(item.getId());
+            if (result != null) {
+                response.setResultId(result.getId());
+                response.setStatus(result.getStatus());
+                response.setTechnicianNotes(result.getTechnicianNotes());
+                response.setS3Key(result.getS3Key());
+                // submittedAt: ServiceChecklistResult không có createdAt, để null
+                response.setSubmittedAt(null);
+
+                // Generate pre-signed URL nếu có media
+                if (result.getS3Key() != null && !result.getS3Key().isEmpty()) {
+                    try {
+                        String presignedUrl = s3Service.generatePresignedUrl(result.getS3Key(), 60);
+                        response.setMediaUrl(presignedUrl);
+                        response.setMediaType(determineMediaType(result.getS3Key()));
+                    } catch (Exception e) {
+                        log.error("Error generating pre-signed URL for s3Key: {}", result.getS3Key(), e);
+                    }
+                }
+            }
+
+            responses.add(response);
+        }
+
+        log.info("Found {} checklist items for order {}, {} items with results",
+                responses.size(), serviceOrderId, resultsMap.size());
+
+        // Kiểm tra xem có checklist nào đã hoàn thành chưa
+        boolean isCompleted = checklists.stream().anyMatch(ServiceChecklist::getIsCompleted);
+
+        return ServiceOrderChecklistResponse.builder()
+                .isCompleted(isCompleted)
+                .items(responses)
+                .build();
     }
 }

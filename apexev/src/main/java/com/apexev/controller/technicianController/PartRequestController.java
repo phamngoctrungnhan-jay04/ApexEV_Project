@@ -13,7 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/parts")
@@ -73,9 +75,10 @@ public class PartRequestController {
 
     /**
      * Lấy yêu cầu theo service order
+     * CUSTOMER có thể xem để duyệt báo giá
      */
     @GetMapping("/requests/order/{serviceOrderId}")
-    @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'ADMIN', 'CUSTOMER')")
     public ResponseEntity<List<PartRequestResponse>> getPartRequestsByOrder(
             @PathVariable Long serviceOrderId,
             @AuthenticationPrincipal User user) {
@@ -134,6 +137,58 @@ public class PartRequestController {
             @AuthenticationPrincipal User technician) {
         log.info("Cancel part request: {}", requestId);
         PartRequestResponse response = partRequestService.cancelPartRequest(requestId, technician);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Gửi email báo giá cho customer (Advisor)
+     */
+    @PostMapping("/requests/send-quote/{serviceOrderId}")
+    @PreAuthorize("hasAnyRole('SERVICE_ADVISOR', 'ADMIN')")
+    public ResponseEntity<Map<String, String>> sendQuoteToCustomer(
+            @PathVariable Long serviceOrderId,
+            @AuthenticationPrincipal User advisor) {
+        log.info("Send quote email for order: {}", serviceOrderId);
+        partRequestService.sendQuoteToCustomer(serviceOrderId, advisor);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đã gửi báo giá qua email cho khách hàng");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Customer duyệt báo giá (QUOTED -> FULFILLED)
+     */
+    @PostMapping("/requests/approve-quote/{serviceOrderId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Map<String, String>> approveQuote(
+            @PathVariable Long serviceOrderId,
+            @AuthenticationPrincipal User customer) {
+        log.info("Customer approve quote for order: {}", serviceOrderId);
+        partRequestService.approveQuote(serviceOrderId, customer);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đã duyệt báo giá thành công");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Customer từ chối báo giá (QUOTED -> REJECTED)
+     */
+    @PostMapping("/requests/reject-quote/{serviceOrderId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Map<String, String>> rejectQuote(
+            @PathVariable Long serviceOrderId,
+            @RequestParam(required = false) String reason,
+            @AuthenticationPrincipal User customer) {
+        log.info("Customer reject quote for order: {}", serviceOrderId);
+        partRequestService.rejectQuote(serviceOrderId, reason, customer);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đã từ chối báo giá");
+
         return ResponseEntity.ok(response);
     }
 }

@@ -4,8 +4,12 @@ import com.apexev.dto.request.SubmitChecklistItemRequest;
 import com.apexev.dto.response.ChecklistItemResponse;
 import com.apexev.dto.response.ChecklistTemplateResponse;
 import com.apexev.dto.response.ServiceChecklistResponse;
+import com.apexev.dto.response.ServiceChecklistItemWithResultResponse;
+import com.apexev.dto.response.ServiceOrderChecklistResponse;
+import com.apexev.dto.response.ServiceOrderChecklistResponse;
 import com.apexev.entity.User;
 import com.apexev.service.serviceImpl.ChecklistService;
+import com.apexev.service.serviceImpl.ChecklistServiceExtension;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +27,7 @@ import java.util.List;
 public class ChecklistController {
 
     private final ChecklistService checklistService;
+    private final ChecklistServiceExtension checklistServiceExtension;
 
     /**
      * Lấy danh sách templates có sẵn
@@ -95,6 +100,25 @@ public class ChecklistController {
     }
 
     /**
+     * API MỚI: Lấy tất cả service_checklist_items của order kèm kết quả
+     * Endpoint: GET /api/checklist/service-order/{serviceOrderId}/items
+     * - Trả về tất cả checklist items của service trong order
+     * - Kèm theo kết quả đã submit (nếu technician đã làm)
+     * - Customer có thể xem ngay cả khi technician chưa submit
+     * - Bao gồm trạng thái isCompleted (đã hoàn tất kiểm tra chưa)
+     */
+    @GetMapping("/service-order/{serviceOrderId}/items")
+    @PreAuthorize("hasAnyRole('TECHNICIAN', 'SERVICE_ADVISOR', 'CUSTOMER', 'ADMIN')")
+    public ResponseEntity<ServiceOrderChecklistResponse> getServiceChecklistItemsForOrder(
+            @PathVariable Long serviceOrderId,
+            @AuthenticationPrincipal User user) {
+        log.info("Get service checklist items for serviceOrderId={}, userId={}", serviceOrderId, user.getUserId());
+        ServiceOrderChecklistResponse response = checklistService.getServiceChecklistItemsForOrder(serviceOrderId,
+                user);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Submit một hạng mục checklist với S3 key
      * Endpoint: POST /api/checklist/submit
      * 
@@ -156,5 +180,57 @@ public class ChecklistController {
         ChecklistItemResponse response = checklistService.getChecklistItem(resultId, user);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * API MỚI: Submit kết quả checklist item cho service order
+     * Endpoint: POST
+     * /api/checklist/service-order/{serviceOrderId}/items/{itemId}/result
+     * - Đơn giản hơn, không cần checklistId
+     * - Tự động tạo/cập nhật ServiceChecklistResult
+     * 
+     * @param serviceOrderId  ID của service order
+     * @param itemId          ID của service_checklist_item
+     * @param status          Status (PASSED, FAILED, NEEDS_ATTENTION,
+     *                        NEEDS_REPLACEMENT)
+     * @param technicianNotes Ghi chú
+     * @param s3Key           S3 key của ảnh
+     * @param technician      User (từ JWT)
+     * @return ChecklistItemResponse
+     */
+    @PostMapping("/service-order/{serviceOrderId}/items/{itemId}/result")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public ResponseEntity<ChecklistItemResponse> submitServiceOrderItemResult(
+            @PathVariable Long serviceOrderId,
+            @PathVariable Long itemId,
+            @RequestParam String status,
+            @RequestParam(required = false) String technicianNotes,
+            @RequestParam(required = false) String s3Key,
+            @AuthenticationPrincipal User technician) {
+        log.info("Submit service order item result: serviceOrderId={}, itemId={}, status={}, technicianId={}",
+                serviceOrderId, itemId, status, technician.getUserId());
+
+        ChecklistItemResponse response = checklistServiceExtension.submitServiceOrderItemResult(
+                serviceOrderId, itemId, status, technicianNotes, s3Key, technician);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Đánh dấu tất cả checklist của service order đã hoàn thành
+     * Được gọi khi kỹ thuật viên bấm "Hoàn tất kiểm tra"
+     * Endpoint: POST /api/checklist/service-order/{serviceOrderId}/complete
+     */
+    @PostMapping("/service-order/{serviceOrderId}/complete")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public ResponseEntity<Void> completeServiceOrderChecklists(
+            @PathVariable Long serviceOrderId,
+            @AuthenticationPrincipal User technician) {
+        log.info("Complete service order checklists: serviceOrderId={}, technicianId={}",
+                serviceOrderId, technician.getUserId());
+
+        checklistServiceExtension.completeServiceOrderChecklists(serviceOrderId);
+
+        return ResponseEntity.ok().build();
     }
 }

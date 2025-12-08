@@ -13,6 +13,9 @@ public interface TechnicianWorkService {
     // Lấy danh sách công việc được giao cho technician
     List<TechnicianWorkResponse> getMyAssignedWorks(User technician);
 
+    // Lấy lịch sử công việc đã hoàn thành
+    List<TechnicianWorkResponse> getMyCompletedWorks(User technician);
+
     // Xem chi tiết 1 công việc
     TechnicianWorkDetailResponse getWorkDetail(Long workId, User technician);
 

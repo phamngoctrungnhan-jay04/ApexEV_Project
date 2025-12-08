@@ -36,16 +36,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http,
-            JwtAuthenticationFilter jwtAuthenticationFilter
-    ) throws Exception {
+            JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/actuator/health", "/actuator/info", "/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/api/auth/**", "/api/ai/**", "/actuator/health", "/actuator/info",
+                                "/swagger-ui/**", "/v3/api-docs/**", "/error")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -55,25 +55,26 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
+
         // 1. Cho phép các nguồn (Origins)
-        // Dùng setAllowedOriginPatterns("*") thay vì setAllowedOrigins("*") 
+        // Dùng setAllowedOriginPatterns("*") thay vì setAllowedOrigins("*")
         // để có thể dùng chung với setAllowCredentials(true)
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:5173",      // Cho phép Localhost (Dev)
-            "https://*.amplifyapp.com",   // Cho phép tất cả các trang Amplify
-            "*"                           // Hoặc dùng "*" để chấp nhận tất cả (Dễ test nhất)
+                "http://localhost:5173", // Cho phép Localhost (Dev)
+                "https://*.amplifyapp.com", // Cho phép tất cả các trang Amplify
+                "*" // Hoặc dùng "*" để chấp nhận tất cả (Dễ test nhất)
         ));
 
         // 2. Cho phép các Methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        
+
         // 3. Cho phép các Headers
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-        
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept",
+                "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+
         // 4. Cho phép gửi Cookie/Token
         configuration.setAllowCredentials(true);
-        
+
         // 5. Expose Headers (để FE đọc được các header trả về nếu cần)
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
@@ -81,8 +82,10 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
     @Bean
-    public ModelMapper modelMapper() { // để spring boot biết khi gọi modelMapper ở service dưới dạng yêu cầu private final -> nếu ko có -> lỗi ko dùng được mapper
+    public ModelMapper modelMapper() { // để spring boot biết khi gọi modelMapper ở service dưới dạng yêu cầu private
+                                       // final -> nếu ko có -> lỗi ko dùng được mapper
         return new ModelMapper();
     }
 }

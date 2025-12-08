@@ -13,7 +13,8 @@ import org.hibernate.annotations.Nationalized;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ServiceChecklistResult { // chứa thông tin chi tiết của cuốn sách -> khi ktv ktra xong và điền thông tin vào form và bấm nộp -> sẽ lưu vào bảng này
+public class ServiceChecklistResult { // chứa thông tin chi tiết của cuốn sách -> khi ktv ktra xong và điền thông tin
+                                      // vào form và bấm nộp -> sẽ lưu vào bảng này
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "result_id")
@@ -36,7 +37,13 @@ public class ServiceChecklistResult { // chứa thông tin chi tiết của cu�
     @JoinColumn(name = "checklist_id", nullable = false)
     private ServiceChecklist serviceChecklist;
 
+    // Link tới ServiceChecklistItem gốc (item trong danh sách service)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_item_id", nullable = false)
-    private ChecklistTemplateItem templateItem; // Hạng mục MẪU được kiểm tra
+    @JoinColumn(name = "service_checklist_item_id", nullable = false)
+    private ServiceChecklistItem serviceChecklistItem;
+
+    // Link tới ChecklistTemplateItem (nếu có template)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_item_id", nullable = true) // Nullable vì không phải service nào cũng có template
+    private ChecklistTemplateItem templateItem;
 }

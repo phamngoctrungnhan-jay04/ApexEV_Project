@@ -40,8 +40,8 @@ public class SNSEmailService {
     /**
      * Gửi email xác nhận đặt lịch hẹn
      */
-    public void sendAppointmentConfirmationEmail(String email, String fullName, String appointmentDate, 
-                                                  String vehicleInfo, String serviceType) {
+    public void sendAppointmentConfirmationEmail(String email, String fullName, String appointmentDate,
+            String vehicleInfo, String serviceType) {
         Map<String, Object> emailData = new HashMap<>();
         emailData.put("type", "APPOINTMENT_CONFIRMATION");
         emailData.put("email", email);
@@ -57,8 +57,8 @@ public class SNSEmailService {
     /**
      * Gửi email nhắc nhở cuộc hẹn (24 giờ trước)
      */
-    public void sendAppointmentReminderEmail(String email, String fullName, String appointmentDate, 
-                                             String appointmentTime, String vehicleInfo) {
+    public void sendAppointmentReminderEmail(String email, String fullName, String appointmentDate,
+            String appointmentTime, String vehicleInfo) {
         Map<String, Object> emailData = new HashMap<>();
         emailData.put("type", "APPOINTMENT_REMINDER");
         emailData.put("email", email);
@@ -74,8 +74,8 @@ public class SNSEmailService {
     /**
      * Gửi email xác nhận thanh toán
      */
-    public void sendPaymentConfirmationEmail(String email, String fullName, String invoiceNumber, 
-                                             Double amount, String paymentDate) {
+    public void sendPaymentConfirmationEmail(String email, String fullName, String invoiceNumber,
+            Double amount, String paymentDate) {
         Map<String, Object> emailData = new HashMap<>();
         emailData.put("type", "PAYMENT_CONFIRMATION");
         emailData.put("email", email);
@@ -92,7 +92,7 @@ public class SNSEmailService {
      * Gửi email cảm ơn và nhắc nhở lấy xe sau khi thanh toán
      */
     public void sendPaymentThankYouAndPickupReminderEmail(String email, String fullName, String invoiceNumber,
-                                                          String vehicleInfo, String serviceDetails) {
+            String vehicleInfo, String serviceDetails) {
         Map<String, Object> emailData = new HashMap<>();
         emailData.put("type", "PAYMENT_THANK_YOU_PICKUP_REMINDER");
         emailData.put("email", email);
@@ -109,7 +109,7 @@ public class SNSEmailService {
      * Gửi email nhắc nhở đặt lịch lấy xe sau khi bảo dưỡng hoàn thành
      */
     public void sendPickupScheduleReminderEmail(String email, String fullName, String vehicleInfo,
-                                                String appointmentScheduleLink) {
+            String appointmentScheduleLink) {
         Map<String, Object> emailData = new HashMap<>();
         emailData.put("type", "PICKUP_SCHEDULE_REMINDER");
         emailData.put("email", email);
@@ -117,6 +117,24 @@ public class SNSEmailService {
         emailData.put("vehicleInfo", vehicleInfo);
         emailData.put("appointmentScheduleLink", appointmentScheduleLink);
         emailData.put("subject", "Nhắc nhở: Đặt lịch lấy xe tại ApexEV");
+
+        publishEmailEvent(emailData);
+    }
+
+    /**
+     * Gửi email báo giá phụ tùng cho customer
+     */
+    public void sendPartQuoteEmail(String email, String fullName, Long orderId,
+            String vehicleInfo, String partsDetails, Double totalAmount) {
+        Map<String, Object> emailData = new HashMap<>();
+        emailData.put("type", "PART_QUOTE");
+        emailData.put("email", email);
+        emailData.put("fullName", fullName);
+        emailData.put("orderId", orderId);
+        emailData.put("vehicleInfo", vehicleInfo);
+        emailData.put("partsDetails", partsDetails);
+        emailData.put("totalAmount", totalAmount);
+        emailData.put("subject", "Báo giá phụ tùng thay thế - ApexEV");
 
         publishEmailEvent(emailData);
     }
@@ -135,7 +153,7 @@ public class SNSEmailService {
 
             PublishResult result = snsClient.publish(publishRequest);
 
-            log.info("Email event published to SNS: messageId={}, type={}", 
+            log.info("Email event published to SNS: messageId={}, type={}",
                     result.getMessageId(), emailData.get("type"));
 
         } catch (Exception e) {

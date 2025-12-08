@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,19 +45,46 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
     private String appointmentScheduleLink;
 
     @Override
+    @Transactional(readOnly = true)
     public List<TechnicianWorkResponse> getMyAssignedWorks(User technician) {
         // Kiểm tra role
         if (technician.getRole() != UserRole.TECHNICIAN) {
             throw new AccessDeniedException("Chỉ kỹ thuật viên mới có thể xem danh sách công việc.");
         }
 
-        // Lấy danh sách công việc (loại trừ COMPLETED và CANCELLED)
-        List<ServiceOrder> works = serviceOrderRepository
-                .findByTechnicianUserIdAndStatusNot(technician.getUserId(), OrderStatus.COMPLETED);
+        // Lấy danh sách công việc (loại trừ COMPLETED, CANCELLED và READY_FOR_INVOICE)
+        List<OrderStatus> excludedStatuses = Arrays.asList(
+                OrderStatus.COMPLETED,
+                OrderStatus.CANCELLED,
+                OrderStatus.READY_FOR_INVOICE);
 
-        // Lọc thêm để loại bỏ CANCELLED
+        List<ServiceOrder> works = serviceOrderRepository
+                .findByTechnicianUserIdAndStatusNotIn(technician.getUserId(), excludedStatuses);
+
         return works.stream()
-                .filter(work -> work.getStatus() != OrderStatus.CANCELLED)
+                .map(this::convertToSummaryDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TechnicianWorkResponse> getMyCompletedWorks(User technician) {
+        // Kiểm tra role
+        if (technician.getRole() != UserRole.TECHNICIAN) {
+            throw new AccessDeniedException("Chỉ kỹ thuật viên mới có thể xem lịch sử công việc.");
+        }
+
+        // Lấy danh sách công việc đã hoàn thành (bao gồm COMPLETED, CANCELLED và
+        // READY_FOR_INVOICE)
+        List<OrderStatus> completedStatuses = Arrays.asList(
+                OrderStatus.COMPLETED,
+                OrderStatus.CANCELLED,
+                OrderStatus.READY_FOR_INVOICE);
+
+        List<ServiceOrder> completedWorks = serviceOrderRepository
+                .findByTechnicianUserIdAndStatusIn(technician.getUserId(), completedStatuses);
+
+        return completedWorks.stream()
                 .map(this::convertToSummaryDto)
                 .collect(Collectors.toList());
     }
@@ -196,13 +224,17 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
         }
 
         // Thông tin xe
-        dto.setVehicleLicensePlate(work.getVehicle().getLicensePlate());
-        dto.setVehicleModel(work.getVehicle().getModel());
-        dto.setVehicleBrand(work.getVehicle().getBrand());
+        if (work.getVehicle() != null) {
+            dto.setVehicleLicensePlate(work.getVehicle().getLicensePlate());
+            dto.setVehicleModel(work.getVehicle().getModel());
+            dto.setVehicleBrand(work.getVehicle().getBrand());
+        }
 
         // Thông tin khách hàng
-        dto.setCustomerName(work.getCustomer().getFullName());
-        dto.setCustomerPhone(work.getCustomer().getPhone());
+        if (work.getCustomer() != null) {
+            dto.setCustomerName(work.getCustomer().getFullName());
+            dto.setCustomerPhone(work.getCustomer().getPhone());
+        }
 
         // Mô tả
         dto.setCustomerDescription(work.getCustomerDescription());
@@ -303,11 +335,16 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
                     .map(tech -> {
                         long activeWorkCount = 0;
                         try {
+                            // Loại trừ COMPLETED, CANCELLED và READY_FOR_INVOICE
+                            List<OrderStatus> excludedStatuses = Arrays.asList(
+                                    OrderStatus.COMPLETED,
+                                    OrderStatus.CANCELLED,
+                                    OrderStatus.READY_FOR_INVOICE);
+
                             List<ServiceOrder> orders = serviceOrderRepository
-                                    .findByTechnicianUserIdAndStatusNot(tech.getUserId(), OrderStatus.COMPLETED);
-                            activeWorkCount = orders.stream()
-                                    .filter(order -> order.getStatus() != OrderStatus.CANCELLED)
-                                    .count();
+                                    .findByTechnicianUserIdAndStatusNotIn(tech.getUserId(), excludedStatuses);
+                            activeWorkCount = orders.size();
+
                             System.out.println("[DEBUG] Tech " + tech.getFullName() + " có " + activeWorkCount
                                     + " công việc đang làm");
                         } catch (Exception e) {
