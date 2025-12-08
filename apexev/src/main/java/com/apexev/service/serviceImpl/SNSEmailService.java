@@ -24,14 +24,14 @@ public class SNSEmailService {
     private String emailTopicArn;
 
     /**
-     * Gửi email xác nhận đăng ký
+     * Gửi email xác nhận đăng ký với OTP
      */
-    public void sendRegistrationConfirmationEmail(String email, String fullName, String confirmationLink) {
+    public void sendRegistrationConfirmationEmail(String email, String fullName, String otp) {
         Map<String, Object> emailData = new HashMap<>();
         emailData.put("type", "REGISTRATION_CONFIRMATION");
         emailData.put("email", email);
         emailData.put("fullName", fullName);
-        emailData.put("confirmationLink", confirmationLink);
+        emailData.put("otp", otp);
         emailData.put("subject", "Xác nhận đăng ký tài khoản ApexEV");
 
         publishEmailEvent(emailData);

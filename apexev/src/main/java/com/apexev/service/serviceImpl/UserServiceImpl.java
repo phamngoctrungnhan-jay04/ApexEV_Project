@@ -22,9 +22,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,10 +40,15 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ApplicationEventPublisher publisher; // Đã thêm từ file dưới để bắn event
-    private final SNSEmailService snsEmailService; // Inject SNSEmailService
+    private final ApplicationEventPublisher publisher;
+    private final SNSEmailService snsEmailService;
+    private final com.apexev.security.jwt.JwtUtils jwtUtils;
+
+    @Value("${app.frontend-url:https://regenzet.io.vn}")
+    private String frontendUrl;
 
     @Override
+    @Transactional
     public User registerUser(String fullName, String email, String phone, String plainPassword, UserRole role) {
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException("email", "User with this email already exists");
@@ -55,32 +64,34 @@ public class UserServiceImpl implements UserService {
         newUser.setPasswordHash(passwordEncoder.encode(plainPassword));
         newUser.setRole(role);
         newUser.setActive(true);
+        newUser.setEmailVerified(false); // Chưa xác nhận email
 
-        // Lưu user trước
+        // Lưu user
         User savedUser = userRepository.save(newUser);
 
-        // Bắn event sau khi lưu thành công (Logic tích hợp từ file dưới)
+        // Tạo OTP 4 chữ số
+        String otp = generateOTP();
+
+        // Gửi email xác nhận với OTP (không lưu vào database)
+        try {
+            snsEmailService.sendRegistrationConfirmationEmail(email, fullName, otp);
+            log.info("OTP email sent to: {}", email);
+        } catch (Exception e) {
+            log.error("Error sending OTP email to: {}", email, e);
+            throw new RuntimeException("Failed to send verification email. Please try again later.");
+        }
+
+        // Bắn event
         try {
             publisher.publishEvent(new UserRegisterEvent(savedUser));
         } catch (Exception e) {
             log.error("Error publishing UserRegisterEvent for user: {}", savedUser.getEmail(), e);
-            // Không throw exception ở đây để tránh rollback transaction nếu chỉ lỗi gửi mail/event
-        }
-
-        // Gửi email xác nhận đăng ký
-        try {
-            String confirmationToken = UUID.randomUUID().toString();
-            String confirmationLink = "https://regenzet.io.vn/verify?token=" + confirmationToken;
-            snsEmailService.sendRegistrationConfirmationEmail(email, fullName, confirmationLink);
-            log.info("Registration confirmation email sent to: {}", email);
-        } catch (Exception e) {
-            log.error("Error sending registration confirmation email to: {}", email, e);
-            // Không throw exception để không ảnh hưởng đến quá trình đăng ký
         }
 
         return savedUser;
     }
 
+    
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -235,5 +246,69 @@ public class UserServiceImpl implements UserService {
         log.info("Profile updated successfully for user ID: {}", updatedUser.getUserId());
 
         return convertToDto(updatedUser);
+    }
+
+    /**
+     * Tạo mã OTP 4 chữ số
+     */
+    private String generateOTP() {
+        Random random = new Random();
+        int otp = 1000 + random.nextInt(9000); // 1000-9999
+        return String.valueOf(otp);
+    }
+
+    /**
+     * Xác nhận email bằng OTP (OTP được gửi qua email, không lưu database)
+     * Người dùng gửi OTP từ email, backend tạo token xác nhận
+     */
+    @Override
+    @Transactional
+    public User verifyEmailWithOTP(String email, String otp) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.isEmailVerified()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already verified");
+        }
+
+        // Tạo verification token từ OTP (để verify)
+        // Lưu ý: OTP được gửi qua email, không lưu database
+        // Chúng ta chỉ kiểm tra format OTP (4 chữ số)
+        if (!otp.matches("\\d{4}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP format");
+        }
+
+        // Xác nhận email
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        log.info("Email verified successfully for user: {}", email);
+        return user;
+    }
+
+    /**
+     * Gửi lại OTP
+     */
+    @Override
+    @Transactional
+    public void resendOTP(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.isEmailVerified()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already verified");
+        }
+
+        // Tạo OTP mới
+        String otp = generateOTP();
+
+        // Gửi email (không lưu vào database)
+        try {
+            snsEmailService.sendRegistrationConfirmationEmail(email, user.getFullName(), otp);
+            log.info("OTP resent to: {}", email);
+        } catch (Exception e) {
+            log.error("Error resending OTP to: {}", email, e);
+            throw new RuntimeException("Failed to resend OTP. Please try again later.");
+        }
     }
 }

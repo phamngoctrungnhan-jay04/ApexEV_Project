@@ -112,4 +112,46 @@ public class JwtUtils {
         }
         return false;
     }
+
+    /**
+     * Tạo token xác nhận email (hết hạn sau 10 phút)
+     */
+    public String generateEmailVerificationToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + 600000)) // 10 phút
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
+     * Lấy email từ verification token
+     */
+    public String getEmailFromVerificationToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    /**
+     * Validate email verification token
+     */
+    public boolean validateEmailVerificationToken(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            logger.error("Email verification token is expired: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Invalid email verification token: {}", e.getMessage());
+        }
+        return false;
+    }
 }

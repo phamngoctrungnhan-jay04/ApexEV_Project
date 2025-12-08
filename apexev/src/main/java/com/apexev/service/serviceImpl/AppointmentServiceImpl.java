@@ -32,6 +32,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
+
     private final AppointmentRepository appointmentRepository;
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository; // gắn cố vấn dịch vụ
@@ -103,35 +104,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 savedAppointment.getAppointmentTime().toString());
         notificationService.sendNotification(customer, message, null);
 
-        // 9. Gửi email xác nhận đặt lịch hẹn
-        try {
-            String appointmentDate = savedAppointment.getAppointmentTime()
-                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-            String vehicleInfo = vehicle.getYearManufactured() + " " + vehicle.getBrand() + " " + vehicle.getModel();
-            snsEmailService.sendAppointmentConfirmationEmail(
-                    customer.getEmail(),
-                    customer.getFullName(),
-                    appointmentDate,
-                    vehicleInfo,
-                    savedAppointment.getRequestedService() != null ? savedAppointment.getRequestedService() : "Chưa xác định"
-            );
-            System.out.println("[DEBUG] Appointment confirmation email sent to: " + customer.getEmail());
-        } catch (Exception e) {
-            System.out.println("[ERROR] Error sending appointment confirmation email: " + e.getMessage());
-        }
+        // Email sẽ được gửi sau khi cố vấn xác nhận (xem method confirmAppointment)
 
         return modelMapper.map(savedAppointment, AppointmentResponse.class);
-        // giải thích
-        /*
-         * thay vì chuyển đổi thủ công bằng convertDTO thông thường
-         * -> hãy để mapper làm nó -> model Mapper là thư viện hỗ trợ việc convert
-         * => thêm dependence vào
-         * <dependency>
-         * <groupId>org.modelmapper</groupId>
-         * <artifactId>modelmapper</artifactId>
-         * <version>3.1.0</version>
-         * </dependency>
-         */
     }
 
     @Override
@@ -503,6 +478,25 @@ public class AppointmentServiceImpl implements AppointmentService {
             System.out.println("[ASSIGN] Đã gửi notification cho customer: " + appointment.getCustomer().getUserId());
         } catch (Exception e) {
             System.out.println("[ERROR] Lỗi gửi notification cho customer: " + e.getMessage());
+        }
+
+        // 9.1. GỬI EMAIL XÁC NHẬN (ĐÃ THÊM LOGIC GỬI EMAIL TẠI ĐÂY)
+        try {
+            String appointmentDate = savedAppointment.getAppointmentTime()
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+            String vehicleInfo = vehicle.getYearManufactured() + " " + vehicle.getBrand() + " " + vehicle.getModel();
+
+            snsEmailService.sendAppointmentConfirmationEmail(
+                    customer.getEmail(),
+                    customer.getFullName(),
+                    appointmentDate,
+                    vehicleInfo,
+                    savedAppointment.getRequestedService() != null ? savedAppointment.getRequestedService() : "Chưa xác định"
+            );
+            System.out.println("[ASSIGN-DEBUG] Appointment confirmation email sent to: " + customer.getEmail());
+        } catch (Exception e) {
+            System.out.println("[ERROR] Error sending appointment confirmation email in assignTechnician: " + e.getMessage());
         }
 
         // 10. Log
