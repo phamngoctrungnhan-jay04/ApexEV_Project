@@ -104,8 +104,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 savedAppointment.getAppointmentTime().toString());
         notificationService.sendNotification(customer, message, null);
 
-        // Email sẽ được gửi sau khi cố vấn xác nhận (xem method confirmAppointment)
-
         return modelMapper.map(savedAppointment, AppointmentResponse.class);
     }
 
@@ -189,7 +187,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 loggedInUser.getFullName());
         notificationService.sendNotification(appointment.getCustomer(), message, null);
 
-        // 7. Gửi email xác nhận lịch hẹn đã được advisor xác nhận
+        // 7. Gửi email xác nhận lịch hẹn (ĐÃ GIỮ LẠI LOGIC NÀY)
         try {
             String appointmentDate = savedAppointment.getAppointmentTime()
                     .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
@@ -480,24 +478,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             System.out.println("[ERROR] Lỗi gửi notification cho customer: " + e.getMessage());
         }
 
-        // 9.1. GỬI EMAIL XÁC NHẬN (ĐÃ THÊM LOGIC GỬI EMAIL TẠI ĐÂY)
-        try {
-            String appointmentDate = savedAppointment.getAppointmentTime()
-                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-
-            String vehicleInfo = vehicle.getYearManufactured() + " " + vehicle.getBrand() + " " + vehicle.getModel();
-
-            snsEmailService.sendAppointmentConfirmationEmail(
-                    customer.getEmail(),
-                    customer.getFullName(),
-                    appointmentDate,
-                    vehicleInfo,
-                    savedAppointment.getRequestedService() != null ? savedAppointment.getRequestedService() : "Chưa xác định"
-            );
-            System.out.println("[ASSIGN-DEBUG] Appointment confirmation email sent to: " + customer.getEmail());
-        } catch (Exception e) {
-            System.out.println("[ERROR] Error sending appointment confirmation email in assignTechnician: " + e.getMessage());
-        }
+        // ĐÃ XÓA LOGIC GỬI EMAIL TẠI ĐÂY (TRẢ VỀ BÌNH THƯỜNG)
 
         // 10. Log
         System.out.println("[ASSIGN] ServiceOrder #" + savedServiceOrder.getId() + " created for Technician "
