@@ -276,10 +276,10 @@ const JobList = () => {
 
     // TỰ ĐỘNG LƯU kết quả lên server
     try {
-      const imageUrl = currentResult?.images?.[0]?.url || null; // Lấy ảnh đầu tiên (nếu có)
+      const s3Key = currentResult?.images?.[0]?.s3Key || null; // Lấy s3Key của ảnh đầu tiên (nếu có)
       
       console.log('📝 Saving item:', { itemId, orderId: selectedOrder.orderId, currentResult });
-      console.log('📝 Notes to send:', currentResult?.notes || '');
+      console.log('📝 S3 Key to send:', s3Key);
       
       // Gọi API lưu kết quả với serviceOrderId và itemId
       await checklistService.saveChecklistItemResult(
@@ -287,7 +287,7 @@ const JobList = () => {
         itemId, // service_checklist_item id
         status,
         currentResult?.notes || '',
-        imageUrl
+        s3Key
       );
       
       // Hiển thị toast thông báo
@@ -322,7 +322,7 @@ const JobList = () => {
     // Auto-save notes sau 1 giây (debounced)
     const currentResult = serviceChecklists[serviceId]?.results[itemId] || {};
     const currentStatus = currentResult.status || 'PENDING';
-    const imageUrl = currentResult?.images?.[0]?.url || null;
+    const s3Key = currentResult?.images?.[0]?.s3Key || null;
     
     // Clear timeout cũ nếu có
     if (window.notesDebounceTimeout) {
@@ -332,13 +332,13 @@ const JobList = () => {
     // Set timeout mới để lưu sau 1.5 giây
     window.notesDebounceTimeout = setTimeout(async () => {
       try {
-        console.log('💾 Auto-saving notes:', { itemId, notes });
+        console.log('💾 Auto-saving notes:', { itemId, notes, s3Key });
         await checklistService.saveChecklistItemResult(
           selectedOrder.orderId,
           itemId,
           currentStatus,
           notes,
-          imageUrl
+          s3Key
         );
         console.log('✅ Notes saved!');
       } catch (err) {
