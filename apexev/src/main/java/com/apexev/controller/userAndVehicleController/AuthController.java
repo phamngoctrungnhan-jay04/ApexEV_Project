@@ -64,7 +64,27 @@ public class AuthController {
                 request.getPassword(),
                 role
         );
-        return ResponseEntity.ok(Map.of("message", "Đăng ký thành công!"));
+        return ResponseEntity.ok(Map.of("message", "Đăng ký thành công! Vui lòng kiểm tra email để nhập mã OTP."));
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody com.apexev.dto.request.userAndVehicleRequest.VerifyEmailRequest request) {
+        try {
+            userService.verifyEmailWithOTP(request.getEmail(), request.getOtp());
+            return ResponseEntity.ok(Map.of("message", "Email verified successfully! You can now login."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOTP(@Valid @RequestBody com.apexev.dto.request.userAndVehicleRequest.ResendOTPRequest request) {
+        try {
+            userService.resendOTP(request.getEmail());
+            return ResponseEntity.ok(Map.of("message", "OTP sent successfully!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/login")
@@ -76,6 +96,16 @@ public class AuthController {
                             loginRequest.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+            // Kiểm tra email verified
+            com.apexev.entity.User user = userService.getUserByEmail(userDetails.getEmail())
+                    .orElseGet(() -> userService.getUserByPhone(userDetails.getPhone()).orElse(null));
+
+            if (user != null && !user.isEmailVerified()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "Email not verified. Please verify your email first."));
+            }
+
             String accessToken = jwtUtils.generateJwtToken(authentication);
             String refreshToken = jwtUtils.generateRefreshToken(authentication);
 

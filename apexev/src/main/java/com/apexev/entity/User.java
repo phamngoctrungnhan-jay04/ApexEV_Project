@@ -62,6 +62,10 @@ public class User {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
+    // Email verification fields
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
+
     // --- Relationships (THÊM @JsonIgnore VÀO TẤT CẢ) ---
 
     @JsonIgnore // <--- Thêm vào đây

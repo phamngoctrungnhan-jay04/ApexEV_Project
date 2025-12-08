@@ -26,4 +26,10 @@ public interface UserService {
 
     // Cập nhật thông tin hồ sơ của người dùng đang đăng nhập.
     UserResponse updateMyProfile(User loggedInUser, UpdateProfileRequest request);
+
+    // Xác nhận email bằng OTP
+    User verifyEmailWithOTP(String email, String otp);
+
+    // Gửi lại OTP
+    void resendOTP(String email);
 }
