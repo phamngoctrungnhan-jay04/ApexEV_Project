@@ -317,16 +317,17 @@ const RegisterPageModern = () => {
                 </div>
 
                 {/* Terms Agreement */}
-                <div className="checkbox-wrapper">
+                <div className="checkbox-wrapper" style={{display: 'flex', alignItems: 'flex-start', gap: '12px', border: '1px solid #e5e7eb', padding: '12px', borderRadius: '8px', marginBottom: '24px'}}>
                   <input
                     type="checkbox"
                     id="agreeTerms"
                     checked={agreeTerms}
                     onChange={(e) => setAgreeTerms(e.target.checked)}
+                    style={{width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', cursor: 'pointer', accentColor: '#10b981', flexShrink: 0}}
                   />
-                  <label htmlFor="agreeTerms">
+                  <label htmlFor="agreeTerms" style={{fontSize: '14px', color: '#6b7280', margin: 0, cursor: 'pointer', flex: 1}}>
                     Tôi đồng ý với{' '}
-                    <a href="#" onClick={(e) => e.preventDefault()}>
+                    <a href="#" onClick={(e) => e.preventDefault()} style={{color: '#10b981', textDecoration: 'none', fontWeight: 500}}>
                       Điều khoản dịch vụ
                     </a>
                   </label>
