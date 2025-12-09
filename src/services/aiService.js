@@ -4,8 +4,10 @@
  * Service quản lý giao tiếp với AWS AI (Amazon Bedrock via Lambda)
  */
 
+// QUAN TRỌNG: Hãy dán Invoke URL bạn copy từ API Gateway vào đây
+// Ví dụ: https://xyz.execute-api.ap-southeast-1.amazonaws.com/dev/chat
 const AWS_AI_ENDPOINT = import.meta.env.VITE_AWS_AI_ENDPOINT || 
-  'https://zwzx1oerz7.execute-api.us-east-1.amazonaws.com/default/Chat';
+  'https://4jxevt0ia6.execute-api.ap-southeast-1.amazonaws.com/dev/chat';
 
 /**
  * Gửi tin nhắn đến AWS AI Assistant
@@ -17,30 +19,33 @@ export const chatWithAI = async (userMessage, sessionId) => {
   try {
     const response = await fetch(AWS_AI_ENDPOINT, {
       method: 'POST',
-      mode: 'cors',
+      mode: 'cors', // Đảm bảo API Gateway đã bật CORS
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
+      // Chỉnh sửa để khớp với Lambda
       body: JSON.stringify({
-        inputText: userMessage,
-        sessionId: sessionId
+        prompt: userMessage,   // Lambda đang đọc body.get('prompt')
+        sessionId: sessionId   // Gửi session ID lên để Agent nhớ ngữ cảnh
       })
     });
 
     if (!response.ok) {
-      throw new Error(`AWS API responded with status ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(AWS API Error: ${response.status} - ${errorData.error || response.statusText});
     }
 
     const data = await response.json();
     
-    // AWS Bedrock trả về response trong key "response"
-    const aiMessage = data.response || data.message || 'Xin lỗi, tôi không thể trả lời câu hỏi này.';
+    // AWS Lambda của bạn trả về key là "result"
+    // (Xem dòng: 'body': json.dumps({'result': completion}) trong Lambda)
+    const aiMessage = data.result || 'Xin lỗi, AI không phản hồi đúng định dạng.';
     
     return aiMessage;
   } catch (error) {
     console.error('❌ [AI Service] Error:', error);
-    throw new Error('Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau.');
+    throw error; // Ném lỗi ra để Component xử lý (hiển thị thông báo)
   }
 };
 
