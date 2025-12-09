@@ -149,11 +149,12 @@ const QuoteApproval = () => {
 
     try {
       setProcessing(true);
-      await rejectQuote(orderId, rejectReason);
-      showToast('warning', 'Đã từ chối báo giá');
+      const response = await rejectQuote(orderId, rejectReason);
+      const successMsg = response?.message || 'Đã từ chối báo giá. Cố vấn sẽ liên hệ với bạn để tư vấn phương án khác.';
+      showToast('warning', successMsg);
       setTimeout(() => {
         navigate(`/customer/order-tracking/${orderId}`);
-      }, 1500);
+      }, 2500);
     } catch (err) {
       console.error('Error rejecting quote:', err);
       const errorMsg = err.response?.data?.message || err.response?.data || 'Không thể từ chối báo giá. Vui lòng thử lại.';

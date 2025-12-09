@@ -317,15 +317,25 @@ const RegisterPageModern = () => {
                 </div>
 
                 {/* Terms Agreement */}
-                <div className="checkbox-wrapper" style={{display: 'flex', alignItems: 'flex-start', gap: '12px', border: '1px solid #e5e7eb', padding: '12px', borderRadius: '8px', marginBottom: '24px'}}>
-                  <input
-                    type="checkbox"
-                    id="agreeTerms"
-                    checked={agreeTerms}
-                    onChange={(e) => setAgreeTerms(e.target.checked)}
-                    style={{width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', cursor: 'pointer', accentColor: '#10b981', flexShrink: 0}}
-                  />
-                  <label htmlFor="agreeTerms" style={{fontSize: '14px', color: '#6b7280', margin: 0, cursor: 'pointer', flex: 1}}>
+                <div className="checkbox-wrapper" style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
+                  <div style={{position: 'relative', width: '20px', height: '20px', flexShrink: 0}}>
+                    <input
+                      type="checkbox"
+                      id="agreeTerms"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        cursor: 'pointer',
+                        margin: 0,
+                        opacity: 1,
+                        position: 'relative',
+                        zIndex: 2
+                      }}
+                    />
+                  </div>
+                  <label htmlFor="agreeTerms" style={{fontSize: '14px', color: '#6b7280', margin: 0, cursor: 'pointer', flex: 1, lineHeight: '20px', userSelect: 'none'}}>
                     Tôi đồng ý với{' '}
                     <a href="#" onClick={(e) => e.preventDefault()} style={{color: '#10b981', textDecoration: 'none', fontWeight: 500}}>
                       Điều khoản dịch vụ

@@ -235,6 +235,40 @@ class AppointmentService {
     }
   }
 
+  // Get my appointments (Service Advisor)
+  async getMyAdvisorAppointments() {
+    try {
+      console.log('Getting my advisor appointments...');
+      
+      const response = await fetch(`${API_BASE_URL}/my-appointment-advisor`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.getAuthToken()}`,
+        },
+      });
+
+      console.log('Get my advisor appointments response:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Get my advisor appointments failed:', errorData);
+        
+        if (response.status === 401) {
+          throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
+        
+        throw new Error(errorData.message || 'Không thể lấy danh sách lịch hẹn.');
+      }
+
+      const data = await response.json();
+      console.log('✅ My advisor appointments:', data);
+      return data;
+    } catch (error) {
+      console.error('Get my advisor appointments error:', error);
+      throw error;
+    }
+  }
+
   // Get appointments for customer by ID (Service Advisor)
   async getAppointmentsForCustomer(customerId) {
     try {

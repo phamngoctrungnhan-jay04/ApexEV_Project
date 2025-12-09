@@ -84,6 +84,23 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
+/* Styling đặc biệt cho bước "Từ chối báo giá" */
+.timeline-step.rejected .timeline-icon {
+  background: linear-gradient(135deg, #FFA726 0%, #FB8C00 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(255, 167, 38, 0.4);
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    box-shadow: 0 6px 20px rgba(255, 167, 38, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 24px rgba(255, 167, 38, 0.6);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     box-shadow: 0 6px 20px rgba(51, 138, 243, 0.4);
@@ -95,7 +112,11 @@
 
 .timeline-content {
   flex: 1;
-  padding-top: 8px;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 56px;
   position: relative;
 }
 
@@ -143,6 +164,12 @@
 
 .timeline-step.completed .timeline-content h5 {
   color: #34c759;
+}
+
+/* Title styling cho bước "Từ chối báo giá" */
+.timeline-step.rejected .timeline-content h5 {
+  color: #FB8C00;
+  font-weight: 700;
 }
 
 .timeline-content p {
@@ -760,6 +787,15 @@
   color: white;
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
   animation: pulse-warning 2s infinite;
+}
+
+/* Badge Status Rejected (Từ chối báo giá) */
+.badge-status.rejected {
+  background: linear-gradient(135deg, #FFA726 0%, #FB8C00 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 167, 38, 0.35);
+  animation: pulse-warning 2s infinite;
+  font-weight: 600;
 }
 
 @keyframes pulse-warning {

@@ -352,6 +352,14 @@ const MaintenanceChecklist = () => {
           </Alert>
         )}
 
+        {/* Warning if vehicle not received yet */}
+        {serviceOrder && serviceOrder.status !== 'RECEPTION' && (
+          <Alert variant="warning" className="mb-4">
+            <FiAlertCircle className="me-2" />
+            <strong>Chưa thể thao tác!</strong> Vui lòng quay lại trang công việc và bấm nút "Tiếp nhận xe" trước khi thực hiện checklist.
+          </Alert>
+        )}
+
         {/* Header */}
         <div className="page-header">
           <div>
@@ -490,7 +498,8 @@ const MaintenanceChecklist = () => {
                                 variant={result?.status === 'PASSED' ? 'success' : 'outline-success'}
                                 onClick={() => handleStatusChange(item.id, 'PASSED')}
                                 className="status-btn"
-                                disabled={submitting}
+                                disabled={submitting || serviceOrder?.status !== 'RECEPTION'}
+                                title={serviceOrder?.status !== 'RECEPTION' ? 'Vui lòng bấm "Tiếp nhận xe" trước' : ''}
                               >
                                 <FiCheckCircle /> Đạt
                               </Button>
@@ -499,7 +508,8 @@ const MaintenanceChecklist = () => {
                                 variant={result?.status === 'FAILED' ? 'danger' : 'outline-danger'}
                                 onClick={() => handleStatusChange(item.id, 'FAILED')}
                                 className="status-btn"
-                                disabled={submitting}
+                                disabled={submitting || serviceOrder?.status !== 'RECEPTION'}
+                                title={serviceOrder?.status !== 'RECEPTION' ? 'Vui lòng bấm "Tiếp nhận xe" trước' : ''}
                               >
                                 <FiXCircle /> Lỗi
                               </Button>
@@ -508,7 +518,8 @@ const MaintenanceChecklist = () => {
                                 variant={result?.status === 'NEEDS_ATTENTION' ? 'warning' : 'outline-warning'}
                                 onClick={() => handleStatusChange(item.id, 'NEEDS_ATTENTION')}
                                 className="status-btn"
-                                disabled={submitting}
+                                disabled={submitting || serviceOrder?.status !== 'RECEPTION'}
+                                title={serviceOrder?.status !== 'RECEPTION' ? 'Vui lòng bấm "Tiếp nhận xe" trước' : ''}
                               >
                                 <FiAlertTriangle /> Chú ý
                               </Button>
@@ -517,7 +528,8 @@ const MaintenanceChecklist = () => {
                                 variant={result?.status === 'NEEDS_REPLACEMENT' ? 'info' : 'outline-info'}
                                 onClick={() => handleStatusChange(item.id, 'NEEDS_REPLACEMENT')}
                                 className="status-btn"
-                                disabled={submitting}
+                                disabled={submitting || serviceOrder?.status !== 'RECEPTION'}
+                                title={serviceOrder?.status !== 'RECEPTION' ? 'Vui lòng bấm "Tiếp nhận xe" trước' : ''}
                               >
                                 <FiAlertCircle /> Thay thế
                               </Button>
@@ -534,18 +546,19 @@ const MaintenanceChecklist = () => {
                             <Form.Control
                               as="textarea"
                               rows={2}
-                              placeholder="Ghi chú kỹ thuật (mô tả vấn đề, đề xuất sửa chữa...)"
+                              placeholder={serviceOrder?.status !== 'RECEPTION' ? 'Vui lòng tiếp nhận xe trước khi thao tác' : 'Ghi chú kỹ thuật (mô tả vấn đề, đề xuất sửa chữa...)'}
                               value={result?.notes || ''}
                               onChange={(e) => handleNotesChange(item.id, e.target.value)}
                               onBlur={() => handleNotesBlur(item.id)}
                               className="notes-input"
+                              disabled={serviceOrder?.status !== 'RECEPTION'}
                             />
                             {result?.status && (
                               <Button 
                                 variant="outline-primary"
                                 onClick={() => handleSubmitItem(item.id)}
-                                disabled={submitting}
-                                title="Lưu thủ công (tự động lưu khi chọn status hoặc blur ghi chú)"
+                                disabled={submitting || serviceOrder?.status !== 'RECEPTION'}
+                                title={serviceOrder?.status !== 'RECEPTION' ? 'Vui lòng bấm "Tiếp nhận xe" trước' : 'Lưu thủ công (tự động lưu khi chọn status hoặc blur ghi chú)'}
                               >
                                 {submitting ? <Spinner size="sm" /> : <FiSave />}
                               </Button>

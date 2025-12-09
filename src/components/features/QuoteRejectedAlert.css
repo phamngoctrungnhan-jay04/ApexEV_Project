@@ -1,0 +1,209 @@
+/* File: src/components/features/QuoteRejectedAlert.css */
+/* Component Quote Rejected Alert - APEX Modern UI */
+
+.quote-rejected-alert {
+  border: none;
+  border-radius: 12px;
+  border-left: 5px solid #f59e0b;
+  background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  margin-bottom: 24px;
+  padding: 20px 24px;
+}
+
+.alert-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.alert-icon {
+  font-size: 32px;
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.alert-reason {
+  margin: 0 0 12px 0;
+  padding: 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 8px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.alert-reason strong {
+  color: #78350f;
+}
+
+.alert-instruction {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.reopen-btn {
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.25);
+}
+
+.reopen-btn:hover {
+  background: linear-gradient(135deg, #2b75d9 0%, #0047cc 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(51, 138, 243, 0.35);
+}
+
+.skip-btn {
+  background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.25);
+}
+
+.skip-btn:hover {
+  background: linear-gradient(135deg, #2ba84a 0%, #228739 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
+}
+
+/* Modal xác nhận */
+.quote-confirm-modal .modal-content {
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(51, 138, 243, 0.2);
+}
+
+.quote-confirm-modal .modal-header {
+  background: #ffffff;
+  border-bottom: 2px solid #E5E7EB;
+  border-radius: 14px 14px 0 0;
+  padding: 20px 24px;
+}
+
+.quote-confirm-modal .modal-title {
+  color: #338AF3;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.quote-confirm-modal .btn-close {
+  color: #6B7280;
+}
+
+.quote-confirm-modal .modal-body {
+  padding: 24px;
+}
+
+.quote-confirm-modal .modal-body p {
+  color: #1F2937;
+  margin-bottom: 16px;
+}
+
+.quote-confirm-modal .modal-body ul {
+  color: #4B5563;
+  margin-bottom: 0;
+}
+
+.quote-confirm-modal .modal-body ul li {
+  margin-bottom: 8px;
+}
+
+.quote-confirm-modal .modal-footer {
+  border-top: 1px solid #E5E7EB;
+  padding: 16px 24px;
+}
+
+.quote-confirm-modal .btn {
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.quote-confirm-modal .btn-primary {
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.25);
+}
+
+.quote-confirm-modal .btn-primary:hover {
+  background: linear-gradient(135deg, #2b75d9 0%, #0047cc 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(51, 138, 243, 0.35);
+}
+
+.quote-confirm-modal .btn-secondary {
+  background: #E5E7EB;
+  color: #4B5563;
+  border: none;
+}
+
+.quote-confirm-modal .btn-secondary:hover {
+  background: #D1D5DB;
+  color: #374151;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .alert-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .alert-icon {
+    font-size: 28px;
+  }
+
+  .alert-title {
+    font-size: 16px;
+  }
+
+  .alert-actions {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    min-width: 100%;
+  }
+
+  .quote-confirm-modal .modal-title {
+    font-size: 18px;
+  }
+
+  .quote-confirm-modal .modal-body {
+    padding: 20px;
+  }
+}

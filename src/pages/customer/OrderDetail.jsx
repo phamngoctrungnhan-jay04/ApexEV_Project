@@ -85,8 +85,23 @@ function OrderDetail() {
   // Fetch checklists và results (dùng API mới)
   const fetchChecklistData = async () => {
     try {
+      console.log('🔄 [OrderDetail] Fetching checklist for orderId:', orderId);
+      
       // API mới: Lấy tất cả service checklist items kèm results
       const itemsWithResults = await getServiceChecklistItemsForOrder(orderId);
+      
+      console.log('✅ [OrderDetail] API Response:', itemsWithResults);
+      
+      // Kiểm tra dữ liệu trả về
+      if (!itemsWithResults || itemsWithResults.length === 0) {
+        console.warn('⚠️ [OrderDetail] No checklist items found');
+        setChecklists([]);
+        setChecklistResults({});
+        setLastUpdated(new Date());
+        setError('');
+        setLoading(false);
+        return;
+      }
       
       // Group items theo serviceId để hiển thị theo service
       const servicesMap = {};
@@ -135,8 +150,31 @@ function OrderDetail() {
       setLastUpdated(new Date());
       setError('');
     } catch (err) {
-      console.error('fetchChecklistData error:', err);
-      setError(err.message || 'Không thể tải dữ liệu checklist');
+      console.error('❌ [OrderDetail] fetchChecklistData error:', err);
+      console.error('❌ Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        config: {
+          url: err.config?.url,
+          method: err.config?.method,
+          headers: err.config?.headers
+        }
+      });
+      
+      // Hiển thị error message chi tiết hơn
+      let errorMessage = 'Không thể tải dữ liệu checklist';
+      if (err.response) {
+        // Server responded with error
+        errorMessage = `Lỗi ${err.response.status}: ${err.response.data?.message || err.response.statusText || 'Server error'}`;
+      } else if (err.request) {
+        // Request made but no response
+        errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+      } else {
+        errorMessage = err.message || errorMessage;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

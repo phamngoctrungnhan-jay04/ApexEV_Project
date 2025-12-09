@@ -14,7 +14,8 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiImage,
-  FiEye
+  FiEye,
+  FiDollarSign
 } from 'react-icons/fi';
 import { Badge } from 'react-bootstrap';
 import './OrderTimeline.css';
@@ -54,7 +55,7 @@ const OrderTimeline = ({ currentStatus, checklists = [], checklistItems = [], is
       setExpandedStep(expandedStep === stepKey ? null : stepKey);
     }
   };
-  // Định nghĩa các bước trong quy trình (CẬP NHẬT: Thêm Kết quả kiểm tra)
+  // Định nghĩa các bước trong quy trình (CẬP NHẬT: Thêm Kết quả kiểm tra + Từ chối báo giá)
   const timeline = [
     { 
       key: 'RECEPTION', 
@@ -83,6 +84,14 @@ const OrderTimeline = ({ currentStatus, checklists = [], checklistItems = [], is
       description: 'Đang chuẩn bị báo giá phụ tùng cần thay (nếu có)'
     },
     { 
+      key: 'QUOTE_REJECTED', 
+      label: 'Từ chối báo giá', 
+      icon: FiXCircle,
+      description: 'Khách hàng từ chối báo giá phụ tùng. Advisor sẽ liên hệ để tư vấn lại.',
+      isVirtual: true, // Không phải bước chính thức trong flow
+      isRejection: true // Đánh dấu là bước từ chối
+    },
+    { 
       key: 'WAITING_FOR_PARTS', 
       label: 'Chờ phụ tùng', 
       icon: FiPackage,
@@ -99,6 +108,12 @@ const OrderTimeline = ({ currentStatus, checklists = [], checklistItems = [], is
       label: 'Hoàn thành', 
       icon: FiCheckCircle,
       description: 'Đã hoàn thành bảo dưỡng, sẵn sàng thanh toán'
+    },
+    { 
+      key: 'INVOICED', 
+      label: 'Xuất hóa đơn', 
+      icon: FiDollarSign,
+      description: 'Advisor đã xuất hóa đơn thanh toán'
     },
     { 
       key: 'COMPLETED', 
@@ -313,11 +328,48 @@ const OrderTimeline = ({ currentStatus, checklists = [], checklistItems = [], is
           stepIsActive = false; // Không bao giờ active (vì không phải status thật)
         }
         
-        // ✅ Xử lý riêng cho bước cuối "Đã giao xe" (COMPLETED)
-        // Khi currentStatus === 'COMPLETED', bước này cũng phải xanh lá
-        if (step.key === 'COMPLETED' && currentStatus === 'COMPLETED') {
+        // ⚠️ Xử lý riêng cho QUOTE_REJECTED (virtual step khi customer từ chối báo giá)
+        const isQuoteRejected = step.key === 'QUOTE_REJECTED';
+        if (isQuoteRejected) {
+          // CHỈ hiển thị bước này khi currentStatus === 'QUOTE_REJECTED'
+          if (currentStatus !== 'QUOTE_REJECTED') {
+            return null; // Ẩn bước này nếu không phải trạng thái từ chối
+          }
+          stepIsCompleted = false; // Không đánh dấu hoàn thành
+          stepIsActive = true; // Đang active vì đây là trạng thái hiện tại
+        }
+        
+        // ✅ Xử lý riêng cho bước "Hoàn thành" (READY_FOR_INVOICE)
+        // Khi kỹ thuật viên bấm nút hoàn thành, bước này phải xanh lá
+        if (step.key === 'READY_FOR_INVOICE' && 
+            (currentStatus === 'READY_FOR_INVOICE' || currentStatus === 'INVOICED' || currentStatus === 'COMPLETED')) {
           stepIsCompleted = true;
-          stepIsActive = false; // Không cần active vì đã completed
+          stepIsActive = (currentStatus === 'READY_FOR_INVOICE'); // Chỉ active khi đúng ở trạng thái này
+        }
+        
+        // ✅ Xử lý riêng cho bước "Xuất hóa đơn" (INVOICED)
+        // Khi advisor bấm xuất hóa đơn, bước này mới chuyển sang xanh lá
+        if (step.key === 'INVOICED') {
+          if (currentStatus === 'INVOICED' || currentStatus === 'COMPLETED') {
+            stepIsCompleted = true;
+            stepIsActive = (currentStatus === 'INVOICED'); // Active khi đang ở trạng thái này
+          } else {
+            stepIsCompleted = false;
+            stepIsActive = false;
+          }
+        }
+        
+        // ✅ Xử lý riêng cho bước cuối "Đã giao xe" (COMPLETED)
+        // CHỈ khi advisor bấm giao xe (status = COMPLETED), bước này mới xanh lá
+        if (step.key === 'COMPLETED') {
+          if (currentStatus === 'COMPLETED') {
+            stepIsCompleted = true;
+            stepIsActive = false; // Không active vì đã hoàn thành
+          } else {
+            // Khi status là INVOICED hoặc bất kỳ trạng thái nào khác, bước này vẫn là xanh dương (pending/active)
+            stepIsCompleted = false;
+            stepIsActive = false;
+          }
         }
         
         const isExpanded = expandedStep === step.key;
@@ -328,7 +380,7 @@ const OrderTimeline = ({ currentStatus, checklists = [], checklistItems = [], is
         return (
           <div 
             key={step.key} 
-            className={`timeline-step ${stepIsActive ? 'active' : ''} ${stepIsCompleted ? 'completed' : ''} ${isPending && !isInspectionResult ? 'pending' : ''} ${isExpanded ? 'expanded' : ''} ${canExpand ? 'clickable' : ''}`}
+            className={`timeline-step ${stepIsActive ? 'active' : ''} ${stepIsCompleted ? 'completed' : ''} ${isPending && !isInspectionResult && !isQuoteRejected ? 'pending' : ''} ${isExpanded ? 'expanded' : ''} ${canExpand ? 'clickable' : ''} ${isQuoteRejected && stepIsActive ? 'rejected' : ''}`}
             onClick={() => handleStepClick(step.key)}
           >
             <div className="timeline-connector" />
@@ -349,10 +401,17 @@ const OrderTimeline = ({ currentStatus, checklists = [], checklistItems = [], is
                 )}
               </div>
               <p className="text-muted">{step.description}</p>
-              {stepIsActive && !isInspectionResult && (
+              {stepIsActive && !isInspectionResult && !isQuoteRejected && (
                 <span className="badge-status">
                   <FiClock className="me-1" />
                   Đang thực hiện
+                </span>
+              )}
+              {/* Badge đặc biệt cho bước từ chối báo giá */}
+              {isQuoteRejected && stepIsActive && (
+                <span className="badge-status rejected">
+                  <FiAlertCircle className="me-1" />
+                  Chúng tôi sẽ liên hệ tư vấn
                 </span>
               )}
               {isInspectionResult && isInspectionCompleted() && !isExpanded && (

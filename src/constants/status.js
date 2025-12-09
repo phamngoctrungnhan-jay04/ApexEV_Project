@@ -7,7 +7,8 @@ export const STATUS = {
   COMPLETED: 'completed',
   CANCELLED: 'cancelled',
   WAITING_PARTS: 'waiting-parts',
-  READY: 'ready'
+  READY: 'ready',
+  QUOTE_REJECTED: 'quote-rejected'
 };
 
 export const STATUS_LABELS = {
@@ -18,7 +19,8 @@ export const STATUS_LABELS = {
   [STATUS.COMPLETED]: 'Hoàn thành',
   [STATUS.CANCELLED]: 'Đã hủy',
   [STATUS.WAITING_PARTS]: 'Chờ phụ tùng',
-  [STATUS.READY]: 'Sẵn sàng'
+  [STATUS.READY]: 'Sẵn sàng',
+  [STATUS.QUOTE_REJECTED]: 'Đã từ chối báo giá'
 };
 
 export const STATUS_COLORS = {
@@ -29,7 +31,8 @@ export const STATUS_COLORS = {
   [STATUS.COMPLETED]: 'success',
   [STATUS.CANCELLED]: 'danger',
   [STATUS.WAITING_PARTS]: 'info',
-  [STATUS.READY]: 'secondary'
+  [STATUS.READY]: 'secondary',
+  [STATUS.QUOTE_REJECTED]: 'danger'
 };
 
 export default STATUS;

@@ -1157,6 +1157,77 @@ const JobList = () => {
                 );
               })()}
 
+              {/* Banner hiển thị phụ tùng đã duyệt - WAITING_FOR_PARTS và IN_PROGRESS */}
+              {['WAITING_FOR_PARTS', 'IN_PROGRESS'].includes(selectedOrder.status) && (() => {
+                const approvedParts = partRequests.filter(req => req.status === 'FULFILLED');
+                
+                if (approvedParts.length === 0) return null;
+
+                const isInProgress = selectedOrder.status === 'IN_PROGRESS';
+
+                return (
+                  <div className="fulfilled-parts-banner">
+                    <div className="banner-icon">
+                      <FiPackage size={24} />
+                    </div>
+                    <div className="banner-content">
+                      <h4>
+                        {isInProgress ? '🔧 Đang thay thế phụ tùng' : '✅ Phụ tùng đã được duyệt'} ({approvedParts.length} mục)
+                      </h4>
+                      <p>
+                        {isInProgress 
+                          ? 'Danh sách phụ tùng đang được thay thế. Hoàn tất công việc khi xong.'
+                          : 'Khách hàng đã duyệt báo giá phụ tùng. Bạn có thể lấy phụ tùng tại kho và bắt đầu thay thế.'
+                        }
+                      </p>
+                      <div className="fulfilled-parts-list">
+                        <strong>{isInProgress ? 'Phụ tùng đang thay thế:' : 'Danh sách phụ tùng cần lấy:'}</strong>
+                        <table className="parts-table">
+                          <thead>
+                            <tr>
+                              <th>Mã phụ tùng</th>
+                              <th>Tên phụ tùng</th>
+                              <th>Số lượng</th>
+                              <th>Đơn giá</th>
+                              <th>Thành tiền</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {approvedParts.map((part, idx) => (
+                              <tr key={idx}>
+                                <td><code>{part.partSku}</code></td>
+                                <td><strong>{part.partName}</strong></td>
+                                <td className="text-center">{part.quantityRequested}</td>
+                                <td>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(part.partPrice)}</td>
+                                <td><strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(part.partPrice * part.quantityRequested)}</strong></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr>
+                              <td colSpan="4" className="text-end"><strong>Tổng cộng:</strong></td>
+                              <td><strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+                                approvedParts.reduce((sum, part) => sum + (part.partPrice * part.quantityRequested), 0)
+                              )}</strong></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                      {!isInProgress && (
+                        <div className="banner-actions">
+                          <button 
+                            className="btn-confirm-parts"
+                            onClick={() => handleStartWork(selectedOrder.orderId)}
+                          >
+                            <FiCheckCircle /> Đã lấy phụ tùng - Bắt đầu thay thế
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Customer & Vehicle info */}
               <div className="detail-info-grid">
                 <div className="info-card">
@@ -1189,26 +1260,28 @@ const JobList = () => {
               </div>
 
               {/* Services with inline checklist */}
-              <div className="services-section">
-                <h3 className="section-title">
-                  <FiTool />
-                  Dịch vụ cần thực hiện
-                </h3>
+              {/* Chỉ hiển thị dịch vụ khi đang trong giai đoạn kiểm tra */}
+              {!['WAITING_FOR_PARTS', 'IN_PROGRESS', 'READY_FOR_INVOICE'].includes(selectedOrder.status) && (
+                <div className="services-section">
+                  <h3 className="section-title">
+                    <FiTool />
+                    Dịch vụ cần thực hiện
+                  </h3>
 
-                {/* Hướng dẫn cho kỹ thuật viên ở bước INSPECTION */}
-                {selectedOrder.status === 'INSPECTION' && (
-                  <div className="inspection-guide">
-                    <FiInfo />
-                    <div>
-                      <strong>Hướng dẫn kiểm tra:</strong>
-                      <p>
-                        Kiểm tra từng mục bên dưới. Nếu phát hiện cần thay phụ tùng, 
-                        đánh dấu ✅ "Cần thay thế" và ghi chú chi tiết. 
-                        Sau đó click <strong>"Hoàn tất kiểm tra"</strong> ở trên.
-                      </p>
+                  {/* Hướng dẫn cho kỹ thuật viên ở bước INSPECTION */}
+                  {selectedOrder.status === 'INSPECTION' && (
+                    <div className="inspection-guide">
+                      <FiInfo />
+                      <div>
+                        <strong>Hướng dẫn kiểm tra:</strong>
+                        <p>
+                          Kiểm tra từng mục bên dưới. Nếu phát hiện cần thay phụ tùng, 
+                          đánh dấu ✅ "Cần thay thế" và ghi chú chi tiết. 
+                          Sau đó click <strong>"Hoàn tất kiểm tra"</strong> ở trên.
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {orderItems.length === 0 ? (
                   <div className="empty-services">
@@ -1273,6 +1346,7 @@ const JobList = () => {
                   </div>
                 )}
               </div>
+              )}
 
               {/* Notes section */}
               {advisorNotes && (

@@ -14,7 +14,7 @@ function AdvisorLayout({ children }) {
   return (
     <div style={{ display: 'flex' }}>
       <AdvisorSidebar onLogout={handleLogout} />
-      <main style={{ marginLeft: 220, width: '100%' }}>
+      <main style={{ marginLeft: 180, width: '100%' }}>
         {children}
       </main>
     </div>

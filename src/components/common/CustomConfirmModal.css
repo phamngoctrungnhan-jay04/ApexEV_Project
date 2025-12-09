@@ -1,0 +1,144 @@
+/* Custom Confirm Modal - APEX Modern UI (Compact & Consistent) */
+.custom-confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(51, 138, 243, 0.08);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+.custom-confirm-modal {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 14px;
+  padding: 24px 20px 20px 20px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.25);
+  animation: popupShow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+}
+
+.confirm-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+}
+
+.confirm-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.confirm-message {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-cancel,
+.btn-confirm {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  min-width: 100px;
+}
+
+.btn-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.btn-cancel:hover {
+  background: #e5e7eb;
+  transform: scale(1.05);
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #338AF3, #005CF0);
+  color: white;
+  box-shadow: 0 2px 8px rgba(51, 138, 243, 0.25);
+}
+
+.btn-confirm:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.35);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popupShow {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .custom-confirm-modal {
+    padding: 20px 16px 16px 16px;
+    max-width: 90%;
+  }
+
+  .confirm-icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .confirm-title {
+    font-size: 16px;
+  }
+
+  .confirm-message {
+    font-size: 13px;
+  }
+
+  .confirm-actions {
+    flex-direction: column;
+  }
+
+  .btn-cancel,
+  .btn-confirm {
+    width: 100%;
+    min-width: auto;
+  }
+}

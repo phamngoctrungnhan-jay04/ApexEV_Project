@@ -78,8 +78,20 @@ function AdvisorAppointments() {
       allAppointments.sort((a, b) => {
         const dateA = formatAppointmentTime(a.appointmentTime);
         const dateB = formatAppointmentTime(b.appointmentTime);
-        return dateB - dateA;
+        
+        // Null check: đẩy các appointment không có thời gian xuống cuối
+        if (!dateA && !dateB) return 0;
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        
+        // So sánh timestamp: mới nhất (lớn hơn) trước
+        return dateB.getTime() - dateA.getTime();
       });
+      
+      console.log('✅ Sorted appointments (newest first):', allAppointments.slice(0, 3).map(a => ({
+        id: a.id,
+        time: formatAppointmentTime(a.appointmentTime)?.toISOString()
+      })));
       
       setAppointments(allAppointments);
       setError('');

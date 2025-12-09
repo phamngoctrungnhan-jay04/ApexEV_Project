@@ -567,8 +567,10 @@
 
 .stats-section {
   padding: 6rem 0;
-  background: var(--titan-gray);
+  background: #c3d9fe;
   color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .stat-item {
@@ -578,14 +580,16 @@
 .stat-number {
   font-size: 3.5rem;
   font-weight: 800;
-  color: var(--vinfast-blue-light);
+  color: #1a202c;
   margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
 }
 
 .stat-label {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 300;
+  color: #f7f7f7;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 /* ============================================

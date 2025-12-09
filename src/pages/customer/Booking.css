@@ -16,6 +16,29 @@
   font-size: 0.95rem;
 }
 
+/* Compact Date Select */
+.compact-select {
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  line-height: 1.4;
+}
+
+.compact-select:focus {
+  border-color: #338AF3;
+  box-shadow: 0 0 0 3px rgba(51, 138, 243, 0.1);
+}
+
+.compact-select option {
+  padding: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 /* Booking Steps */
 .steps-card {
   border: none;

@@ -67,20 +67,22 @@ const InvoicePreview = ({ invoice, orderItems = [] }) => {
   return (
     <Card className="invoice-preview-card">
       <Card.Header className="invoice-header">
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <h5 className="mb-1">
-              <FiFileText className="me-2" />
-              Hóa đơn chi tiết
-            </h5>
+        <div className="header-top">
+          <div className="header-icon-wrapper">
+            <FiFileText className="header-icon" />
+          </div>
+          <div className="header-content">
+            <h5 className="header-title">Hóa đơn chi tiết</h5>
             {invoice?.invoiceCode && (
-              <small className="text-muted">Mã: {invoice.invoiceCode}</small>
+              <p className="header-subtitle">Mã: {invoice.invoiceCode}</p>
             )}
           </div>
-          <div>
-            {invoice?.status && getStatusBadge(invoice.status)}
-          </div>
         </div>
+        {invoice?.status && (
+          <div className="header-status">
+            {getStatusBadge(invoice.status)}
+          </div>
+        )}
       </Card.Header>
 
       <Card.Body>
@@ -164,12 +166,15 @@ const InvoicePreview = ({ invoice, orderItems = [] }) => {
         )}
 
         {/* Tổng cộng */}
-        <div className="invoice-total">
-          <div className="total-row">
-            <span className="total-label">
-              TỔNG HÓA ĐƠN:
-            </span>
-            <span className="total-amount">{formatCurrency(grandTotal)}</span>
+        <div className="invoice-total-wrapper">
+          <div className="invoice-total">
+            <div className="total-icon-wrapper">
+              <FiCheckCircle className="total-icon" />
+            </div>
+            <div className="total-content">
+              <div className="total-label">TỔNG HÓA ĐƠN</div>
+              <div className="total-amount">{formatCurrency(grandTotal)}</div>
+            </div>
           </div>
         </div>
 

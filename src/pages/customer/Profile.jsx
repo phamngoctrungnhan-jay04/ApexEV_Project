@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Modal, Table } from 'react-bootstrap';
 
 // 1. Import các icon Feather (Fi...)
@@ -24,6 +24,8 @@ import CustomAlertModal from '../../components/common/CustomAlertModal';
 const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const vehiclesSectionRef = useRef(null);
   const [loading, setLoading] = useState(true);
 
   // --- State cho Alert ---
@@ -54,8 +56,7 @@ const Profile = () => {
     model: '',
     yearManufactured: new Date().getFullYear(),
     licensePlate: '',
-    vinNumber: '',
-    color: '' 
+    vinNumber: ''
   });
 
   const handleLogout = () => {
@@ -88,6 +89,18 @@ const Profile = () => {
     }
     fetchData();
   }, []);
+
+  // Scroll to vehicles section if coming from homepage
+  useEffect(() => {
+    if (location.state?.scrollToVehicles && vehiclesSectionRef.current) {
+      setTimeout(() => {
+        vehiclesSectionRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 300);
+    }
+  }, [location.state, loading]);
 
   const handleEditProfile = () => {
     setIsEditing(true);
@@ -138,8 +151,7 @@ const Profile = () => {
         model: vehicle.model,
         yearManufactured: vehicle.yearManufactured,
         licensePlate: vehicle.licensePlate,
-        vinNumber: vehicle.vinNumber || '',
-        color: vehicle.color || ''
+        vinNumber: vehicle.vinNumber || ''
       });
     } else {
       setEditingVehicle(null);
@@ -148,8 +160,7 @@ const Profile = () => {
         model: '',
         yearManufactured: new Date().getFullYear(),
         licensePlate: '',
-        vinNumber: '',
-        color: ''
+        vinNumber: ''
       });
     }
     setShowVehicleModal(true);
@@ -361,7 +372,7 @@ const Profile = () => {
                 </Card.Body>
               </Card>
 
-              <Card>
+              <Card ref={vehiclesSectionRef}>
                 <Card.Header className="d-flex justify-content-between align-items-center">
                   <h5 className="mb-0"><FaCar className="me-2" />Danh sách xe ({vehicles.length})</h5>
                   <Button variant="primary" size="sm" onClick={() => handleShowVehicleModal()}>
@@ -478,16 +489,6 @@ const Profile = () => {
                 </Col>
               </Row>
               <Form.Group className="mb-3">
-                <Form.Label>Màu xe</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="color"
-                  value={vehicleFormData.color || ''}
-                  onChange={handleVehicleInputChange}
-                  placeholder="VD: Trắng, Đen, Xanh"
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
                 <Form.Label>VIN (Vehicle Identification Number)</Form.Label>
                 <Form.Control
                   type="text"
@@ -497,6 +498,9 @@ const Profile = () => {
                   placeholder="17 ký tự"
                   maxLength={17}
                 />
+                <Form.Text className="text-muted">
+                  Tùy chọn - Số VIN giúp xác định chính xác xe của bạn
+                </Form.Text>
               </Form.Group>
             </Form>
           </Modal.Body>

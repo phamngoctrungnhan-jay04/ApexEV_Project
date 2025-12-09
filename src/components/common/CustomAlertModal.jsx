@@ -4,18 +4,18 @@ import './CustomAlertModal.css';
 const CustomAlertModal = ({ show, type = 'success', message, onClose }) => {
   return (
     show && (
-      <div className="custom-alert-modal-overlay">
-        <div className={`custom-alert-modal ${type}`}>
-          <div className="icon">
+      <div className="custom-alert-modal-overlay" onClick={onClose}>
+        <div className={`custom-alert-modal ${type}`} onClick={(e) => e.stopPropagation()}>
+          <div className="alert-icon-wrapper">
             {type === 'success' ? (
-              <FiCheckCircle size={40} color="var(--success-color)" />
+              <FiCheckCircle size={32} />
             ) : (
-              <FiAlertCircle size={40} color="var(--danger-color)" />
+              <FiAlertCircle size={32} />
             )}
           </div>
-          <div className="message">{message}</div>
-          <button className="close-btn" onClick={onClose}>
-            Đóng
+          <div className="alert-message">{message}</div>
+          <button className="alert-close-btn" onClick={onClose}>
+            OK
           </button>
         </div>
       </div>

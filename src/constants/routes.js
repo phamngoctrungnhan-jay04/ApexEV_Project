@@ -41,9 +41,11 @@ export const ROUTES = {
     PROFILE: '/advisor/profile',
     APPOINTMENTS: '/advisor/appointments',
     PARTS_APPROVAL: '/advisor/parts-approval',
+    QUOTE_REJECTED: '/advisor/quote-rejected',
     ORDERS: '/advisor/orders',
     ORDER_DETAIL: '/advisor/orders/:id',
-    CHAT: '/advisor/chat'
+    CHAT: '/advisor/chat',
+    INVOICE_MANAGEMENT: '/advisor/invoice-management'
   },
   
   // Manager routes (BUSINESS_MANAGER - Quản lý Tài chính)

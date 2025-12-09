@@ -96,12 +96,24 @@ export const getChecklistsByOrder = async (serviceOrderId) => {
  */
 export const getServiceChecklistItemsForOrder = async (serviceOrderId) => {
   try {
-    const response = await axios.get(`${API_URL}/service-order/${serviceOrderId}/items`, {
+    const fullUrl = `${API_URL}/service-order/${serviceOrderId}/items`;
+    console.log('🌐 [checklistService] Calling API:', fullUrl);
+    console.log('🔑 [checklistService] Auth header:', getAuthHeader());
+    
+    const response = await axios.get(fullUrl, {
       headers: getAuthHeader()
     });
+    
+    console.log('✅ [checklistService] API Success:', response.status, response.data);
     return response.data;
   } catch (error) {
-    console.error('getServiceChecklistItemsForOrder error:', error);
+    console.error('❌ [checklistService] getServiceChecklistItemsForOrder error:', error);
+    console.error('❌ Error details:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
     throw error;
   }
 };

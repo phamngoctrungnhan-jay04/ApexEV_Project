@@ -11,10 +11,11 @@ import {
   FiCheck,
   FiArrowRight,
   FiInfo,
-  FiLogOut,
+  FiPlusCircle,
 } from 'react-icons/fi';
 import { FaCar } from 'react-icons/fa';
 import { CustomButton, CustomInput, CustomSelect, CustomCard } from '../../components/common';
+import CustomAlertModal from '../../components/common/CustomAlertModal';
 import serviceService from '../../services/serviceService';
 import { serviceCategories, technicians } from '../../mockData';
 import vehicleService from '../../services/vehicleService';
@@ -28,12 +29,27 @@ function Booking() {
 
   // Lấy danh sách xe thật của user từ BE
   const [customerVehicles, setCustomerVehicles] = useState([]);
+  const [vehiclePendingAppointments, setVehiclePendingAppointments] = useState([]);
+  
   useEffect(() => {
     async function fetchVehicles() {
       try {
         const data = await vehicleService.getMyVehicles();
         console.log('API trả về xe:', data);
         setCustomerVehicles(Array.isArray(data) ? data : []);
+        
+        // Lấy danh sách appointment đang chờ của user
+        try {
+          const appointments = await appointmentService.getMyAppointments();
+          // Lọc các appointment còn PENDING hoặc CONFIRMED
+          const pendingVehicleIds = appointments
+            .filter(apt => apt.status === 'PENDING' || apt.status === 'CONFIRMED' || apt.status === 'IN_PROGRESS')
+            .map(apt => apt.vehicle?.id)
+            .filter(id => id !== undefined);
+          setVehiclePendingAppointments(pendingVehicleIds);
+        } catch (aptErr) {
+          console.error('Lỗi lấy appointments:', aptErr);
+        }
       } catch (err) {
         console.error('Lỗi lấy xe:', err);
         setCustomerVehicles([]);
@@ -78,9 +94,21 @@ function Booking() {
     return saved || '';
   });
   
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [services, setServices] = useState([]);
+  
+  // Alert modal state (for vehicle restriction)
+  const [showVehicleAlert, setShowVehicleAlert] = useState(false);
+  
+  // Vehicle modal state
+  const [showVehicleModal, setShowVehicleModal] = useState(false);
+  const [vehicleFormData, setVehicleFormData] = useState({
+    brand: '',
+    model: '',
+    yearManufactured: new Date().getFullYear(),
+    licensePlate: '',
+    vinNumber: ''
+  });
 
   // Lưu trạng thái vào localStorage mỗi khi thay đổi
   useEffect(() => {
@@ -172,7 +200,46 @@ function Booking() {
 
   // Handle booking submission
   const handleSubmit = () => {
-    setShowConfirmModal(true);
+    confirmBooking();
+  };
+  
+  // Vehicle modal handlers
+  const handleOpenVehicleModal = () => {
+    setVehicleFormData({
+      brand: '',
+      model: '',
+      yearManufactured: new Date().getFullYear(),
+      licensePlate: '',
+      vinNumber: ''
+    });
+    setShowVehicleModal(true);
+  };
+  
+  const handleCloseVehicleModal = () => {
+    setShowVehicleModal(false);
+  };
+  
+  const handleVehicleInputChange = (e) => {
+    const { name, value } = e.target;
+    setVehicleFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSaveVehicle = async () => {
+    // Validate required fields
+    if (!vehicleFormData.brand || !vehicleFormData.model || !vehicleFormData.licensePlate) {
+      alert('Vui lòng nhập đầy đủ: Hãng xe, Model và Biển số');
+      return;
+    }
+    
+    try {
+      const newVehicle = await vehicleService.addVehicle(vehicleFormData);
+      setCustomerVehicles(prev => [...prev, newVehicle]);
+      setSelectedVehicle(newVehicle.id.toString());
+      handleCloseVehicleModal();
+    } catch (error) {
+      console.error('Lỗi thêm xe:', error);
+      alert(error.message || 'Đã có lỗi xảy ra khi thêm xe!');
+    }
   };
 
   // Xóa dữ liệu booking trong localStorage
@@ -187,9 +254,17 @@ function Booking() {
   };
 
   const confirmBooking = () => {
+    // Kiểm tra xe có đơn pending trước khi submit
+    const vehicleId = selectedVehicle ? parseInt(selectedVehicle) : null;
+    if (vehicleId && vehiclePendingAppointments.includes(vehicleId)) {
+      console.log('Blocked: Vehicle has pending appointment', vehicleId, vehiclePendingAppointments);
+      setShowVehicleAlert(true);
+      return;
+    }
+
     const bookingData = {
         // Cần chuyển vehicleId sang Integer nếu BE cần
-        vehicleId: selectedVehicle ? parseInt(selectedVehicle) : null,
+        vehicleId: vehicleId,
         // Format ISO: 2025-11-20T10:30:00
         appointmentTime: selectedDate && selectedTime ? `${selectedDate}T${selectedTime}:00` : null,
         serviceIds: selectedServices,
@@ -200,13 +275,11 @@ function Booking() {
         .then(response => {
             console.log('Đặt lịch thành công!', response);
             clearBookingData(); // Xóa dữ liệu đã lưu sau khi đặt lịch thành công
-            setShowConfirmModal(false);
             setShowSuccessModal(true); // Hiển thị modal thành công
         })
         .catch(error => {
             console.error('Lỗi đặt lịch:', error);
             alert(`Đặt lịch thất bại: ${error.message}`);
-            setShowConfirmModal(false);
         });
   };
 
@@ -239,19 +312,7 @@ function Booking() {
     '15:00', '15:30', '16:00', '16:30', '17:00'
   ];
 
-  // Reset toàn bộ form
-  const handleResetBooking = () => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ thông tin đặt lịch?')) {
-      clearBookingData();
-      setStep(1);
-      setSelectedCategory('all');
-      setSelectedServices([]);
-      setSelectedVehicle('');
-      setSelectedDate('');
-      setSelectedTime('');
-      setNotes('');
-    }
-  };
+
 
   return (
     <div className="booking-page">
@@ -269,16 +330,6 @@ function Booking() {
               {t('booking.subtitle') || 'Chọn dịch vụ và thời gian phù hợp với bạn'}
             </p>
           </div>
-          {(step > 1 || selectedServices.length > 0) && (
-            <CustomButton
-              variant="outline-danger"
-              size="sm"
-              onClick={handleResetBooking}
-            >
-              <FiLogOut className="me-2" />
-              Xóa & Bắt đầu lại
-            </CustomButton>
-          )}
         </div>
         {/* Progress Steps và các bước booking giữ nguyên */}
         <Card className="steps-card mb-4">
@@ -408,16 +459,18 @@ function Booking() {
                     <Form.Select
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      size="lg"
+                      className="compact-select"
+                      size="5"
                     >
                       <option value="">-- Chọn ngày --</option>
-                      {availableDates.map(date => {
+                      {availableDates.slice(0, 10).map(date => {
                         const dateObj = new Date(date);
-                        const dayName = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
-                        const dateStr = dateObj.toLocaleDateString('vi-VN');
+                        const dayName = dateObj.toLocaleDateString('vi-VN', { weekday: 'short' });
+                        const day = dateObj.getDate();
+                        const month = dateObj.getMonth() + 1;
                         return (
                           <option key={date} value={date}>
-                            {dayName}, {dateStr}
+                            {dayName}, {day}/{month}
                           </option>
                         );
                       })}
@@ -465,18 +518,46 @@ function Booking() {
 
                   {/* Vehicle Selection */}
                   <Form.Group className="mb-4">
-                    <Form.Label>Chọn xe</Form.Label>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <Form.Label className="mb-0">Chọn xe</Form.Label>
+                      <CustomButton
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={handleOpenVehicleModal}
+                      >
+                        <FiPlusCircle className="me-2" />
+                        Thêm xe
+                      </CustomButton>
+                    </div>
                     <Form.Select
                       value={selectedVehicle}
-                      onChange={(e) => setSelectedVehicle(e.target.value)}
+                      onChange={(e) => {
+                        const vehicleId = parseInt(e.target.value);
+                        console.log('Vehicle selected:', vehicleId, 'Pending list:', vehiclePendingAppointments);
+                        // Kiểm tra xe có đơn pending không
+                        if (vehicleId && vehiclePendingAppointments.includes(vehicleId)) {
+                          console.log('⚠️ Vehicle has pending appointment, showing alert');
+                          setShowVehicleAlert(true);
+                          setSelectedVehicle(''); // Reset state
+                          return;
+                        }
+                        setSelectedVehicle(e.target.value);
+                      }}
                       size="lg"
                     >
                       <option value="">-- Chọn xe --</option>
-                      {customerVehicles.map(vehicle => (
-                        <option key={vehicle.id} value={vehicle.id}>
-                          {vehicle.brand} {vehicle.model} ({vehicle.year}) - {vehicle.licensePlate}
-                        </option>
-                      ))}
+                      {customerVehicles.map(vehicle => {
+                        const hasPendingAppointment = vehiclePendingAppointments.includes(vehicle.id);
+                        return (
+                          <option 
+                            key={vehicle.id} 
+                            value={vehicle.id}
+                          >
+                            {vehicle.brand} {vehicle.model} {vehicle.yearManufactured} - {vehicle.licensePlate}
+                            {hasPendingAppointment ? ' (Đang có đơn chờ xử lý)' : ''}
+                          </option>
+                        );
+                      })}
                     </Form.Select>
                   </Form.Group>
 
@@ -724,66 +805,6 @@ function Booking() {
           </Col>
         </Row>
 
-        {/* Confirmation Modal */}
-        <Modal 
-          show={showConfirmModal} 
-          onHide={() => setShowConfirmModal(false)} 
-          centered
-          size="md"
-          backdrop="static"
-          dialogClassName="confirm-modal-custom"
-        >
-          <Modal.Body className="p-0">
-            <div className="confirm-modal-content">
-              {/* Header với gradient background */}
-              <div className="confirm-modal-header">
-                <div className="confirm-icon-wrapper">
-                  <FiCheck className="confirm-icon" />
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="confirm-modal-body">
-                <h3 className="confirm-title">Xác nhận đặt lịch bảo dưỡng</h3>
-                <p className="confirm-subtitle">
-                  Bạn có chắc chắn muốn đặt lịch bảo dưỡng?
-                </p>
-
-                {/* Info Card */}
-                <div className="confirm-info-card">
-                  <div className="confirm-info-icon-wrapper">
-                    <FiInfo className="confirm-info-icon" />
-                  </div>
-                  <div className="confirm-info-text">
-                    <p className="mb-0">
-                      Chúng tôi sẽ gửi <strong>thông báo</strong> đến email của bạn khi lịch hẹn được xác nhận
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="confirm-actions">
-                  <CustomButton 
-                    variant="outline-secondary" 
-                    onClick={() => setShowConfirmModal(false)}
-                    className="confirm-cancel-btn"
-                  >
-                    Hủy
-                  </CustomButton>
-                  <CustomButton 
-                    variant="success" 
-                    onClick={confirmBooking}
-                    className="confirm-submit-btn"
-                  >
-                    <FiCheck className="me-2" />
-                    Xác nhận
-                  </CustomButton>
-                </div>
-              </div>
-            </div>
-          </Modal.Body>
-        </Modal>
-
         {/* Success Modal */}
         <Modal 
           show={showSuccessModal} 
@@ -835,6 +856,119 @@ function Booking() {
             </div>
           </Modal.Body>
         </Modal>
+
+        {/* Add Vehicle Modal */}
+        <Modal
+          show={showVehicleModal}
+          onHide={handleCloseVehicleModal}
+          centered
+          size="md"
+        >
+          <Modal.Header closeButton style={{ 
+            background: 'linear-gradient(135deg, #338AF3 0%, #005CF0 100%)',
+            color: 'white',
+            borderBottom: 'none'
+          }}>
+            <Modal.Title style={{ color: 'white' }}>
+              <FaCar className="me-2" />
+              Thêm xe mới
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Hãng xe <span className="text-danger">*</span></Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="brand"
+                      placeholder="VD: VinFast, Tesla, Hyundai"
+                      value={vehicleFormData.brand}
+                      onChange={handleVehicleInputChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Model <span className="text-danger">*</span></Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="model"
+                      placeholder="VD: VF8, Model 3, IONIQ 5"
+                      value={vehicleFormData.model}
+                      onChange={handleVehicleInputChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Năm sản xuất</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="yearManufactured"
+                      value={vehicleFormData.yearManufactured}
+                      onChange={handleVehicleInputChange}
+                      min="2000"
+                      max={new Date().getFullYear() + 1}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Biển số <span className="text-danger">*</span></Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="licensePlate"
+                      placeholder="VD: 30A-12345"
+                      value={vehicleFormData.licensePlate}
+                      onChange={handleVehicleInputChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Form.Group className="mb-3">
+                <Form.Label>VIN (Vehicle Identification Number)</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="vinNumber"
+                  placeholder="17 ký tự"
+                  value={vehicleFormData.vinNumber}
+                  onChange={handleVehicleInputChange}
+                  maxLength="17"
+                />
+                <Form.Text className="text-muted">
+                  Tùy chọn - Số VIN giúp xác định chính xác xe của bạn
+                </Form.Text>
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <CustomButton variant="outline-secondary" onClick={handleCloseVehicleModal}>
+              Hủy
+            </CustomButton>
+            <CustomButton variant="primary" onClick={handleSaveVehicle}>
+              <FiCheck className="me-2" />
+              Thêm xe
+            </CustomButton>
+          </Modal.Footer>
+        </Modal>
+
+      {/* Alert Modal for Vehicle Restriction */}
+      <CustomAlertModal
+        show={showVehicleAlert}
+        type="error"
+        message="Xe này đang có đơn bảo dưỡng chưa hoàn thành. Vui lòng chờ hoàn tất trước khi đặt lịch mới."
+        onClose={() => setShowVehicleAlert(false)}
+      />
+
       </Container>
     </div>
   );

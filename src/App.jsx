@@ -39,6 +39,7 @@ import AdvisorProfile from './pages/advisor/AdvisorProfile';
 import AdvisorAppointments from './pages/advisor/AdvisorAppointments';
 import PartsApproval from './pages/advisor/PartsApproval';
 import InvoiceManagement from './pages/advisor/InvoiceManagement';
+import QuoteRejected from './pages/advisor/QuoteRejected';
 
 // Layout
 import { CustomerLayout, TechnicianLayout } from './components/layout';
@@ -177,6 +178,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AdvisorLayout>
               <PartsApproval />
+            </AdvisorLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route 
+        path="/advisor/quote-rejected" 
+        element={
+          <ProtectedRoute>
+            <AdvisorLayout>
+              <QuoteRejected />
             </AdvisorLayout>
           </ProtectedRoute>
         }

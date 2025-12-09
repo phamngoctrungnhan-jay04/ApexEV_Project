@@ -126,7 +126,7 @@ export const approvePartRequest = async (requestId, notes = null) => {
 };
 
 /**
- * Từ chối yêu cầu (Advisor/Admin)
+ * Từ chối yêu cầu PENDING (Advisor/Admin)
  */
 export const rejectPartRequest = async (requestId, notes = null) => {
   try {
@@ -141,6 +141,26 @@ export const rejectPartRequest = async (requestId, notes = null) => {
     return response.data;
   } catch (error) {
     console.error('rejectPartRequest error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa phụ tùng APPROVED khỏi báo giá (Advisor/Admin)
+ */
+export const removePartRequest = async (requestId, notes = null) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/requests/${requestId}/remove`,
+      null,
+      {
+        params: { notes },
+        headers: getAuthHeader()
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('removePartRequest error:', error);
     throw error;
   }
 };
@@ -301,7 +321,7 @@ export const approveQuote = async (orderId) => {
 };
 
 /**
- * Customer từ chối báo giá (QUOTED -> REJECTED)
+ * Customer từ chối báo giá (QUOTED -> REJECTED -> QUOTE_REJECTED)
  */
 export const rejectQuote = async (orderId, reason) => {
   try {
@@ -316,6 +336,44 @@ export const rejectQuote = async (orderId, reason) => {
     return response.data;
   } catch (error) {
     console.error('rejectQuote error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Advisor tư vấn lại - Mở lại báo giá (QUOTE_REJECTED -> QUOTING)
+ */
+export const reopenQuote = async (orderId) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/requests/reopen-quote/${orderId}`,
+      null,
+      {
+        headers: getAuthHeader()
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('reopenQuote error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Advisor bỏ qua phụ tùng, hoàn tất đơn (QUOTE_REJECTED -> IN_PROGRESS)
+ */
+export const skipPartsAndComplete = async (orderId) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/requests/skip-parts/${orderId}`,
+      null,
+      {
+        headers: getAuthHeader()
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('skipPartsAndComplete error:', error);
     throw error;
   }
 };
@@ -335,8 +393,11 @@ export default {
   getPendingPartRequests,
   approvePartRequest,
   rejectPartRequest,
+  removePartRequest,
   cancelPartRequest,
   sendQuoteEmail,
   approveQuote,
-  rejectQuote
+  rejectQuote,
+  reopenQuote,
+  skipPartsAndComplete
 };

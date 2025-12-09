@@ -838,6 +838,66 @@
   border-radius: 10px;
 }
 
+/* Alert Reopen Quote */
+.parts-approval-reopen-alert {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+  border-left: 5px solid #FFA726;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: 0 4px 12px rgba(255, 167, 38, 0.15);
+  animation: slideInDown 0.5s ease-out;
+}
+
+.parts-approval-reopen-alert .alert-icon {
+  font-size: 32px;
+  color: #FB8C00;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+.parts-approval-reopen-alert .alert-content h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #E65100;
+  margin: 0 0 8px 0;
+}
+
+.parts-approval-reopen-alert .alert-content p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.parts-approval-reopen-alert .alert-content strong {
+  color: #338AF3;
+  font-weight: 700;
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
 /* Order Info Section in Modal */
 .parts-approval-order-info-section {
   background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);

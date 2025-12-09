@@ -1,5 +1,5 @@
 /* File: src/components/features/InvoicePreview.css */
-/* Component Invoice Preview (APEX Modern UI) */
+/* Component Invoice Preview (APEX Modern UI - Enhanced) */
 
 .invoice-preview-card {
   border: none;
@@ -16,25 +16,61 @@
   border-bottom: none;
 }
 
-.invoice-header h5 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: white;
+.header-top {
   display: flex;
   align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.header-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon {
+  font-size: 22px;
+  color: white;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.header-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.header-status {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .invoice-section {
   border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 20px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .section-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #1F2937;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
 }
@@ -47,18 +83,19 @@
   background: #f8fafc;
   color: #6B7280;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
   border: none;
-  padding: 12px 16px;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .invoice-table tbody td {
-  padding: 14px 16px;
+  padding: 12px 12px;
   vertical-align: middle;
-  border-color: #e2e8f0;
+  border-color: #f1f5f9;
   color: #1F2937;
+  font-size: 14px;
 }
 
 .invoice-table tbody tr:hover {
@@ -68,13 +105,14 @@
 .invoice-table tfoot td {
   background: #f8fafc;
   font-weight: 700;
-  font-size: 15px;
-  padding: 14px 16px;
+  font-size: 14px;
+  padding: 12px 12px;
   border-top: 2px solid #338AF3;
+  color: #338AF3;
 }
 
 .subtotal-row td {
-  color: #1F2937;
+  color: #338AF3;
 }
 
 .badge-sm {
@@ -82,40 +120,62 @@
   padding: 4px 8px;
 }
 
-.invoice-total {
-  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
-  padding: 24px;
-  border-radius: 12px;
-  margin-top: 20px;
-  box-shadow: 0 6px 20px rgba(51, 138, 243, 0.25);
+.invoice-total-wrapper {
+  margin-top: 16px;
 }
 
-.total-row {
+.invoice-total {
+  background: linear-gradient(135deg, #338AF3 0%, #005CF0 100%);
+  padding: 20px 24px;
+  border-radius: 12px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(51, 138, 243, 0.2);
+}
+
+.total-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.total-icon {
+  font-size: 24px;
   color: white;
 }
 
-.total-label {
-  font-size: 18px;
-  font-weight: 700;
+.total-content {
+  flex: 1;
   display: flex;
+  justify-content: space-between;
   align-items: center;
+}
+
+.total-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .total-amount {
   font-size: 28px;
   font-weight: 800;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .invoice-notes {
-  padding: 16px;
+  padding: 12px 16px;
   background: #f8fafc;
   border-radius: 8px;
   border-left: 4px solid #338AF3;
+  margin-top: 16px;
 }
 
 /* Responsive */
@@ -124,25 +184,28 @@
     padding: 16px 20px;
   }
 
-  .invoice-header h5 {
-    font-size: 18px;
-  }
-
-  .invoice-table {
-    font-size: 13px;
+  .header-title {
+    font-size: 16px;
   }
 
   .invoice-table thead th,
   .invoice-table tbody td,
   .invoice-table tfoot td {
-    padding: 10px 12px;
+    padding: 10px;
+    font-size: 13px;
   }
 
-  .total-label {
-    font-size: 16px;
+  .invoice-total {
+    padding: 16px 20px;
+  }
+
+  .total-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
   .total-amount {
-    font-size: 22px;
+    font-size: 24px;
   }
 }

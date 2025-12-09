@@ -3,6 +3,7 @@
 // Flow: Hiện đơn hàng có yêu cầu → Click vào → Hiện các yêu cầu của đơn đó
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   FiPackage,
   FiRefreshCw,
@@ -57,6 +58,8 @@ const URGENCY_LEVELS = {
 };
 
 function PartsApproval() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   // State cho danh sách đơn hàng
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -188,6 +191,19 @@ function PartsApproval() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Auto-open order modal khi có orderId trong URL query parameter
+  useEffect(() => {
+    const orderIdParam = searchParams.get('orderId');
+    if (orderIdParam && orders.length > 0 && !showOrderModal) {
+      const targetOrder = orders.find(order => order.orderId === parseInt(orderIdParam));
+      if (targetOrder) {
+        handleOpenOrderModal(targetOrder);
+        // Remove orderId từ URL sau khi đã mở
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, orders, showOrderModal]);
 
   // Filter orders
   useEffect(() => {
@@ -677,6 +693,19 @@ function PartsApproval() {
               </div>
 
               <div className="parts-approval-modal-body">
+                {/* Alert khi đơn đang ở trạng thái QUOTING (sau reopen) */}
+                {selectedOrder.orderStatus === 'QUOTING' && (
+                  <div className="parts-approval-reopen-alert">
+                    <div className="alert-icon">
+                      <FiAlertCircle />
+                    </div>
+                    <div className="alert-content">
+                      <h4>Đơn hàng đang chờ gửi báo giá mới</h4>
+                      <p>Bạn có thể duyệt/từ chối các yêu cầu phụ tùng hiện tại, sau đó nhấn <strong>"Gửi báo giá"</strong> để gửi email cho khách hàng.</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Order Info Section */}
                 <div className="parts-approval-order-info-section">
                   <div className="parts-approval-order-info-item">

@@ -9,7 +9,8 @@ import {
   FiCalendar,
   FiCheckCircle,
   FiArrowRight,
-  FiHome
+  FiHome,
+  FiPlusCircle
 } from 'react-icons/fi';
 import { IoCarSportOutline } from 'react-icons/io5';
 import Header from '../../components/layout/Header';
@@ -87,10 +88,16 @@ function Homepage() {
               </button>
               <button 
                 className="btn-secondary-cta"
-                onClick={() => navigate('/customer/tracking')}
+                onClick={() => {
+                  if (user) {
+                    navigate('/customer/profile', { state: { scrollToVehicles: true } });
+                  } else {
+                    navigate('/register');
+                  }
+                }}
               >
-                <FiCheckCircle className="me-2" />
-                Tra Cứu Tình Trạng Xe
+                <FiPlusCircle className="me-2" />
+                Thêm Xe Của Bạn
               </button>
             </div>
           </div>
