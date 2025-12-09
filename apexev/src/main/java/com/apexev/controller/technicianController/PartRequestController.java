@@ -115,7 +115,7 @@ public class PartRequestController {
     }
 
     /**
-     * Từ chối yêu cầu
+     * Từ chối yêu cầu (chỉ áp dụng cho PENDING)
      */
     @PatchMapping("/requests/{requestId}/reject")
     @PreAuthorize("hasAnyRole('SERVICE_ADVISOR', 'ADMIN')")
@@ -125,6 +125,20 @@ public class PartRequestController {
             @AuthenticationPrincipal User approver) {
         log.info("Reject part request: {}", requestId);
         PartRequestResponse response = partRequestService.approveOrRejectPartRequest(requestId, false, notes, approver);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Xóa phụ tùng khỏi báo giá (áp dụng cho APPROVED)
+     */
+    @PatchMapping("/requests/{requestId}/remove")
+    @PreAuthorize("hasAnyRole('SERVICE_ADVISOR', 'ADMIN')")
+    public ResponseEntity<PartRequestResponse> removePartRequest(
+            @PathVariable Long requestId,
+            @RequestParam(required = false) String notes,
+            @AuthenticationPrincipal User approver) {
+        log.info("Remove part request from quote: {}", requestId);
+        PartRequestResponse response = partRequestService.removeApprovedPartRequest(requestId, notes, approver);
         return ResponseEntity.ok(response);
     }
 
@@ -176,7 +190,7 @@ public class PartRequestController {
     }
 
     /**
-     * Customer từ chối báo giá (QUOTED -> REJECTED)
+     * Customer từ chối báo giá (QUOTED -> REJECTED -> QUOTE_REJECTED)
      */
     @PostMapping("/requests/reject-quote/{serviceOrderId}")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -188,7 +202,41 @@ public class PartRequestController {
         partRequestService.rejectQuote(serviceOrderId, reason, customer);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Đã từ chối báo giá");
+        response.put("message", "Đã từ chối báo giá. Cố vấn sẽ liên hệ với bạn để tư vấn phương án khác.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Advisor tư vấn lại - Mở lại form báo giá (QUOTE_REJECTED -> QUOTING)
+     */
+    @PostMapping("/requests/reopen-quote/{serviceOrderId}")
+    @PreAuthorize("hasAnyRole('SERVICE_ADVISOR', 'ADMIN')")
+    public ResponseEntity<Map<String, String>> reopenQuote(
+            @PathVariable Long serviceOrderId,
+            @AuthenticationPrincipal User advisor) {
+        log.info("Advisor reopen quote for order: {}", serviceOrderId);
+        partRequestService.reopenQuote(serviceOrderId, advisor);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đã mở lại báo giá. Bạn có thể chỉnh sửa và gửi lại cho khách hàng.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Advisor hoàn tất đơn - Bỏ qua phụ tùng (QUOTE_REJECTED -> IN_PROGRESS)
+     */
+    @PostMapping("/requests/skip-parts/{serviceOrderId}")
+    @PreAuthorize("hasAnyRole('SERVICE_ADVISOR', 'ADMIN')")
+    public ResponseEntity<Map<String, String>> skipPartsAndComplete(
+            @PathVariable Long serviceOrderId,
+            @AuthenticationPrincipal User advisor) {
+        log.info("Advisor skip parts for order: {}", serviceOrderId);
+        partRequestService.skipPartsAndComplete(serviceOrderId, advisor);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Đã bỏ qua phụ tùng. Đơn hàng sẽ hoàn tất với dịch vụ ban đầu.");
 
         return ResponseEntity.ok(response);
     }

@@ -15,8 +15,11 @@ public class AppointmentResponse {
     private Long customerId;
     private String customerFullName;
     private String customerPhone; // Thêm số điện thoại khách hàng
+    private String customerEmail; // Thêm email khách hàng
     private Long vehicleId;
     private String vehicleLicensePlate;
+    private String vehicleBrand; // Thêm hãng xe
+    private String vehicleModel; // Thêm model xe
     private Long serviceAdvisorId; // Có thể null
     private String serviceAdvisorName; // Có thể null
     private Long assignedTechnicianId; // Technician đã được assign

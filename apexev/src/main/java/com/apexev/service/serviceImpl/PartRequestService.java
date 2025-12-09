@@ -207,6 +207,71 @@ public class PartRequestService {
 
         partRequest = partRequestRepository.save(partRequest);
 
+        // ✅ AUTO-SEND QUOTE: Kiểm tra nếu tất cả part requests đã được xử lý
+        // thì tự động gửi báo giá cho customer
+        if (approve) {
+            ServiceOrder serviceOrder = partRequest.getServiceOrder();
+            List<PartRequest> allRequests = partRequestRepository
+                    .findByServiceOrderIdOrderByCreatedAtDesc(serviceOrder.getId());
+
+            // Đếm số lượng PENDING còn lại
+            long pendingCount = allRequests.stream()
+                    .filter(r -> r.getStatus() == PartRequestStatus.PENDING)
+                    .count();
+
+            // Nếu không còn PENDING nào (tất cả đã APPROVED hoặc REJECTED)
+            if (pendingCount == 0) {
+                long approvedCount = allRequests.stream()
+                        .filter(r -> r.getStatus() == PartRequestStatus.APPROVED)
+                        .count();
+
+                // Chỉ gửi nếu có ít nhất 1 phụ tùng được duyệt
+                if (approvedCount > 0) {
+                    log.info("All part requests processed. Auto-sending quote to customer for order: {}",
+                            serviceOrder.getId());
+                    try {
+                        sendQuoteToCustomer(serviceOrder.getId(), approver);
+                    } catch (Exception e) {
+                        log.error("Failed to auto-send quote after approval: {}", e.getMessage());
+                        // Không throw exception để không block việc approve
+                    }
+                }
+            }
+        }
+
+        return convertToResponse(partRequest);
+    }
+
+    /**
+     * Xóa phụ tùng đã duyệt khỏi báo giá (dùng trong EditPartsModal)
+     * Cho phép advisor xóa phụ tùng APPROVED khi đang chỉnh sửa báo giá
+     */
+    @Transactional
+    public PartRequestResponse removeApprovedPartRequest(Long requestId, String notes, User approver) {
+        if (approver.getRole() != UserRole.SERVICE_ADVISOR && approver.getRole() != UserRole.ADMIN) {
+            throw new AccessDeniedException("Bạn không có quyền xóa phụ tùng");
+        }
+
+        PartRequest partRequest = partRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy yêu cầu với ID: " + requestId));
+
+        // Chỉ cho phép xóa phụ tùng APPROVED (đang trong báo giá)
+        if (partRequest.getStatus() != PartRequestStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "Chỉ có thể xóa phụ tùng đã được duyệt. Trạng thái hiện tại: " + partRequest.getStatus());
+        }
+
+        // Chuyển sang REJECTED và lưu lý do
+        partRequest.setStatus(PartRequestStatus.REJECTED);
+        partRequest.setApprovedBy(approver);
+        partRequest.setApproverNotes(notes != null ? notes : "Đã xóa khỏi báo giá");
+        partRequest.setApprovedAt(LocalDateTime.now());
+
+        partRequest = partRequestRepository.save(partRequest);
+
+        log.info("Removed approved part request from quote: id={}, approver={}, reason={}",
+                requestId, approver.getUserId(), notes);
+
         return convertToResponse(partRequest);
     }
 
@@ -499,6 +564,126 @@ public class PartRequestService {
                     serviceOrderId, partRequest.getPart().getId(), reason);
         }
 
-        log.info("Customer rejected all quotes for order: {}", serviceOrderId);
+        // ✅ Chuyển ServiceOrder sang QUOTE_REJECTED để advisor xử lý
+        serviceOrder.setStatus(OrderStatus.QUOTE_REJECTED);
+        serviceOrderRepository.save(serviceOrder);
+
+        log.info("Customer rejected all quotes for order: {} → Status changed to QUOTE_REJECTED", serviceOrderId);
+
+        // Gửi notification cho advisor để tư vấn lại
+        User advisor = serviceOrder.getAppointment().getServiceAdvisor();
+        if (advisor != null) {
+            String message = String.format(
+                    "Khách hàng từ chối báo giá phụ tùng cho đơn #%d. Lý do: %s. Vui lòng liên hệ tư vấn lại.",
+                    serviceOrderId,
+                    reason != null ? reason : "Không có lý do");
+            notificationService.sendNotification(advisor, message, serviceOrder);
+            log.info("Sent notification to advisor: advisorId={}, orderId={}", advisor.getUserId(), serviceOrderId);
+        }
+    }
+
+    /**
+     * Advisor tư vấn lại - Mở form báo giá mới (QUOTE_REJECTED -> QUOTING)
+     */
+    @Transactional
+    public void reopenQuote(Long serviceOrderId, User advisor) {
+        // Validate advisor role
+        if (advisor.getRole() != UserRole.SERVICE_ADVISOR && advisor.getRole() != UserRole.ADMIN) {
+            throw new AccessDeniedException("Chỉ advisor/admin mới có quyền tư vấn lại");
+        }
+
+        // Tìm service order
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy service order với ID: " + serviceOrderId));
+
+        if (serviceOrder.getStatus() != OrderStatus.QUOTE_REJECTED) {
+            throw new IllegalStateException("Chỉ có thể tư vấn lại đơn hàng bị từ chối báo giá");
+        }
+
+        // Chuyển các part request từ REJECTED về APPROVED để có thể chỉnh sửa và gửi
+        // lại
+        List<PartRequest> rejectedRequests = partRequestRepository
+                .findByServiceOrderIdOrderByCreatedAtDesc(serviceOrderId)
+                .stream()
+                .filter(r -> r.getStatus() == PartRequestStatus.REJECTED)
+                .collect(Collectors.toList());
+
+        for (PartRequest partRequest : rejectedRequests) {
+            partRequest.setStatus(PartRequestStatus.APPROVED); // Quay về APPROVED để advisor có thể sửa/gửi lại
+            partRequestRepository.save(partRequest);
+        }
+
+        // Chuyển ServiceOrder về QUOTING
+        serviceOrder.setStatus(OrderStatus.QUOTING);
+        serviceOrderRepository.save(serviceOrder);
+
+        log.info("Advisor reopened quote for order: {} → Status: QUOTE_REJECTED -> QUOTING", serviceOrderId);
+
+        // Gửi notification cho customer
+        User customer = serviceOrder.getCustomer();
+        String message = String.format(
+                "Cố vấn đã cập nhật phương án mới cho đơn #%d. Vui lòng xem lại báo giá.",
+                serviceOrderId);
+        notificationService.sendNotification(customer, message, serviceOrder);
+    }
+
+    /**
+     * Advisor hoàn tất đơn hàng - Bỏ qua phụ tùng, chỉ tính dịch vụ (QUOTE_REJECTED
+     * -> IN_PROGRESS)
+     */
+    @Transactional
+    public void skipPartsAndComplete(Long serviceOrderId, User advisor) {
+        // Validate advisor role
+        if (advisor.getRole() != UserRole.SERVICE_ADVISOR && advisor.getRole() != UserRole.ADMIN) {
+            throw new AccessDeniedException("Chỉ advisor/admin mới có quyền hoàn tất đơn hàng");
+        }
+
+        // Tìm service order
+        ServiceOrder serviceOrder = serviceOrderRepository.findById(serviceOrderId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy service order với ID: " + serviceOrderId));
+
+        if (serviceOrder.getStatus() != OrderStatus.QUOTE_REJECTED) {
+            throw new IllegalStateException("Chỉ có thể hoàn tất đơn hàng bị từ chối báo giá");
+        }
+
+        // Xóa tất cả part requests bị từ chối (không tính vào hóa đơn)
+        List<PartRequest> rejectedRequests = partRequestRepository
+                .findByServiceOrderIdOrderByCreatedAtDesc(serviceOrderId)
+                .stream()
+                .filter(r -> r.getStatus() == PartRequestStatus.REJECTED)
+                .collect(Collectors.toList());
+
+        for (PartRequest partRequest : rejectedRequests) {
+            partRequest.setStatus(PartRequestStatus.CANCELLED); // Đánh dấu là đã hủy
+            partRequestRepository.save(partRequest);
+        }
+
+        // Chuyển ServiceOrder sang READY_FOR_INVOICE (bỏ qua bước IN_PROGRESS vì không
+        // cần kỹ thuật viên làm gì thêm)
+        // Nếu kỹ thuật viên đã hoàn thành công việc trước đó, thì chuyển thẳng sang
+        // READY_FOR_INVOICE
+        serviceOrder.setStatus(OrderStatus.READY_FOR_INVOICE);
+        serviceOrderRepository.save(serviceOrder);
+
+        log.info("Advisor skipped parts and completed order: {} → Status: QUOTE_REJECTED -> READY_FOR_INVOICE",
+                serviceOrderId);
+
+        // Gửi notification cho technician
+        User technician = serviceOrder.getTechnician();
+        if (technician != null) {
+            String message = String.format(
+                    "Đơn #%d đã hoàn tất (không thay phụ tùng). Công việc của bạn đã được xác nhận.",
+                    serviceOrderId);
+            notificationService.sendNotification(technician, message, serviceOrder);
+        }
+
+        // Gửi notification cho customer
+        User customer = serviceOrder.getCustomer();
+        String message = String.format(
+                "Đơn #%d đã sẵn sàng xuất hóa đơn. Dịch vụ thực hiện theo kế hoạch ban đầu.",
+                serviceOrderId);
+        notificationService.sendNotification(customer, message, serviceOrder);
     }
 }

@@ -202,6 +202,10 @@ public class TechnicianWorkServiceImpl implements TechnicianWorkService {
                 isValidTransition = (newStatus == OrderStatus.READY_FOR_INVOICE
                         || newStatus == OrderStatus.WAITING_FOR_PARTS);
                 break;
+            case READY_FOR_INVOICE:
+                // Nếu đã ở READY_FOR_INVOICE, cho phép giữ nguyên (idempotent)
+                isValidTransition = (newStatus == OrderStatus.READY_FOR_INVOICE);
+                break;
             default:
                 isValidTransition = false;
         }

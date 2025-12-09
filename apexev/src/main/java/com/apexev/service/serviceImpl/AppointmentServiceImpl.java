@@ -286,10 +286,23 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointments.stream()
                 .map(appointment -> {
                     AppointmentResponse dto = modelMapper.map(appointment, AppointmentResponse.class);
-                    // Thêm phone của customer
+
+                    // Populate thông tin customer
                     if (appointment.getCustomer() != null) {
+                        dto.setCustomerId(appointment.getCustomer().getUserId().longValue());
+                        dto.setCustomerFullName(appointment.getCustomer().getFullName());
                         dto.setCustomerPhone(appointment.getCustomer().getPhone());
+                        dto.setCustomerEmail(appointment.getCustomer().getEmail());
                     }
+
+                    // Populate thông tin vehicle
+                    if (appointment.getVehicle() != null) {
+                        dto.setVehicleId(appointment.getVehicle().getId().longValue());
+                        dto.setVehicleLicensePlate(appointment.getVehicle().getLicensePlate());
+                        dto.setVehicleBrand(appointment.getVehicle().getBrand());
+                        dto.setVehicleModel(appointment.getVehicle().getModel());
+                    }
+
                     // Kiểm tra xem appointment này đã có ServiceOrder chưa -> lấy technician từ đó
                     ServiceOrder existingOrder = serviceOrderRepository.findByAppointmentId(appointment.getId())
                             .orElse(null);

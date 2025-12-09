@@ -8,6 +8,8 @@ public enum OrderStatus {
     IN_PROGRESS,
     COMPLETED,
     CANCELLED,
-    QUOTING,
-    READY_FOR_INVOICE // Kỹ thuật viên hoàn thành công việc, chờ cố vấn xuất hóa đơn
+    QUOTING, // Đang báo giá phụ tùng
+    QUOTE_REJECTED, // Customer từ chối báo giá, chờ advisor tư vấn lại
+    READY_FOR_INVOICE, // Kỹ thuật viên hoàn thành công việc, chờ cố vấn xuất hóa đơn
+    INVOICED // Đã xuất hóa đơn
 }
