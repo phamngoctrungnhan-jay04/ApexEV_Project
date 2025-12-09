@@ -7,7 +7,7 @@
 // QUAN TRỌNG: Hãy dán Invoke URL bạn copy từ API Gateway vào đây
 // Ví dụ: https://xyz.execute-api.ap-southeast-1.amazonaws.com/dev/chat
 const AWS_AI_ENDPOINT = import.meta.env.VITE_AWS_AI_ENDPOINT || 
-  'https://4jxevt0ia6.execute-api.ap-southeast-1.amazonaws.com/dev/chat';
+  'https://zwzx1oerz7.execute-api.us-east-1.amazonaws.com/default/Chat';
 
 /**
  * Gửi tin nhắn đến AWS AI Assistant
