@@ -33,7 +33,7 @@ export const chatWithAI = async (userMessage, sessionId) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(AWS API Error: ${response.status} - ${errorData.error || response.statusText});
+      throw new Error(`AWS API Error: ${response.status} - ${errorData.error || response.statusText}`);
     }
 
     const data = await response.json();
