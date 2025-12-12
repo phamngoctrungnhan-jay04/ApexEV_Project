@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FileUploadResponse {
     private String s3Key;           // S3 key để lưu vào DB
+    private String url;             // URL đầy đủ để hiển thị ảnh ngay
     private String mediaType;       // IMAGE or VIDEO
     private String fileName;        // Tên file gốc
     private String message;         // Thông báo

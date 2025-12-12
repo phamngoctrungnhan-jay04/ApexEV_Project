@@ -1,0 +1,55 @@
+# Sử dụng Docker image có cài sẵn Docker (Docker-in-Docker) để build image
+image: docker:24.0.5
+
+services:
+  - docker:24.0.5-dind
+
+variables:
+  # Tag cho image, dùng biến commit sha để versioning hoặc 'latest'
+  IMAGE_TAG: latest
+  # Biến này để fix lỗi certificate khi dùng dind
+  DOCKER_TLS_CERTDIR: "/certs"
+
+stages:
+  - build
+  - deploy
+
+# Giai đoạn 1: Build Docker Image và Push lên ECR
+build_and_push:
+  stage: build
+  before_script:
+    # Cài đặt AWS CLI để login vào ECR
+    - apk add --no-cache aws-cli
+  script:
+    - echo "Logging in to Amazon ECR..."
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
+    
+    - echo "Building Docker image..."
+    # Build image với tag latest
+    - docker build -t $ECR_REPOSITORY_URI:$IMAGE_TAG .
+    
+    - echo "Pushing image to ECR..."
+    - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+    
+    - echo "Build and Push complete!"
+  only:
+    - main # Chỉ chạy khi push vào nhánh main
+
+# Giai đoạn 2: Deploy lên ECS Fargate
+deploy_to_ecs:
+  stage: deploy
+  image: 
+    # Sử dụng image có sẵn AWS CLI để chạy lệnh update service
+    name: amazon/aws-cli:latest
+    entrypoint: [""]
+  before_script:
+    - aws --version
+  script:
+    - echo "Updating ECS Service..."
+    # Lệnh này ép ECS tải image mới nhất về và redeploy (Zero downtime)
+    - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_DEFAULT_REGION
+    
+    - echo "Deployment triggered! Fargate is updating tasks."
+  only:
+    - main
+  needs: ["build_and_push"] # Đảm bảo build xong mới deploy

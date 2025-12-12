@@ -30,9 +30,16 @@ public class S3Service {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
+    @Value("${aws.s3.region:ap-southeast-1}")
+    private String region;
+
+    @Value("${aws.s3.use-public-url:true}")
+    private boolean usePublicUrl;
+
     /**
      * Upload file lên S3 và trả về S3 key
-     * @param file MultipartFile từ request
+     * 
+     * @param file   MultipartFile từ request
      * @param folder Folder trong S3 (e.g., "checklist", "invoice")
      * @return S3 key (e.g., "checklist/2024-11-25_abc123.jpg")
      */
@@ -49,8 +56,7 @@ public class S3Service {
                     folder,
                     LocalDate.now(),
                     UUID.randomUUID().toString().substring(0, 8),
-                    extension
-            );
+                    extension);
 
             // Build PutObjectRequest
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -61,7 +67,7 @@ public class S3Service {
                     .build();
 
             // Upload to S3
-            s3Client.putObject(putObjectRequest, 
+            s3Client.putObject(putObjectRequest,
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
             log.info("File uploaded to S3: bucket={}, key={}", bucketName, fileKey);
@@ -76,11 +82,21 @@ public class S3Service {
 
     /**
      * Generate pre-signed URL để download file
-     * @param fileKey S3 key (e.g., "checklist/2024-11-25_abc123.jpg")
+     * 
+     * @param fileKey           S3 key (e.g., "checklist/2024-11-25_abc123.jpg")
      * @param expirationMinutes Thời gian hết hạn (phút)
-     * @return Pre-signed URL
+     * @return Pre-signed URL hoặc Public URL
      */
     public String generatePresignedUrl(String fileKey, int expirationMinutes) {
+        // Nếu bucket là public, trả về public URL đơn giản
+        if (usePublicUrl) {
+            String publicUrl = String.format("https://%s.s3.%s.amazonaws.com/%s",
+                    bucketName, region, fileKey);
+            log.info("Generated public URL for key: {}", fileKey);
+            return publicUrl;
+        }
+
+        // Nếu bucket là private, dùng presigned URL
         try {
             // Build GetObjectRequest
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -111,6 +127,7 @@ public class S3Service {
 
     /**
      * Xóa file từ S3
+     * 
      * @param fileKey S3 key
      */
     public void deleteFile(String fileKey) {
@@ -141,8 +158,7 @@ public class S3Service {
         String contentType = file.getContentType();
         if (!isValidFileType(contentType)) {
             throw new IllegalArgumentException(
-                    "Chỉ chấp nhận ảnh (jpg, png, webp) hoặc video (mp4)"
-            );
+                    "Chỉ chấp nhận ảnh (jpg, png, webp) hoặc video (mp4)");
         }
 
         // Validate file size (max 10MB)
@@ -156,13 +172,11 @@ public class S3Service {
      * Kiểm tra file type hợp lệ
      */
     private boolean isValidFileType(String contentType) {
-        return contentType != null && (
-                contentType.equals("image/jpeg") ||
-                        contentType.equals("image/jpg") ||
-                        contentType.equals("image/png") ||
-                        contentType.equals("image/webp") ||
-                        contentType.equals("video/mp4")
-        );
+        return contentType != null && (contentType.equals("image/jpeg") ||
+                contentType.equals("image/jpg") ||
+                contentType.equals("image/png") ||
+                contentType.equals("image/webp") ||
+                contentType.equals("video/mp4"));
     }
 
     /**

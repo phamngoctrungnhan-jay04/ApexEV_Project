@@ -76,12 +76,16 @@ public class FileUploadController {
         // 1. Upload lên S3 và nhận về Key
         String s3Key = s3Service.uploadFile(file, folder);
         
-        // 2. Lấy loại file (IMAGE/VIDEO)
+        // 2. Generate URL để hiển thị ảnh ngay (Public URL hoặc Presigned URL)
+        String url = s3Service.generatePresignedUrl(s3Key, 60);
+        
+        // 3. Lấy loại file (IMAGE/VIDEO)
         String mediaType = s3Service.getMediaType(file.getContentType());
 
-        // 3. Tạo DTO trả về
+        // 4. Tạo DTO trả về
         FileUploadResponse response = FileUploadResponse.builder()
                 .s3Key(s3Key)
+                .url(url)
                 .mediaType(mediaType)
                 .fileName(file.getOriginalFilename())
                 .message("Upload thành công")
