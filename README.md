@@ -1,4 +1,3 @@
-<img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/73a160fc-f520-48fc-8739-62537130dc20" /># 🚗 APEX EV - Hệ thống Quản lý Bảo dưỡng Xe Điện
 
 ![Architecture](ApexEV_BE/.attachments/architecture-diagram.png)
 
