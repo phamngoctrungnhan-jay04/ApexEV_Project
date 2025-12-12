@@ -1,5 +1,5 @@
 
-![Architecture](ApexEV_BE/.attachments/architecture-diagram.png)
+
 
 ## 📋 Mục lục
 - [Giới thiệu](#giới-thiệu)
